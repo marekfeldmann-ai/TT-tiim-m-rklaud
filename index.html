@@ -277,8 +277,9 @@
       padding: 8px 10px;
       margin-bottom: 10px;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
+      justify-content: space-between;
       gap: 6px;
     }
 
@@ -287,13 +288,15 @@
       font-weight: 800;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-right: 4px;
+      margin-right: 2px;
       letter-spacing: 0.4px;
+      white-space: nowrap;
     }
 
     .athlete-pill-btn {
+      flex: 1;
       min-height: 40px;
-      padding: 6px 12px;
+      padding: 6px 8px;
       border-radius: 10px;
       border: 1.5px solid #334155;
       background-color: #152238;
@@ -301,6 +304,8 @@
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
       transition: all 0.15s ease;
     }
 
@@ -1155,10 +1160,10 @@
         <!-- Position Toggle & Compact Header Controls -->
         <div class="mode-switcher" style="max-width:340px;">
           <button id="btnPosProne" type="button" onclick="setPositionMode('prone')" class="mode-btn active">
-            ● Lamades 45 mm
+            ● Lamades
           </button>
           <button id="btnPosStanding" type="button" onclick="setPositionMode('standing')" class="mode-btn">
-            ◯ Püsti 115 mm
+            ◯ Püsti
           </button>
         </div>
       </div>
@@ -1166,9 +1171,9 @@
       <!-- Hidden Athlete Select for internal state compatibility -->
       <div class="hidden">
         <select id="selectAthlete" onchange="handleAthleteChange()" aria-label="Sportlane">
-          <option value="Tuuli Tomingas">Tuuli Tomingas</option>
-          <option value="Hanna-Brita Kaasik">Hanna-Brita Kaasik</option>
-          <option value="Karl Rasmus Tiislar">Karl Rasmus Tiislar</option>
+          <option value="Tuuli">Tuuli</option>
+          <option value="Hanna-Brita">Hanna-Brita</option>
+          <option value="Rasmus">Rasmus</option>
           <option value="Muu">Muu sportlane...</option>
         </select>
       </div>
@@ -1189,9 +1194,9 @@
       <!-- 1-TAP ATHLETE QUICK-SELECT BAR -->
       <div class="quick-athlete-bar" id="quickAthleteBar">
         <span class="quick-athlete-label">⚡ Laskja:</span>
-        <button type="button" onclick="selectQuickAthlete('Tuuli Tomingas')" data-athlete="Tuuli Tomingas" class="athlete-pill-btn active">Tuuli Tomingas</button>
-        <button type="button" onclick="selectQuickAthlete('Hanna-Brita Kaasik')" data-athlete="Hanna-Brita Kaasik" class="athlete-pill-btn">Hanna-Brita Kaasik</button>
-        <button type="button" onclick="selectQuickAthlete('Karl Rasmus Tiislar')" data-athlete="Karl Rasmus Tiislar" class="athlete-pill-btn">Karl Rasmus Tiislar</button>
+        <button type="button" onclick="selectQuickAthlete('Tuuli')" data-athlete="Tuuli" class="athlete-pill-btn active">Tuuli</button>
+        <button type="button" onclick="selectQuickAthlete('Hanna-Brita')" data-athlete="Hanna-Brita" class="athlete-pill-btn">Hanna-Brita</button>
+        <button type="button" onclick="selectQuickAthlete('Rasmus')" data-athlete="Rasmus" class="athlete-pill-btn">Rasmus</button>
       </div>
 
       <!-- Compact Status Bar Above Target -->
@@ -1366,7 +1371,7 @@
 
         <div class="target-bottom-hint">
           <span id="targetBottomModeHint">Puuduta lasu märkimiseks (max 8)</span>
-          <span id="activeZoneHint" style="color:#0284C7; font-weight:800;">Lamades: Ø 45 mm</span>
+          <span id="activeZoneHint" style="color:#0284C7; font-weight:800;">Lamades</span>
         </div>
       </div>
 
@@ -1754,7 +1759,7 @@
         appState.savedSeries = [
           {
             id: 'sample-1',
-            athlete: 'Tuuli Tomingas',
+            athlete: 'Tuuli',
             position: 'prone',
             timestamp: '15.11.2026 10:15:22',
             windDir: 9,
@@ -1771,7 +1776,7 @@
           },
           {
             id: 'sample-2',
-            athlete: 'Hanna-Brita Kaasik',
+            athlete: 'Hanna-Brita',
             position: 'standing',
             timestamp: '15.11.2026 09:42:10',
             windDir: 3,
@@ -1788,7 +1793,7 @@
           },
           {
             id: 'sample-3',
-            athlete: 'Karl Rasmus Tiislar',
+            athlete: 'Rasmus',
             position: 'prone',
             timestamp: '14.11.2026 15:20:05',
             windDir: 0,
@@ -2476,11 +2481,11 @@
       if (mode === 'prone') {
         btnProne.className = 'mode-btn active';
         btnStanding.className = 'mode-btn';
-        hint.textContent = 'Lamades: Ø 45 mm';
+        hint.textContent = 'Lamades';
       } else {
         btnStanding.className = 'mode-btn active';
         btnProne.className = 'mode-btn';
-        hint.textContent = 'Püsti: Ø 115 mm';
+        hint.textContent = 'Püsti';
       }
       renderAll();
     }
@@ -2617,7 +2622,7 @@
       var sel = document.getElementById('selectAthlete').value;
       if (sel === 'Muu') {
         var custom = document.getElementById('inputCustomAthlete').value.trim();
-        return custom || 'Tuuli Tomingas';
+        return custom || 'Tuuli';
       }
       return sel;
     }
@@ -3108,7 +3113,7 @@
         var item = appState.savedSeries[i];
         var stats = computeAnalytics(item.shots, item.position);
         var isComparing = appState.comparisonSeries && appState.comparisonSeries.id === item.id;
-        var posLabel = item.position === 'prone' ? 'Lamades 45mm' : 'Püsti 115mm';
+        var posLabel = item.position === 'prone' ? 'Lamades' : 'Püsti';
         var windBadge = item.wind || formatWindBadgeString(item.windDir || 0, item.windSpeed || 0);
 
         var card = document.createElement('div');
@@ -3244,7 +3249,7 @@
       var windTel = computeWindDriftTelemetry(seriesObj.windDir || 0, seriesObj.windSpeed || 0, appState.clickStepMm);
       var totalX = (stats.count > 0 ? stats.mpiX : 0) + windTel.driftXmm;
       var totalY = (stats.count > 0 ? stats.mpiY : 0) + windTel.driftYmm;
-      var posLabel = seriesObj.position === 'prone' ? 'Lamades (45mm)' : 'Püsti (115mm)';
+      var posLabel = seriesObj.position === 'prone' ? 'Lamades' : 'Püsti';
       var windLabel = formatWindBadgeString(seriesObj.windDir, seriesObj.windSpeed);
       var horizClicks = Math.round(Math.abs(totalX) / appState.clickStepMm);
       var vertClicks = Math.round(Math.abs(totalY) / appState.clickStepMm);
