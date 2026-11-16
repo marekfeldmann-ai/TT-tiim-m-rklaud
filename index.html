@@ -1064,7 +1064,7 @@
         <div class="brand-title-wrap">
           <div class="brand-title-line">
             <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
-            <span class="badge-est">EST • 50m • v2.5</span>
+            <span class="badge-est">EST • 50m</span>
           </div>
           <p class="brand-subtitle">Digitaalne Laskesuusatamise Märklaud 50m</p>
         </div>
@@ -1298,8 +1298,8 @@
         <button type="button" id="btnSave" onclick="saveCurrentSeries()" class="action-btn btn-save">
           💾 Salvesta seeria
         </button>
-        <button type="button" onclick="shareActiveTargetWhatsAppImage()" class="action-btn btn-wa-primary">
-          🟢 Jaga pilt (WhatsApp)
+        <button type="button" onclick="shareActiveWhatsAppTextLink()" class="action-btn btn-wa-primary">
+          🟢 Jaga (WhatsApp)
         </button>
       </div>
 
@@ -3106,90 +3106,16 @@
     function shareSeriesObjWhatsAppById(id) {
       var found = findSeriesById(id);
       if (!found) return;
-      loadSavedSeriesAsActive(id);
-      shareActiveTargetWhatsAppImage();
+      var text = formatWhatsAppSummaryText(found);
+      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+      window.open(waUrl, '_blank');
     }
 
-    var cachedShareData = {
-      u8arr: null,
-      dataUrl: '',
-      fileName: 'marklaud.png',
-      athlete: 'Tuuli Tomingas'
-    };
-
-    function dataUrlToUint8Array(dataUrl) {
-      var parts = dataUrl.split(',');
-      var bstr = atob(parts[1]);
-      var n = bstr.length;
-      var u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return u8arr;
+    function shareActiveTargetWhatsAppImage() {
+      shareActiveWhatsAppTextLink();
     }
 
-    function createFreshPngFile() {
-      if (!cachedShareData.u8arr) return null;
-      try {
-        return new File([cachedShareData.u8arr], cachedShareData.fileName, {
-          type: 'image/png',
-          lastModified: Date.now()
-        });
-      } catch (e) {
-        return null;
-      }
-    }
-
-    // Pre-builds the PNG bytes in the background whenever shots/wind/athlete change
-    function refreshCachedTargetPng() {
-      if (!appState.activeShots || appState.activeShots.length === 0) {
-        cachedShareData.u8arr = null;
-        cachedShareData.dataUrl = '';
-        return;
-      }
-      try {
-        var rendered = renderTargetCanvasSync();
-        var dataUrl = rendered.canvas.toDataURL('image/png');
-        var safeName = rendered.athlete.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sportlane';
-        var fileName = 'marklaud-' + safeName + '.png';
-        cachedShareData.dataUrl = dataUrl;
-        cachedShareData.fileName = fileName;
-        cachedShareData.athlete = rendered.athlete;
-        cachedShareData.u8arr = dataUrlToUint8Array(dataUrl);
-      } catch (e) {}
-    }
-
-    function openShareFallbackModal(reasonText) {
-      var modal = document.getElementById('shareFallbackModal');
-      var img = document.getElementById('shareModalPreviewImg');
-      var txt = document.getElementById('shareModalReasonText');
-      if (img && cachedShareData.dataUrl) {
-        img.src = cachedShareData.dataUrl;
-      }
-      if (txt && reasonText) {
-        txt.textContent = reasonText;
-      }
-      if (modal) {
-        modal.classList.remove('hidden');
-      }
-    }
-
-    function closeShareFallbackModal() {
-      var modal = document.getElementById('shareFallbackModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    // Jumps out of WhatsApp/Messenger in-app browser directly into Google Chrome on Android
-    // with the exact current shots (?s=...) preserved!
-    function openAppInAndroidChrome() {
-      var snap = getCurrentSeriesSnapshot();
-      var fullShareUrl = encodeSeriesShareUrl(snap);
-      var noProtocol = fullShareUrl.replace(/^https?:\/\//i, '');
-      var intentUrl = 'intent://' + noProtocol + '#Intent;scheme=https;package=com.android.chrome;end';
-      window.location.href = intentUrl;
-    }
-
-    // 100% Synchronous 2D Canvas Renderer (Optimized 800x926 for instant Android encoding)
+    // 100% Synchronous 2D Canvas Renderer for PNG Download
     function renderTargetCanvasSync() {
       var canvas = document.createElement('canvas');
       canvas.width = 1080;
@@ -3466,40 +3392,6 @@
     function renderTargetCanvasImage(callback) {
       var res = renderTargetCanvasSync();
       callback(res.canvas, res.athlete);
-    }
-
-    function shareActiveTargetWhatsAppImage() {
-      if (appState.activeShots.length === 0) {
-        showToast('Märgi vähemalt 1 lask enne jagamist!');
-        return;
-      }
-
-      if (!cachedShareData.u8arr) {
-        refreshCachedTargetPng();
-      }
-
-      var file = createFreshPngFile();
-
-      // 1. Try native OS file share (opens Android/iOS Share Sheet with WhatsApp)
-      if (navigator.share && file) {
-        navigator.share({
-          files: [file]
-        }).then(function () {
-          showToast('🟢 Pilt jagatud!');
-        }).catch(function (err) {
-          if (err && err.name === 'AbortError') return; // User closed the share sheet manually
-          openShareFallbackModal(
-            'Otse pildi jagamine ebaõnnestus selles brauseris (' + (err && err.name ? err.name : 'Toetus puudub') + '). Ava leht Google Chrome\'is või saada tulemus WhatsAppi:'
-          );
-        });
-        return;
-      }
-
-      // 2. If navigator.share is missing (e.g., opened inside WhatsApp in-app browser or HTTP),
-      // DO NOT silently download PNG — show the 1-tap Chrome/WhatsApp launcher instead!
-      openShareFallbackModal(
-        'Oled praegu sisebrauseris (nt WhatsAppi või Messengeri sees), mis blokeerib pildifaili otse jagamise. Vajuta allolevat nuppu, et avada märklaud Google Chrome\'is:'
-      );
     }
 
     // =========================================================================
