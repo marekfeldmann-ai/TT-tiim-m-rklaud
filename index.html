@@ -3228,59 +3228,42 @@
       shareDirectPngToWhatsApp();
     }
 
-    // 100% Synchronous 2D Canvas Renderer for PNG Download
+    // 100% Synchronous 2D Canvas Renderer for PNG Download (Strictly Target & Shots Only)
     function renderTargetCanvasSync() {
       var canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1250;
+      canvas.width = 1000;
+      canvas.height = 1000;
       var ctx = canvas.getContext('2d');
 
-      // Deep Navy Background
-      ctx.fillStyle = '#0B132B';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Estonian Tricolor Top Stripe
-      ctx.fillStyle = '#0072CE';
-      ctx.fillRect(0, 0, 360, 12);
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(360, 0, 360, 12);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(720, 0, 360, 12);
-
-      // Coordinate system matching SVG viewBox (-105..105 -> 1000x1000 box at (40,40))
-      var cx = 540;
-      var cy = 540;
+      // Coordinate system matching SVG viewBox (-105..105 -> 1000x1000 square target)
+      var cx = 500;
+      var cy = 500;
       var scale = 1000 / 210; // mm to canvas px
 
       function mmX(x) { return cx + x * scale; }
       function mmY(y) { return cy + y * scale; }
       function mmR(r) { return r * scale; }
 
-      // White Metal Target Plate
+      // White Metal Target Plate (Full 1000x1000 Square)
       ctx.save();
       ctx.fillStyle = '#F1F5F9';
       ctx.strokeStyle = '#CBD5E1';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 6;
       ctx.beginPath();
       if (ctx.roundRect) {
-        ctx.roundRect(40, 40, 1000, 1000, 60);
+        ctx.roundRect(0, 0, 1000, 1000, 48);
       } else {
-        ctx.rect(40, 40, 1000, 1000);
+        ctx.rect(0, 0, 1000, 1000);
       }
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      // Top Plate Label
-      ctx.fillStyle = '#64748B';
-      ctx.font = 'bold 23px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('LASKESUUSATAMISE 50M MÄRKLAUD', cx, mmY(-92));
-
       // Clock Numbers (12, 3, 6, 9)
       ctx.fillStyle = '#475569';
       ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillText('12', mmX(0), mmY(-85));
       ctx.fillText('3', mmX(86), mmY(0));
       ctx.fillText('6', mmX(0), mmY(86));
@@ -3466,39 +3449,7 @@
       }
       drawShotsLayerOnCanvas(appState.activeShots, '#FF2A85', '#FFFFFF', false);
 
-      // Footer Summary Block
-      var stats = computeAnalytics(appState.activeShots, appState.position);
       var athlete = getSelectedAthleteName();
-      var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
-      var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
-      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
-      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
-      var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
-      var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
-
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 34px sans-serif';
-      ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1095);
-
-      ctx.fillStyle = '#38BDF8';
-      ctx.font = 'bold 25px sans-serif';
-      ctx.fillText(
-        posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
-        45,
-        1140
-      );
-
-      ctx.fillStyle = '#FDE68A';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.fillText('Diopter: Külg ' + hText + '   |   Kõrgus ' + vText, 45, 1180);
-
-      var notes = document.getElementById('inputNotes').value.trim();
-      ctx.fillStyle = '#94A3B8';
-      ctx.font = '21px sans-serif';
-      ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1220);
-
       return { canvas: canvas, athlete: athlete };
     }
 
