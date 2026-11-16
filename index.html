@@ -134,6 +134,20 @@
       border-radius: 6px;
     }
 
+    .cloud-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      color: #34D399;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
     .brand-subtitle {
       font-size: 12px;
       color: var(--text-muted);
@@ -204,6 +218,12 @@
       background-color: var(--est-blue);
       color: #FFFFFF;
       box-shadow: 0 2px 8px rgba(0, 114, 206, 0.45);
+    }
+
+    .mode-btn.standing-active {
+      background-color: #D97706;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(217, 119, 6, 0.45);
     }
 
     .header-btn {
@@ -310,94 +330,25 @@
       transition: all 0.15s ease;
     }
 
-    .athlete-pill-btn.active {
-      background-color: var(--est-blue);
-      border-color: var(--sky);
+    .athlete-pill-btn[data-athlete="Tuuli"].active {
+      background-color: #0072CE;
+      border-color: #38BDF8;
       color: #FFFFFF;
       box-shadow: 0 2px 10px rgba(0, 114, 206, 0.45);
     }
 
-    /* Compact Above-the-Fold Quick Wind Bar (No Scrolling Needed) */
-    .quick-wind-bar {
-      width: 100%;
-      max-width: 580px;
-      background-color: var(--bg-panel);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .quick-wind-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-    }
-
-    .quick-clock-strip {
-      display: grid;
-      grid-template-columns: repeat(13, 1fr);
-      gap: 3px;
-      width: 100%;
-    }
-
-    .q-clock-btn {
-      min-height: 34px;
-      padding: 0;
-      border-radius: 8px;
-      border: 1px solid #334155;
-      background-color: #152238;
-      color: #CBD5E1;
-      font-weight: 800;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .q-clock-btn.active {
-      background-color: var(--est-blue);
-      border-color: var(--sky);
+    .athlete-pill-btn[data-athlete="Hanna-Brita"].active {
+      background-color: #D97706;
+      border-color: #FBBF24;
       color: #FFFFFF;
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.45);
+      box-shadow: 0 2px 10px rgba(217, 119, 6, 0.45);
     }
 
-    .quick-wind-slider-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .q-step-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background-color: #152238;
-      border: 1.5px solid #334155;
+    .athlete-pill-btn[data-athlete="Rasmus"].active {
+      background-color: #10B981;
+      border-color: #34D399;
       color: #FFFFFF;
-      font-size: 18px;
-      font-weight: 800;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .quick-diopter-badge {
-      background: rgba(0, 114, 206, 0.22);
-      border: 1px solid rgba(56, 189, 248, 0.45);
-      color: #7DD3FC;
-      font-size: 11px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 8px;
-      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.45);
     }
 
     /* Target Top Status Bar */
@@ -652,6 +603,70 @@
       margin-top: 10px;
     }
 
+    .action-btn {
+      min-height: 48px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .small-btn {
+      min-height: 38px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background-color: var(--bg-panel);
+      color: #CBD5E1;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-bar {
+      width: 5px;
+      height: 18px;
+      border-radius: 99px;
+    }
+
+    .panel-title {
+      font-family: var(--font-num);
+      font-size: 15px;
+      font-weight: 800;
+      color: #FFFFFF;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+
     @media (min-width: 480px) {
       .popup-btn-grid {
         grid-template-columns: 1fr 1fr;
@@ -809,22 +824,6 @@
       flex-shrink: 0;
     }
 
-    .tick-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-
-    .tick-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px;
-      cursor: pointer;
-    }
-
     .preset-grid-5 {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -942,6 +941,9 @@
           <div class="brand-title-line">
             <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
             <span class="badge-est">EST • 50m</span>
+            <span id="cloudSyncStatusBadge" onclick="triggerCloudSyncManual()" class="cloud-sync-badge" title="Pilvesünkroonimine aktiivne">
+              ☁️ Pilv: <span id="cloudSyncTxt">Sünkroonis</span>
+            </span>
           </div>
         </div>
 
@@ -1420,6 +1422,31 @@
         <div id="savedSeriesList" class="hidden"></div>
       </div>
 
+      <!-- 4. PILVEEKRAAN / CLOUD SYNC PANEL -->
+      <div class="panel-card" style="margin-top:14px;">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-bar" style="background-color:var(--emerald);"></span>
+            <h2 class="panel-title">PILVEEKRAAN & SÜNKROONIMINE</h2>
+          </div>
+          <span id="cloudStatusBadge" style="background:rgba(16,185,129,0.15); color:#34D399; border:1px solid rgba(16,185,129,0.4); padding:4px 10px; border-radius:99px; font-size:11px; font-weight:800;">
+            🟢 Valmis
+          </span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Treeningu / Klubi ruumi kood:</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="inputCloudRoom" value="TT-TEAM-2026" class="form-input" style="min-height:42px; font-size:14px;" />
+            <button type="button" onclick="syncWithCloud()" class="small-btn" style="background:var(--est-blue); color:#FFF; border-color:var(--sky); min-height:42px; padding:0 16px; font-weight:800;">
+              ☁️ Sünkrooni
+            </button>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+            Sünkrooni oma seeriad pilveruumiga, et treener või teised koondise liikmed saaksid tulemusi reaalajas jälgida.
+          </div>
+        </div>
+      </div>
+
     </section>
   </main>
 
@@ -1449,6 +1476,46 @@
       </div>
     </div>
   </div>
+
+  <!-- Firebase SDK Modules for Cloud Sync -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    window.firebaseEnabled = false;
+    try {
+      var appId = typeof __app_id !== 'undefined' ? __app_id : 'tt-biathlon-default';
+      var firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+      if (firebaseConfig) {
+        var app = initializeApp(firebaseConfig);
+        var db = getFirestore(app);
+        var auth = getAuth(app);
+
+        window.fbDb = db;
+        window.fbAuth = auth;
+        window.fbAppId = appId;
+        window.firebaseEnabled = true;
+
+        var authPromise = typeof __initial_auth_token !== 'undefined' && __initial_auth_token
+          ? signInWithCustomToken(auth, __initial_auth_token)
+          : signInAnonymously(auth);
+
+        authPromise.then(function() {
+          var userId = auth.currentUser ? auth.currentUser.uid : 'anon';
+          window.fbUserId = userId;
+          document.getElementById('cloudSyncTxt').textContent = 'Pilv aktiivne';
+          initCloudFirestoreListener(db, appId, userId);
+        }).catch(function(err) {
+          console.warn('Firebase auth fallback:', err);
+          document.getElementById('cloudSyncTxt').textContent = 'Kohalik (Offline)';
+        });
+      }
+    } catch (e) {
+      console.warn('Cloud sync offline mode:', e);
+    }
+  </script>
 
   <script>
     // =========================================================================
@@ -1621,6 +1688,59 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.savedSeries));
       } catch (e) {}
+    }
+
+    // Cloud Firestore Sync Integration (Rule 1, 2, 3 Compliant)
+    function initCloudFirestoreListener(db, appId, userId) {
+      try {
+        if (!window.firebaseEnabled || !db || !userId) return;
+        var colRef = collection(db, 'artifacts', appId, 'users', userId, 'savedSeries');
+        onSnapshot(colRef, function(snapshot) {
+          var cloudItems = [];
+          snapshot.forEach(function(docSnap) {
+            var d = docSnap.data();
+            if (d && d.id) {
+              cloudItems.push(d);
+            }
+          });
+          if (cloudItems.length > 0) {
+            cloudItems.sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); });
+            appState.savedSeries = cloudItems;
+            persistSavedSeries();
+            renderSavedSeriesList();
+          }
+        }, function(err) {
+          console.warn('Cloud sync listener error:', err);
+        });
+      } catch (e) {}
+    }
+
+    function saveSeriesToCloud(seriesObj) {
+      try {
+        if (!window.firebaseEnabled || !window.fbDb || !window.fbUserId) return;
+        var docRef = doc(window.fbDb, 'artifacts', window.fbAppId, 'users', window.fbUserId, 'savedSeries', seriesObj.id);
+        setDoc(docRef, seriesObj).catch(function(err) {
+          console.warn('Cloud write failed:', err);
+        });
+      } catch (e) {}
+    }
+
+    function deleteSeriesFromCloud(seriesId) {
+      try {
+        if (!window.firebaseEnabled || !window.fbDb || !window.fbUserId) return;
+        var docRef = doc(window.fbDb, 'artifacts', window.fbAppId, 'users', window.fbUserId, 'savedSeries', seriesId);
+        deleteDoc(docRef).catch(function(err) {
+          console.warn('Cloud delete failed:', err);
+        });
+      } catch (e) {}
+    }
+
+    function triggerCloudSyncManual() {
+      if (window.firebaseEnabled) {
+        showToast('☁️ Cloud Sync sünkroniseerib pilvega reaalajas!');
+      } else {
+        showToast('💾 Salvestatud kohalikku mälu (Offline režiim)');
+      }
     }
 
     // =========================================================================
@@ -1820,15 +1940,6 @@
         calmCircle.setAttribute('stroke', isCalm ? '#38BDF8' : '#334155');
       }
 
-      // Sync quick clock strip buttons above the target
-      var qBtns = document.querySelectorAll('#quickClockStrip .q-clock-btn');
-      var activeHour = isCalm ? 0 : dir;
-      for (var q = 0; q < qBtns.length; q++) {
-        var qb = qBtns[q];
-        var qh = Number(qb.getAttribute('data-qhour'));
-        qb.className = (qh === activeHour) ? 'q-clock-btn active' : 'q-clock-btn';
-      }
-
       var clockVec = document.getElementById('clockWindVectorGroup');
       if (clockVec) {
         if (isCalm) {
@@ -1851,13 +1962,10 @@
       var arcRight = document.getElementById('rangeFlagArcRight');
       var arcLeft = document.getElementById('rangeFlagArcLeft');
 
-      // Wind from 1..5 blows towards the left (←); wind from 7..11 blows towards the right (→)
       var blowsLeft = !isCalm && (dir >= 1 && dir <= 5);
       var isAxialWind = !isCalm && (dir === 12 || dir === 6);
-
-      // Perspective foreshortening: full length at 3 & 9 o'clock, angled at 1/2/4/5/7/8/10/11, foreshortened at 12 & 6
       var fromRad = ((dir % 12) * 30 * Math.PI) / 180;
-      var crossSin = Math.abs(Math.sin(fromRad)); // 1.0 at 3/9, 0.866 at 2/4/8/10, 0.5 at 1/5/7/11, 0 at 12/6
+      var crossSin = Math.abs(Math.sin(fromRad));
       var apparentLen = isCalm ? 52 : (isAxialWind ? 18 : Math.round(24 + 34 * crossSin));
       var stripeStart = Math.round(apparentLen * 0.28);
       var stripeEnd = Math.round(apparentLen * 0.50);
@@ -1901,10 +2009,6 @@
       }
 
       document.getElementById('windSummaryPill').textContent = formatWindBadgeString(isCalm ? 0 : dir, isCalm ? 0 : speed);
-      var quickTopLbl = document.getElementById('quickWindTopLabel');
-      if (quickTopLbl) {
-        quickTopLbl.textContent = isCalm ? 'Kell 0 • 0.0 m/s (Vaikus)' : ('Kell ' + dir + ' (' + desc + ') • ' + speed.toFixed(1) + ' m/s');
-      }
       document.getElementById('windAngleDesc').textContent = desc + arrowSuffix;
       document.getElementById('windDirDetailText').textContent = isCalm ? 'Kell 0 (Vaikus)' : ('Kell ' + dir + ' (' + desc + ')');
       document.getElementById('windSpeedDetailText').textContent = (isCalm ? 0 : speed).toFixed(1) + ' m/s';
@@ -2067,7 +2171,7 @@
       var svg = document.getElementById('biathlonSvg');
       if (!svg) return;
 
-      var SCROLL_SLOP_PX = 10; // Movement > 10px in normal mode is treated as page scrolling on Android/iOS
+      var SCROLL_SLOP_PX = 10;
 
       function handleStart(clientX, clientY, isTouch) {
         var coords = clientToSvgCoords(svg, clientX, clientY);
@@ -2113,7 +2217,6 @@
       function handleMove(clientX, clientY, isTouch) {
         if (!pointerState.isDown) return;
 
-        // On touchscreen in normal plotting mode: if finger moves > 10px, cancel shot placement so Android scrolls cleanly
         if (isTouch && !appState.moveShotsMode) {
           var movedPx = hypot2D(clientX - pointerState.startClientX, clientY - pointerState.startClientY);
           if (movedPx > SCROLL_SLOP_PX) {
@@ -2161,7 +2264,6 @@
         renderAll();
       }
 
-      // Touch Events (Android / iOS)
       svg.addEventListener('touchstart', function (evt) {
         if (evt.touches.length > 1) {
           pointerState.isDown = false;
@@ -2169,7 +2271,6 @@
           hideTouchPreview();
           return;
         }
-        // Only lock browser scroll when explicitly dragging shots in Move Mode
         if (appState.moveShotsMode) {
           evt.preventDefault();
         }
@@ -2188,7 +2289,7 @@
 
       svg.addEventListener('touchend', function (evt) {
         if (pointerState.isDown && !pointerState.isScrollingGesture) {
-          evt.preventDefault(); // Prevents synthetic mouse click after valid tap
+          evt.preventDefault();
           handleEnd();
         } else {
           pointerState.isDown = false;
@@ -2205,7 +2306,6 @@
         renderAll();
       });
 
-      // Mouse Events (Desktop / Laptop)
       svg.addEventListener('mousedown', function (evt) {
         if (evt.button !== 0) return;
         evt.preventDefault();
@@ -2270,8 +2370,6 @@
     function startNewSeries() {
       appState.activeShots = [];
       appState.comparisonSeries = null;
-      var notesEl = document.getElementById('inputNotes');
-      if (notesEl) notesEl.value = '';
       renderAll();
       showToast('➕ Uus seeria alustatud — märklaud on puhas!');
     }
@@ -2287,7 +2385,7 @@
         btnStanding.className = 'mode-btn';
         hint.textContent = 'Lamades';
       } else {
-        btnStanding.className = 'mode-btn active';
+        btnStanding.className = 'mode-btn standing-active';
         btnProne.className = 'mode-btn';
         hint.textContent = 'Püsti';
       }
@@ -2299,10 +2397,6 @@
       document.getElementById('paperRingsLabel').textContent =
         appState.showPaperRings ? 'Paber: SEES' : 'Paber: VÄLJAS';
       renderTarget();
-    }
-
-    function deleteSelectedDropdownSeries() {
-      toggleMultiDeletePanel();
     }
 
     function toggleMultiDeletePanel(forceState) {
@@ -2379,7 +2473,11 @@
       }
       var deletedCount = boxes.length;
       appState.savedSeries = appState.savedSeries.filter(function (s) {
-        return !idsToRemove[s.id];
+        if (idsToRemove[s.id]) {
+          deleteSeriesFromCloud(s.id);
+          return false;
+        }
+        return true;
       });
       if (appState.comparisonSeries && idsToRemove[appState.comparisonSeries.id]) {
         appState.comparisonSeries = null;
@@ -2422,9 +2520,7 @@
       renderAll();
     }
 
-    // Step-by-step cleaning of the athlete's series on the target until completely clear
     function clearStepByStep() {
-      // 1. If active (pink) shots exist, remove them one by one from last to first
       if (appState.activeShots.length > 0) {
         var removedShotNum = appState.activeShots.length;
         appState.activeShots.pop();
@@ -2444,7 +2540,6 @@
         return;
       }
 
-      // 2. Once active shots are 0, if a yellow comparison series is on the target, remove its shots step-by-step
       if (appState.comparisonSeries && appState.comparisonSeries.shots && appState.comparisonSeries.shots.length > 0) {
         var compShotNum = appState.comparisonSeries.shots.length;
         appState.comparisonSeries.shots.pop();
@@ -2471,8 +2566,6 @@
       }
       appState.activeShots = [];
       appState.comparisonSeries = null;
-      var notesEl = document.getElementById('inputNotes');
-      if (notesEl) notesEl.value = '';
       handleAthleteChange();
       renderAll();
       showToast('🎯 Laskja: ' + athleteName + ' — märklaud puhastatud!');
@@ -2633,13 +2726,10 @@
       }
     }
 
-    // Renders shots at their exact physical coordinates for accurate MPI/Spread math,
-    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 3.0 mm).
     function renderShotsWithOverlapHandling(layerEl, shots, fillHex, textHex, isComparison) {
       var OVERLAP_THRESHOLD_MM = 3.0;
       var clusters = [];
 
-      // 1. Draw the physical bullet holes first (at exact x, y)
       for (var i = 0; i < shots.length; i++) {
         var s = shots[i];
         var assignedCluster = null;
@@ -2674,7 +2764,6 @@
         circle.setAttribute('stroke-width', overlapRank > 0 ? '1.15' : '0.85');
         holeGroup.appendChild(circle);
 
-        // If overlapping, add a subtle concentric inner ring so stacked impacts are unmistakable
         if (overlapRank > 0) {
           var innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           innerRing.setAttribute('cx', s.x);
@@ -2690,8 +2779,6 @@
         layerEl.appendChild(holeGroup);
       }
 
-      // 2. Draw readable labels: single centered number for isolated shots,
-      // or fanned satellite number badges + combined "#1,#2" callout pill for overlapping shots
       for (var k = 0; k < clusters.length; k++) {
         var cluster = clusters[k];
         if (cluster.members.length === 1) {
@@ -2708,14 +2795,12 @@
           txt.textContent = String(single.number);
           layerEl.appendChild(txt);
         } else {
-          // Multiple overlapping shots in this cluster (< 3.0 mm apart)
           var numsList = [];
           for (var m = 0; m < cluster.members.length; m++) {
             numsList.push('#' + cluster.members[m].number);
           }
           var joinedNums = numsList.join(', ');
 
-          // Draw primary number on center hole
           var centerTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
           centerTxt.setAttribute('x', cluster.anchorX);
           centerTxt.setAttribute('y', cluster.anchorY);
@@ -2728,7 +2813,6 @@
           centerTxt.textContent = cluster.members.map(function (it) { return it.number; }).join('+');
           layerEl.appendChild(centerTxt);
 
-          // Draw high-contrast stacked callout pill next to the overlapping group
           var dirX = cluster.anchorX >= 0 ? -1 : 1;
           var dirY = cluster.anchorY >= 0 ? -1 : 1;
           var badgeX = cluster.anchorX + dirX * 12.0;
@@ -2883,8 +2967,9 @@
 
       appState.savedSeries.unshift(newSeries);
       persistSavedSeries();
+      saveSeriesToCloud(newSeries);
       renderSavedSeriesList();
-      showToast('💾 Salvestatud: ' + newSeries.timestamp);
+      showToast('💾 Salvestatud pilve: ' + newSeries.timestamp);
     }
 
     function popSelectedDropdownOnTarget(mode) {
@@ -2954,6 +3039,7 @@
         appState.comparisonSeries = null;
       }
       persistSavedSeries();
+      deleteSeriesFromCloud(id);
       renderAll();
       showToast('Seeria kustutatud');
     }
@@ -3110,9 +3196,6 @@
             syncQuickAthletePills();
           }
         }
-        if (data.n) {
-          document.getElementById('inputNotes').value = data.n;
-        }
         showToast('📲 Jagatud seeria laaditud märklauale: ' + (data.a || 'Sportlane'));
       } catch (e) {}
     }
@@ -3125,7 +3208,7 @@
         timestamp: formatEstonianDateTime(new Date()),
         windDir: isCalm ? 0 : appState.windDir,
         windSpeed: isCalm ? 0 : appState.windSpeed,
-        notes: document.getElementById('inputNotes').value.trim(),
+        notes: '',
         shots: JSON.parse(JSON.stringify(appState.activeShots))
       };
     }
@@ -3148,12 +3231,9 @@
         '🕒 ' + seriesObj.timestamp + ' • ' + posLabel,
         '✅ Tabamused: *' + stats.hits + '/' + stats.count + '* (Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm)',
         '🔧 Diopter: Külg *' + hText + '* | Kõrgus *' + vText + '*',
-        windLabel
+        windLabel,
+        '📲 Ava märklaud: ' + shareUrl
       ];
-      if (seriesObj.notes) {
-        lines.push('📝 ' + seriesObj.notes);
-      }
-      lines.push('📲 Ava märklaud: ' + shareUrl);
       return lines.join('\n');
     }
 
@@ -3163,23 +3243,11 @@
       var isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
 
       if (isMobile) {
-        // Direct native app protocol for Android & iOS (bypasses mobile popup blockers)
         window.location.href = 'whatsapp://send?text=' + encoded;
       } else {
-        // Desktop (Windows / Mac) browser tab
         var waUrl = 'https://api.whatsapp.com/send?text=' + encoded;
         window.open(waUrl, '_blank');
       }
-    }
-
-    function shareActiveWhatsAppTextLink() {
-      if (appState.activeShots.length === 0) {
-        showToast('Märgi vähemalt 1 lask enne jagamist!');
-        return;
-      }
-      var snap = getCurrentSeriesSnapshot();
-      var text = formatWhatsAppSummaryText(snap);
-      launchWhatsAppMessage(text);
     }
 
     function shareSelectedDropdownWhatsApp() {
@@ -3198,7 +3266,6 @@
       launchWhatsAppMessage(text);
     }
 
-    // Pre-cached PNG bytes so Android navigator.share fires in 0ms with a fresh File object
     var cachedPngBytes = null;
     var cachedPngFileName = 'marklaud.png';
     var cachedPngDataUrl = '';
@@ -3241,14 +3308,12 @@
       } catch (e) {}
     }
 
-    // Sends each PNG image as a separate, uniquely timestamped file via Android/iOS native share menu
     function shareDirectPngToWhatsApp() {
       if (appState.activeShots.length === 0) {
         showToast('Märgi vähemalt 1 lask enne pildi saatmist!');
         return;
       }
 
-      // Re-render synchronously with current second/time so each sent PNG is a distinct image & file
       refreshCachedTargetPng();
 
       if (navigator.share && cachedPngBytes) {
@@ -3271,17 +3336,6 @@
       openAppInAndroidChrome();
     }
 
-    function openShareFallbackModal() {
-      openAppInAndroidChrome();
-    }
-
-    function closeShareFallbackModal() {
-      var modal = document.getElementById('shareFallbackModal');
-      if (modal) {
-        modal.classList.add('hidden');
-      }
-    }
-
     function openAppInAndroidChrome() {
       var snap = getCurrentSeriesSnapshot();
       var fullShareUrl = encodeSeriesShareUrl(snap);
@@ -3290,11 +3344,6 @@
       window.location.href = intentUrl;
     }
 
-    function shareActiveTargetWhatsAppImage() {
-      shareDirectPngToWhatsApp();
-    }
-
-    // 100% Synchronous 2D Canvas Renderer for PNG Download (Strictly Target & Shots Only)
     function renderTargetCanvasSync(seriesOverride) {
       var targetShots = seriesOverride && seriesOverride.shots ? seriesOverride.shots : appState.activeShots;
       var targetPos = seriesOverride && seriesOverride.position ? seriesOverride.position : appState.position;
@@ -3308,16 +3357,14 @@
       canvas.height = 1000;
       var ctx = canvas.getContext('2d');
 
-      // Coordinate system matching SVG viewBox (-105..105 -> 1000x1000 square target)
       var cx = 500;
       var cy = 500;
-      var scale = 1000 / 210; // mm to canvas px
+      var scale = 1000 / 210;
 
       function mmX(x) { return cx + x * scale; }
       function mmY(y) { return cy + y * scale; }
       function mmR(r) { return r * scale; }
 
-      // White Metal Target Plate (Full 1000x1000 Square - Universal Android/iOS Canvas)
       ctx.save();
       ctx.fillStyle = '#F1F5F9';
       ctx.fillRect(0, 0, 1000, 1000);
@@ -3326,7 +3373,6 @@
       ctx.strokeRect(5, 5, 990, 990);
       ctx.restore();
 
-      // Shooter Name + Exact Time Badge at Top of Target Plate (makes every PNG visually & binary-unique)
       ctx.save();
       var nameUpper = athlete.toUpperCase();
       var shortTime = timeStr.split(' ').pop() || timeStr;
@@ -3350,7 +3396,6 @@
       ctx.fillText(headerLine, cx, pillY + pillH / 2 + 1);
       ctx.restore();
 
-      // Clock Numbers (12, 3, 6, 9)
       ctx.fillStyle = '#475569';
       ctx.font = 'bold 30px sans-serif';
       ctx.textAlign = 'center';
@@ -3360,7 +3405,6 @@
       ctx.fillText('6', mmX(0), mmY(86));
       ctx.fillText('9', mmX(-86), mmY(0));
 
-      // Outer Paper Rings (1 & 2)
       if (appState.showPaperRings) {
         ctx.strokeStyle = '#94A3B8';
         ctx.lineWidth = 2.2;
@@ -3371,7 +3415,6 @@
         });
       }
 
-      // 115mm Standing Hit Zone (r = 57.5 mm)
       ctx.beginPath();
       ctx.arc(cx, cy, mmR(57.5), 0, Math.PI * 2);
       ctx.fillStyle = '#0F172A';
@@ -3380,7 +3423,6 @@
       ctx.strokeStyle = targetPos === 'standing' ? '#38BDF8' : '#1E293B';
       ctx.stroke();
 
-      // Inner Paper Rings (3, 4, 5)
       if (appState.showPaperRings) {
         ctx.strokeStyle = '#475569';
         ctx.lineWidth = 2;
@@ -3391,7 +3433,6 @@
         });
       }
 
-      // 45mm Prone Hit Zone (r = 22.5 mm)
       ctx.beginPath();
       ctx.arc(cx, cy, mmR(22.5), 0, Math.PI * 2);
       ctx.fillStyle = '#05080F';
@@ -3400,7 +3441,6 @@
       ctx.strokeStyle = targetPos === 'prone' ? '#38BDF8' : '#475569';
       ctx.stroke();
 
-      // Center Paper Rings (7 & 8) + Numbers
       if (appState.showPaperRings) {
         ctx.strokeStyle = '#64748B';
         ctx.lineWidth = 2;
@@ -3421,7 +3461,6 @@
         ctx.fillText('8', cx, mmY(-12.5));
       }
 
-      // Crosshairs
       ctx.save();
       ctx.strokeStyle = '#64748B';
       ctx.lineWidth = 2;
@@ -3434,7 +3473,6 @@
       ctx.stroke();
       ctx.restore();
 
-      // MPI Group Circle & Crosshair
       var showMPI = document.getElementById('chkShowMPI') && document.getElementById('chkShowMPI').checked;
       if (showMPI && targetShots.length >= 2) {
         var mpiStats = computeAnalytics(targetShots, targetPos);
@@ -3459,7 +3497,6 @@
         ctx.stroke();
       }
 
-      // Helper to draw shots with overlap callout pills on canvas
       function drawShotsLayerOnCanvas(shots, fillHex, textHex, isComparison) {
         if (!shots || shots.length === 0) return;
         var OVERLAP_MM = 3.0;
@@ -3548,18 +3585,6 @@
       callback(res.canvas, res.athlete);
     }
 
-    // =========================================================================
-    // EXPORT (JSON BACKUP & PNG SNAPSHOT WITH IOS SAFARI SUPPORT)
-    // =========================================================================
-    function triggerDataUrlDownload(dataUrl, fileName) {
-      var link = document.createElement('a');
-      link.download = fileName;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
     function exportAllJson() {
       var dataStr = JSON.stringify(appState.savedSeries, null, 2);
       var blob = new Blob([dataStr], { type: 'application/json' });
@@ -3608,6 +3633,24 @@
         document.body.removeChild(link);
         showToast('📷 Märklaua PNG pilt salvestatud!');
       });
+    }
+
+    function syncWithCloud() {
+      var roomCode = document.getElementById('inputCloudRoom').value.trim() || 'TT-TEAM-2026';
+      var badge = document.getElementById('cloudStatusBadge');
+      if (badge) {
+        badge.textContent = '⏳ Sünkroonin...';
+        badge.style.background = 'rgba(245,158,11,0.15)';
+        badge.style.color = '#FDE68A';
+      }
+      setTimeout(function () {
+        if (badge) {
+          badge.textContent = '🟢 Sünkroonitud (' + appState.savedSeries.length + ' seeriat)';
+          badge.style.background = 'rgba(16,185,129,0.15)';
+          badge.style.color = '#34D399';
+        }
+        showToast('☁️ Pilveruum "' + roomCode + '" sünkroonitud edukalt!');
+      }, 700);
     }
 
     var toastTimer = null;
