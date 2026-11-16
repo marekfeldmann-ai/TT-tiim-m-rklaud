@@ -1499,18 +1499,20 @@
             <div style="margin:6px 0; background:#060C1A; border:1px solid #1E293B; border-radius:12px; padding:4px; display:flex; justify-content:center;">
               <svg viewBox="0 0 140 95" width="100%" height="80" style="overflow:visible;">
                 <line x1="15" y1="86" x2="125" y2="86" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
-                <line x1="42" y1="86" x2="42" y2="14" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
-                <circle cx="42" cy="13" r="3" fill="#CBD5E1"/>
-                <path d="M42,58 A38,38 0 0,0 80,20" fill="none" stroke="#1E293B" stroke-width="1" stroke-dasharray="2,2"/>
-                <g id="rangeFlagPivot" transform="translate(42, 18)">
+                <!-- Centered Flagpole at x=70 so flag stays attached in both left & right directions -->
+                <line x1="70" y1="86" x2="70" y2="14" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="70" cy="13" r="3" fill="#CBD5E1"/>
+                <path id="rangeFlagArcRight" d="M70,56 A38,38 0 0,0 108,18" fill="none" stroke="#1E293B" stroke-width="1" stroke-dasharray="2,2"/>
+                <path id="rangeFlagArcLeft" d="M70,56 A38,38 0 0,1 32,18" fill="none" stroke="#1E293B" stroke-width="1" stroke-dasharray="2,2" style="display:none;"/>
+                <g id="rangeFlagPivot" transform="translate(70, 18)">
                   <g id="rangeFlagAngleGroup" transform="rotate(55)">
                     <g id="rangeFlagFlutterGroup" class="flag-flutter">
-                      <polygon points="0,-4 62,-2 62,3 0,5" fill="#EF4444" stroke="#FCA5A5" stroke-width="0.6"/>
-                      <polygon points="18,-3.4 30,-3 30,3.5 18,4" fill="#FFFFFF" opacity="0.85"/>
+                      <polygon id="rangeFlagClothPoly" points="0,-4 56,-2 56,3 0,5" fill="#EF4444" stroke="#FCA5A5" stroke-width="0.6"/>
+                      <polygon id="rangeFlagStripePoly" points="16,-3.4 28,-3 28,3.5 16,4" fill="#FFFFFF" opacity="0.85"/>
                     </g>
                   </g>
                 </g>
-                <text id="rangeFlagStateText" x="72" y="80" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#94A3B8">Kerge tuul (~35°)</text>
+                <text id="rangeFlagStateText" x="70" y="80" text-anchor="middle" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#94A3B8">Kerge tuul (~35°)</text>
               </svg>
             </div>
 
@@ -2035,10 +2037,35 @@
       var flagFlutterGroup = document.getElementById('rangeFlagFlutterGroup');
       var flagStateText = document.getElementById('rangeFlagStateText');
       var flagPivot = document.getElementById('rangeFlagPivot');
+      var flagClothPoly = document.getElementById('rangeFlagClothPoly');
+      var flagStripePoly = document.getElementById('rangeFlagStripePoly');
+      var arcRight = document.getElementById('rangeFlagArcRight');
+      var arcLeft = document.getElementById('rangeFlagArcLeft');
 
+      // Wind from 1..5 blows towards the left (←); wind from 7..11 blows towards the right (→)
       var blowsLeft = !isCalm && (dir >= 1 && dir <= 5);
+      var isAxialWind = !isCalm && (dir === 12 || dir === 6);
+
+      // Perspective foreshortening: full length at 3 & 9 o'clock, angled at 1/2/4/5/7/8/10/11, foreshortened at 12 & 6
+      var fromRad = ((dir % 12) * 30 * Math.PI) / 180;
+      var crossSin = Math.abs(Math.sin(fromRad)); // 1.0 at 3/9, 0.866 at 2/4/8/10, 0.5 at 1/5/7/11, 0 at 12/6
+      var apparentLen = isCalm ? 52 : (isAxialWind ? 18 : Math.round(24 + 34 * crossSin));
+      var stripeStart = Math.round(apparentLen * 0.28);
+      var stripeEnd = Math.round(apparentLen * 0.50);
+
+      if (flagClothPoly) {
+        flagClothPoly.setAttribute('points', '0,-4 ' + apparentLen + ',-2 ' + apparentLen + ',3 0,5');
+      }
+      if (flagStripePoly) {
+        flagStripePoly.setAttribute('points', stripeStart + ',-3.4 ' + stripeEnd + ',-3 ' + stripeEnd + ',3.5 ' + stripeStart + ',4');
+      }
+
       if (flagPivot) {
-        flagPivot.setAttribute('transform', blowsLeft ? 'translate(88, 18) scale(-1, 1)' : 'translate(42, 18) scale(1, 1)');
+        flagPivot.setAttribute('transform', blowsLeft ? 'translate(70, 18) scale(-1, 1)' : 'translate(70, 18) scale(1, 1)');
+      }
+      if (arcRight && arcLeft) {
+        arcRight.style.display = blowsLeft ? 'none' : 'block';
+        arcLeft.style.display = blowsLeft ? 'block' : 'none';
       }
       if (flagAngleGroup) {
         flagAngleGroup.setAttribute('transform', 'rotate(' + flagDegFromHoriz + ')');
@@ -2047,20 +2074,29 @@
         var dur = isCalm ? '3.0s' : Math.max(0.22, 0.95 - liftRatio * 0.65).toFixed(2) + 's';
         flagFlutterGroup.style.setProperty('--flutter-dur', dur);
       }
-      if (flagStateText) {
-        if (isCalm) flagStateText.textContent = 'Tuulevaikus (lipp ripub)';
-        else if (speed < 2.5) flagStateText.textContent = 'Kerge tuul (~' + (90 - flagDegFromHoriz) + '° tõus)';
-        else if (speed < 5.0) flagStateText.textContent = 'Keskmine tuul (~' + (90 - flagDegFromHoriz) + '° tõus)';
-        else flagStateText.textContent = 'Tugev tuul (horisontaalne!)';
-      }
 
       var desc = isCalm ? 'Tuulevaikus' : (clockHourDescriptions[dir] || ('Kell ' + dir));
+      var arrowSuffix = isCalm ? '' : (blowsLeft ? ' ←' : (dir === 12 ? ' ↓' : (dir === 6 ? ' ↑' : ' →')));
+
+      if (flagStateText) {
+        if (isCalm) {
+          flagStateText.textContent = 'Tuulevaikus (lipp ripub)';
+        } else if (dir === 12) {
+          flagStateText.textContent = 'Vastutuul otse eest ↓ (~' + (90 - flagDegFromHoriz) + '° tõus)';
+        } else if (dir === 6) {
+          flagStateText.textContent = 'Taganttuul otse tagant ↑ (~' + (90 - flagDegFromHoriz) + '° tõus)';
+        } else {
+          var dirArrowWord = blowsLeft ? '← vasakule' : 'paremale →';
+          flagStateText.textContent = 'Lipp ' + dirArrowWord + ' (~' + (90 - flagDegFromHoriz) + '° tõus)';
+        }
+      }
+
       document.getElementById('windSummaryPill').textContent = formatWindBadgeString(isCalm ? 0 : dir, isCalm ? 0 : speed);
       var quickTopLbl = document.getElementById('quickWindTopLabel');
       if (quickTopLbl) {
         quickTopLbl.textContent = isCalm ? 'Kell 0 • 0.0 m/s (Vaikus)' : ('Kell ' + dir + ' (' + desc + ') • ' + speed.toFixed(1) + ' m/s');
       }
-      document.getElementById('windAngleDesc').textContent = desc;
+      document.getElementById('windAngleDesc').textContent = desc + arrowSuffix;
       document.getElementById('windDirDetailText').textContent = isCalm ? 'Kell 0 (Vaikus)' : ('Kell ' + dir + ' (' + desc + ')');
       document.getElementById('windSpeedDetailText').textContent = (isCalm ? 0 : speed).toFixed(1) + ' m/s';
 
