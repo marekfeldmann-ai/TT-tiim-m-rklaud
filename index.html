@@ -3153,6 +3153,20 @@
       return ia;
     }
 
+    function buildUniqueTimestampedFileName(athleteName) {
+      var now = new Date();
+      var stamp =
+        now.getFullYear() +
+        pad2(now.getMonth() + 1) +
+        pad2(now.getDate()) + '-' +
+        pad2(now.getHours()) + '-' +
+        pad2(now.getMinutes()) + '-' +
+        pad2(now.getSeconds()) + '-' +
+        String(now.getMilliseconds());
+      var cleanAthlete = (athleteName || 'laskja').toLowerCase().replace(/[^a-z0-9]/g, '-');
+      return 'marklaud-' + cleanAthlete + '-' + stamp + '.png';
+    }
+
     function refreshCachedTargetPng() {
       try {
         if (!appState.activeShots || appState.activeShots.length === 0) {
@@ -3162,37 +3176,38 @@
         }
         var res = renderTargetCanvasSync();
         cachedPngDataUrl = res.canvas.toDataURL('image/png');
-        cachedPngFileName = 'marklaud-' + res.athlete.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+        cachedPngFileName = buildUniqueTimestampedFileName(res.athlete);
         cachedPngBytes = dataUrlToBytesSync(cachedPngDataUrl);
       } catch (e) {}
     }
 
-    // Sends ONLY the PNG image file (no link) via Android/iOS native share menu to WhatsApp (Bypasses modal)
+    // Sends each PNG image as a separate, uniquely timestamped file via Android/iOS native share menu
     function shareDirectPngToWhatsApp() {
       if (appState.activeShots.length === 0) {
         showToast('Märgi vähemalt 1 lask enne pildi saatmist!');
         return;
       }
 
-      if (!cachedPngBytes || !cachedPngDataUrl) {
-        refreshCachedTargetPng();
-      }
+      // Re-render synchronously with current second/time so each sent PNG is a distinct image & file
+      refreshCachedTargetPng();
 
       if (navigator.share && cachedPngBytes) {
-        var freshFile = new File([cachedPngBytes], cachedPngFileName, { type: 'image/png' });
+        var uniqueFileName = buildUniqueTimestampedFileName(getSelectedAthleteName());
+        var freshFile = new File([cachedPngBytes], uniqueFileName, {
+          type: 'image/png',
+          lastModified: Date.now()
+        });
         navigator.share({
           files: [freshFile]
         }).then(function () {
-          showToast('📷 Pilt saadetud!');
+          showToast('📷 Pilt saadetud (' + uniqueFileName.slice(-15) + ')');
         }).catch(function (err) {
           if (err && err.name === 'AbortError') return;
-          // If browser blocked file sharing, jump straight to Chrome without showing modal
           openAppInAndroidChrome();
         });
         return;
       }
 
-      // Bypass modal and jump straight to Chrome if opened inside an in-app browser
       openAppInAndroidChrome();
     }
 
@@ -3220,7 +3235,14 @@
     }
 
     // 100% Synchronous 2D Canvas Renderer for PNG Download (Strictly Target & Shots Only)
-    function renderTargetCanvasSync() {
+    function renderTargetCanvasSync(seriesOverride) {
+      var targetShots = seriesOverride && seriesOverride.shots ? seriesOverride.shots : appState.activeShots;
+      var targetPos = seriesOverride && seriesOverride.position ? seriesOverride.position : appState.position;
+      var athlete = seriesOverride && seriesOverride.athlete ? seriesOverride.athlete : getSelectedAthleteName();
+      var timeStr = seriesOverride && seriesOverride.timestamp
+        ? seriesOverride.timestamp
+        : formatEstonianDateTime(new Date());
+
       var canvas = document.createElement('canvas');
       canvas.width = 1000;
       canvas.height = 1000;
@@ -3244,17 +3266,17 @@
       ctx.strokeRect(5, 5, 990, 990);
       ctx.restore();
 
-      var athlete = getSelectedAthleteName();
-
-      // Shooter Name Badge at Top of Target Plate
+      // Shooter Name + Exact Time Badge at Top of Target Plate (makes every PNG visually & binary-unique)
       ctx.save();
-      ctx.font = '800 32px sans-serif';
       var nameUpper = athlete.toUpperCase();
-      var textWidth = ctx.measureText(nameUpper).width;
-      var pillW = Math.max(280, textWidth + 64);
+      var shortTime = timeStr.split(' ').pop() || timeStr;
+      var headerLine = nameUpper + '  •  ' + shortTime;
+      ctx.font = '800 28px sans-serif';
+      var textWidth = ctx.measureText(headerLine).width;
+      var pillW = Math.max(340, textWidth + 56);
       var pillH = 54;
       var pillX = cx - pillW / 2;
-      var pillY = 22;
+      var pillY = 20;
 
       ctx.fillStyle = '#0B132B';
       ctx.fillRect(pillX, pillY, pillW, pillH);
@@ -3265,7 +3287,7 @@
       ctx.fillStyle = '#FFFFFF';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(nameUpper, cx, pillY + pillH / 2 + 1);
+      ctx.fillText(headerLine, cx, pillY + pillH / 2 + 1);
       ctx.restore();
 
       // Clock Numbers (12, 3, 6, 9)
@@ -3294,8 +3316,8 @@
       ctx.arc(cx, cy, mmR(57.5), 0, Math.PI * 2);
       ctx.fillStyle = '#0F172A';
       ctx.fill();
-      ctx.lineWidth = appState.position === 'standing' ? 7 : 4;
-      ctx.strokeStyle = appState.position === 'standing' ? '#38BDF8' : '#1E293B';
+      ctx.lineWidth = targetPos === 'standing' ? 7 : 4;
+      ctx.strokeStyle = targetPos === 'standing' ? '#38BDF8' : '#1E293B';
       ctx.stroke();
 
       // Inner Paper Rings (3, 4, 5)
@@ -3314,8 +3336,8 @@
       ctx.arc(cx, cy, mmR(22.5), 0, Math.PI * 2);
       ctx.fillStyle = '#05080F';
       ctx.fill();
-      ctx.lineWidth = appState.position === 'prone' ? 6 : 3;
-      ctx.strokeStyle = appState.position === 'prone' ? '#38BDF8' : '#475569';
+      ctx.lineWidth = targetPos === 'prone' ? 6 : 3;
+      ctx.strokeStyle = targetPos === 'prone' ? '#38BDF8' : '#475569';
       ctx.stroke();
 
       // Center Paper Rings (7 & 8) + Numbers
@@ -3354,8 +3376,8 @@
 
       // MPI Group Circle & Crosshair
       var showMPI = document.getElementById('chkShowMPI') && document.getElementById('chkShowMPI').checked;
-      if (showMPI && appState.activeShots.length >= 2) {
-        var mpiStats = computeAnalytics(appState.activeShots, appState.position);
+      if (showMPI && targetShots.length >= 2) {
+        var mpiStats = computeAnalytics(targetShots, targetPos);
         ctx.save();
         ctx.beginPath();
         ctx.arc(mmX(mpiStats.mpiX), mmY(mpiStats.mpiY), mmR(Math.max(4, mpiStats.boundingRadius + CALIBER_RADIUS_MM)), 0, Math.PI * 2);
@@ -3453,10 +3475,10 @@
         }
       }
 
-      if (appState.comparisonSeries && appState.comparisonSeries.shots) {
+      if (!seriesOverride && appState.comparisonSeries && appState.comparisonSeries.shots) {
         drawShotsLayerOnCanvas(appState.comparisonSeries.shots, '#FFD700', '#090D16', true);
       }
-      drawShotsLayerOnCanvas(appState.activeShots, '#FF2A85', '#FFFFFF', false);
+      drawShotsLayerOnCanvas(targetShots, '#FF2A85', '#FFFFFF', false);
 
       return { canvas: canvas, athlete: athlete };
     }
@@ -3519,7 +3541,7 @@
       renderTargetCanvasImage(function (canvas, athlete) {
         var pngUrl = canvas.toDataURL('image/png');
         var link = document.createElement('a');
-        link.download = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
+        link.download = buildUniqueTimestampedFileName(athlete);
         link.href = pngUrl;
         document.body.appendChild(link);
         link.click();
