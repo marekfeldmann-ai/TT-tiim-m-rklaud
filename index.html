@@ -989,6 +989,19 @@
         <button type="button" onclick="selectQuickAthlete('Rasmus')" data-athlete="Rasmus" class="athlete-pill-btn">Rasmus</button>
       </div>
 
+      <!-- LIVE MULTI-DEVICE SYNC STATUS BAR ABOVE TARGET -->
+      <div id="liveTargetSyncBar" style="width:100%; max-width:500px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:6px 10px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px;">
+        <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+          <span id="liveSyncPulseDot" style="width:9px; height:9px; border-radius:50%; background:#10B981; display:inline-block; flex-shrink:0;"></span>
+          <span id="liveSyncTopText" style="font-weight:700; color:#D1FAE5; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            LIVE (<strong id="liveSyncRoomTop">TT-TEAM-2026</strong>): Ühendatud • v3.5
+          </span>
+        </div>
+        <button type="button" onclick="syncWithCloud('pull')" style="background:#065F46; color:#FFFFFF; border:1px solid #34D399; border-radius:8px; padding:3px 9px; font-size:11px; font-weight:800; cursor:pointer; flex-shrink:0;">
+          🔄 Uuenda
+        </button>
+      </div>
+
       <!-- Compact Status Bar Above Target -->
       <div class="target-status-bar">
         <div class="status-pill-group">
@@ -1021,7 +1034,7 @@
       </div>
 
       <!-- INTERACTIVE 50m TARGET CARD -->
-      <div class="target-board-card touch-pan-surface">
+      <div class="target-board-card">
 
         <!-- Top-Left Wind Indicator Overlay -->
         <div class="target-overlay-left">
@@ -1055,7 +1068,7 @@
         </div>
 
         <!-- 50M BIATHLON SVG TARGET -->
-        <svg id="biathlonSvg" viewBox="-105 -105 210 210" class="touch-pan-surface">
+        <svg id="biathlonSvg" viewBox="-105 -105 210 210" class="touch-none-surface">
           <defs>
             <radialGradient id="plateGrad" cx="50%" cy="45%" r="55%">
               <stop offset="0%" stop-color="#FFFFFF"/>
@@ -1564,7 +1577,15 @@
     window.deviceSessionId = 'dev-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
     var cloudRoomUnsubscribe = null;
     var isApplyingRemoteCloudUpdate = false;
-    var lastAppliedCloudTimestamp = 0;
+    var lastAppliedRevisionId = '';
+    var lastAppliedTimestamp = 0;
+    var liveWsConnections = [];
+    var liveWsKeepAliveTimer = null;
+    var liveNtfyEventSource = null;
+    var liveNtfySocket = null;
+    var liveHttpPollTimer = null;
+    var liveSentCount = 0;
+    var liveReceivedCount = 0;
 
     var appState = {
       position: 'prone',
@@ -1627,7 +1648,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', function () {
-      autoEscapeAndroidInAppBrowser();
       initWindClockDial();
       loadSavedSeriesFromStorage();
       initCloudRoomInputFromStorage();
@@ -1635,22 +1655,12 @@
       setupTargetInteractions();
       syncWindSpeedInputs(appState.windSpeed);
       syncQuickAthletePills();
+      isApplyingRemoteCloudUpdate = true;
       updateWindDisplay();
       renderAll();
+      isApplyingRemoteCloudUpdate = false;
+      connectToCloudRoom(getActiveCloudRoomCode());
     });
-
-    // Automatically breaks out of WhatsApp/Messenger in-app WebView on Android right on load
-    function autoEscapeAndroidInAppBrowser() {
-      var ua = navigator.userAgent || '';
-      var isAndroid = /Android/i.test(ua);
-      if (!isAndroid) return;
-
-      var isInAppWebView = /WhatsApp|FBAN|FBAV|Instagram|Line|MicroMessenger|; wv\)/i.test(ua) || !navigator.share;
-      if (isInAppWebView && window.location.protocol.indexOf('http') === 0) {
-        var cleanUrl = window.location.href.replace(/^https?:\/\//i, '');
-        window.location.replace('intent://' + cleanUrl + '#Intent;scheme=https;package=com.android.chrome;end');
-      }
-    }
 
     function loadSavedSeriesFromStorage() {
       try {
@@ -1751,12 +1761,19 @@
 
     function initCloudRoomInputFromStorage() {
       try {
-        var savedRoom = localStorage.getItem(CLOUD_ROOM_STORAGE_KEY);
-        if (savedRoom) {
-          appState.cloudRoomCode = sanitizeRoomCode(savedRoom);
-          var input = document.getElementById('inputCloudRoom');
-          if (input) input.value = appState.cloudRoomCode;
+        var params = new URLSearchParams(window.location.search);
+        var urlRoom = params.get('room');
+        if (urlRoom) {
+          appState.cloudRoomCode = sanitizeRoomCode(urlRoom);
+          localStorage.setItem(CLOUD_ROOM_STORAGE_KEY, appState.cloudRoomCode);
+        } else {
+          var savedRoom = localStorage.getItem(CLOUD_ROOM_STORAGE_KEY);
+          if (savedRoom) {
+            appState.cloudRoomCode = sanitizeRoomCode(savedRoom);
+          }
         }
+        var input = document.getElementById('inputCloudRoom');
+        if (input) input.value = appState.cloudRoomCode;
       } catch (e) {}
     }
 
@@ -1764,6 +1781,8 @@
       var badge = document.getElementById('cloudStatusBadge');
       var headerTxt = document.getElementById('cloudSyncTxt');
       var activityEl = document.getElementById('cloudLiveActivityText');
+      var topBarTxt = document.getElementById('liveSyncTopText');
+      var topDot = document.getElementById('liveSyncPulseDot');
 
       if (headerTxt) headerTxt.textContent = stateText;
       if (badge) {
@@ -1784,9 +1803,398 @@
           badge.style.borderColor = 'rgba(148,163,184,0.3)';
         }
       }
+      if (topDot) {
+        topDot.style.background = colorType === 'ok' ? '#10B981' : (colorType === 'syncing' ? '#F59E0B' : '#94A3B8');
+      }
+      if (topBarTxt) {
+        topBarTxt.innerHTML = 'LIVE (<strong>' + escapeHtml(appState.cloudRoomCode) + '</strong>) • ↑' + liveSentCount + ' ↓' + liveReceivedCount + ' • Lasud: ' + appState.activeShots.length + '/8';
+      }
       if (activityEl && detailMsg) {
         activityEl.innerHTML = detailMsg;
       }
+    }
+
+    // =========================================================================
+    // PORT-443 HTTPS LIVE STREAM + POLLING + WSS RELAY (ANDROID & GITHUB PAGES)
+    // =========================================================================
+    var LIVE_WSS_BROKERS = [
+      'wss://broker.emqx.io:8084/mqtt',
+      'wss://broker.hivemq.com:8884/mqtt'
+    ];
+
+    function getNtfyChannelForRoom(roomCode) {
+      var clean = sanitizeRoomCode(roomCode).toLowerCase().replace(/[^a-z0-9]/g, '_');
+      return 'tt_biathlon_50m_live_' + clean;
+    }
+
+    function parseAndApplyNtfyLine(rawLine, cleanRoom, forcePull) {
+      if (!rawLine) return;
+      try {
+        var env = JSON.parse(rawLine);
+        if (!env || env.event !== 'message' || typeof env.message !== 'string') return;
+        if (env.message.indexOf('TTLIVE:') !== 0) return;
+        var b64 = env.message.substring(7);
+        var decodedStr = decodeURIComponent(escape(atob(b64)));
+        var data = JSON.parse(decodedStr);
+        applyIncomingCloudRoomData(data, cleanRoom, forcePull);
+      } catch (e) {}
+    }
+
+    function pollNtfyLatestRoomState(roomCode, forcePull) {
+      var cleanRoom = sanitizeRoomCode(roomCode);
+      var channel = getNtfyChannelForRoom(cleanRoom);
+      var url = 'https://ntfy.sh/' + channel + '/json?poll=1&since=20m&t=' + Date.now();
+
+      fetch(url, { method: 'GET', cache: 'no-store' })
+        .then(function (res) { return res.text(); })
+        .then(function (text) {
+          if (!text) return;
+          var lines = text.trim().split('\n');
+          var latestValidLine = null;
+          for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (line && line.indexOf('"TTLIVE:') !== -1) {
+              latestValidLine = line;
+            }
+          }
+          if (latestValidLine) {
+            parseAndApplyNtfyLine(latestValidLine, cleanRoom, forcePull);
+          }
+        })
+        .catch(function () {});
+    }
+
+    function publishToNtfyChannel(roomCode, payloadObj) {
+      try {
+        var channel = getNtfyChannelForRoom(roomCode);
+        var jsonStr = JSON.stringify(payloadObj);
+        var b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+        var bodyTxt = 'TTLIVE:' + b64;
+        fetch('https://ntfy.sh/' + channel, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: bodyTxt
+        }).catch(function () {});
+      } catch (e) {}
+    }
+
+    function encodeMqttLength(len) {
+      var bytes = [];
+      do {
+        var encodedByte = len % 128;
+        len = Math.floor(len / 128);
+        if (len > 0) encodedByte = encodedByte | 128;
+        bytes.push(encodedByte);
+      } while (len > 0);
+      return bytes;
+    }
+
+    function encodeMqttUtf8(str) {
+      var u8 = new TextEncoder().encode(str);
+      var out = [(u8.length >> 8) & 0xFF, u8.length & 0xFF];
+      for (var i = 0; i < u8.length; i++) out.push(u8[i]);
+      return out;
+    }
+
+    function buildMqttConnectPacket(clientId) {
+      var varHdr = encodeMqttUtf8('MQTT').concat([0x04, 0x02, 0x00, 0x28]);
+      var payload = encodeMqttUtf8(clientId);
+      var rem = encodeMqttLength(varHdr.length + payload.length);
+      return new Uint8Array([0x10].concat(rem, varHdr, payload));
+    }
+
+    function buildMqttSubscribePacket(topic) {
+      var varHdr = [0x00, 0x01];
+      var payload = encodeMqttUtf8(topic).concat([0x00]);
+      var rem = encodeMqttLength(varHdr.length + payload.length);
+      return new Uint8Array([0x82].concat(rem, varHdr, payload));
+    }
+
+    function buildMqttPublishPacket(topic, jsonStr, retain) {
+      var topicBytes = encodeMqttUtf8(topic);
+      var payloadU8 = new TextEncoder().encode(jsonStr);
+      var totalLen = topicBytes.length + payloadU8.length;
+      var rem = encodeMqttLength(totalLen);
+      var headerByte = retain ? 0x31 : 0x30;
+      var out = new Uint8Array(1 + rem.length + totalLen);
+      var pos = 0;
+      out[pos++] = headerByte;
+      for (var r = 0; r < rem.length; r++) out[pos++] = rem[r];
+      for (var t = 0; t < topicBytes.length; t++) out[pos++] = topicBytes[t];
+      out.set(payloadU8, pos);
+      return out;
+    }
+
+    function getMqttTopicForRoom(roomCode) {
+      return 'tt-biathlon-est-50m/v2/room/' + sanitizeRoomCode(roomCode);
+    }
+
+    function connectWebSocketLiveRelay(roomCode) {
+      var cleanRoom = sanitizeRoomCode(roomCode);
+      var topic = getMqttTopicForRoom(cleanRoom);
+      var ntfyChannel = getNtfyChannelForRoom(cleanRoom);
+
+      // Clean up existing connections
+      for (var c = 0; c < liveWsConnections.length; c++) {
+        try { liveWsConnections[c].close(); } catch (e) {}
+      }
+      liveWsConnections = [];
+      if (liveWsKeepAliveTimer) {
+        clearInterval(liveWsKeepAliveTimer);
+        liveWsKeepAliveTimer = null;
+      }
+      if (liveNtfyEventSource) {
+        try { liveNtfyEventSource.close(); } catch (e) {}
+        liveNtfyEventSource = null;
+      }
+      if (liveNtfySocket) {
+        try { liveNtfySocket.close(); } catch (e) {}
+        liveNtfySocket = null;
+      }
+      if (liveHttpPollTimer) {
+        clearInterval(liveHttpPollTimer);
+        liveHttpPollTimer = null;
+      }
+
+      // 1. Standard Port-443 HTTPS Server-Sent Events (SSE)
+      try {
+        if (typeof EventSource !== 'undefined') {
+          liveNtfyEventSource = new EventSource('https://ntfy.sh/' + ntfyChannel + '/sse');
+          liveNtfyEventSource.onopen = function () {
+            setCloudStatusUI(
+              'Sünkroonis (' + cleanRoom + ')',
+              'ok',
+              '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong> ühendatud (HTTPS Port 443)! Märgi lask — ilmub kohe teises seadmes.'
+            );
+          };
+          liveNtfyEventSource.onmessage = function (evt) {
+            if (evt && evt.data) {
+              parseAndApplyNtfyLine(evt.data, cleanRoom, false);
+            }
+          };
+        }
+      } catch (e) {}
+
+      // 2. Standard Port-443 WSS Socket to ntfy.sh
+      try {
+        liveNtfySocket = new WebSocket('wss://ntfy.sh/' + ntfyChannel + '/ws');
+        liveNtfySocket.onmessage = function (evt) {
+          if (evt && typeof evt.data === 'string') {
+            parseAndApplyNtfyLine(evt.data, cleanRoom, false);
+          }
+        };
+      } catch (e) {}
+
+      // 3. Immediate Initial Pull + 2.5s Automatic Polling Fallback (guarantees Android updates)
+      pollNtfyLatestRoomState(cleanRoom, false);
+      liveHttpPollTimer = setInterval(function () {
+        if (appState.cloudLiveEnabled) {
+          pollNtfyLatestRoomState(cleanRoom, false);
+        }
+      }, 2500);
+
+      // 4. Secondary MQTT-over-WSS Brokers
+      LIVE_WSS_BROKERS.forEach(function (brokerUrl, idx) {
+        try {
+          var ws = new WebSocket(brokerUrl, 'mqtt');
+          ws.binaryType = 'arraybuffer';
+          ws._isReady = false;
+
+          ws.onopen = function () {
+            var clientId = 'tt50m-' + window.deviceSessionId + '-' + idx;
+            ws.send(buildMqttConnectPacket(clientId));
+          };
+
+          ws.onmessage = function (evt) {
+            if (!evt.data) return;
+            var u8 = new Uint8Array(evt.data);
+            if (u8.length < 2) return;
+            var pktType = u8[0] & 0xF0;
+
+            if (pktType === 0x20) {
+              ws._isReady = true;
+              ws.send(buildMqttSubscribePacket(topic));
+              setCloudStatusUI(
+                'Sünkroonis (' + cleanRoom + ')',
+                'ok',
+                '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong> ühendatud! Märgi lask — ilmub kohe teises seadmes.'
+              );
+              return;
+            }
+
+            if (pktType === 0x30) {
+              var multiplier = 1;
+              var remLen = 0;
+              var pos = 1;
+              var encodedByte;
+              do {
+                encodedByte = u8[pos++];
+                remLen += (encodedByte & 127) * multiplier;
+                multiplier *= 128;
+              } while ((encodedByte & 128) !== 0 && pos < u8.length);
+
+              if (pos + 2 > u8.length) return;
+              var topicLen = (u8[pos] << 8) | u8[pos + 1];
+              pos += 2 + topicLen;
+
+              var qos = (u8[0] >> 1) & 0x03;
+              if (qos > 0) pos += 2;
+
+              if (pos >= u8.length) return;
+              var jsonStr = new TextDecoder().decode(u8.subarray(pos));
+              try {
+                var data = JSON.parse(jsonStr);
+                applyIncomingCloudRoomData(data, cleanRoom, false);
+              } catch (e) {}
+            }
+          };
+
+          liveWsConnections.push(ws);
+        } catch (err) {}
+      });
+
+      liveWsKeepAliveTimer = setInterval(function () {
+        var pingPkt = new Uint8Array([0xC0, 0x00]);
+        for (var i = 0; i < liveWsConnections.length; i++) {
+          var s = liveWsConnections[i];
+          if (s && s.readyState === 1 && s._isReady) {
+            try { s.send(pingPkt); } catch (e) {}
+          }
+        }
+      }, 20000);
+    }
+
+    function publishToWebSocketLiveRelay(roomCode, payloadObj) {
+      // Always publish over Port-443 HTTPS ntfy relay
+      publishToNtfyChannel(roomCode, payloadObj);
+
+      var topic = getMqttTopicForRoom(roomCode);
+      var jsonStr = JSON.stringify(payloadObj);
+      var pkt = buildMqttPublishPacket(topic, jsonStr, true);
+      var sentAny = false;
+      for (var i = 0; i < liveWsConnections.length; i++) {
+        var ws = liveWsConnections[i];
+        if (ws && ws.readyState === 1 && ws._isReady) {
+          try {
+            ws.send(pkt);
+            sentAny = true;
+          } catch (e) {}
+        }
+      }
+      return sentAny;
+    }
+
+    function applyIncomingCloudRoomData(data, cleanRoom, forcePull) {
+      if (!data) return;
+      if (data.roomCode && sanitizeRoomCode(data.roomCode) !== cleanRoom) return;
+
+      var isFromOtherDevice = data.senderSessionId && data.senderSessionId !== window.deviceSessionId;
+      var revId = data.revisionId || String(data.updatedAt || '');
+      if (!forcePull && revId && revId === lastAppliedRevisionId) return;
+
+      // 1. Merge Saved Series from shared room
+      if (data.savedSeriesJson) {
+        try {
+          var remoteSeries = JSON.parse(data.savedSeriesJson);
+          if (Array.isArray(remoteSeries)) {
+            var mergedMap = {};
+            var mergedList = [];
+            var combined = remoteSeries.concat(appState.savedSeries || []);
+            for (var i = 0; i < combined.length; i++) {
+              var item = combined[i];
+              if (item && item.id && !mergedMap[item.id]) {
+                mergedMap[item.id] = true;
+                mergedList.push(item);
+              }
+            }
+            if (data.deletedIdsJson) {
+              var delIds = JSON.parse(data.deletedIdsJson);
+              if (Array.isArray(delIds) && delIds.length > 0) {
+                var delSet = {};
+                for (var d = 0; d < delIds.length; d++) delSet[delIds[d]] = true;
+                mergedList = mergedList.filter(function (s) { return !delSet[s.id]; });
+              }
+            }
+            appState.savedSeries = mergedList;
+            persistSavedSeries();
+            renderSavedSeriesList();
+          }
+        } catch (e) {}
+      }
+
+      // 2. Apply Real-Time Live Shots if enabled and coming from another device (or forced pull)
+      if ((appState.cloudLiveEnabled && isFromOtherDevice && revId !== lastAppliedRevisionId) || forcePull) {
+        lastAppliedRevisionId = revId;
+        liveReceivedCount++;
+        isApplyingRemoteCloudUpdate = true;
+        try {
+          if (data.liveShotsJson) {
+            var liveShots = JSON.parse(data.liveShotsJson);
+            if (Array.isArray(liveShots)) {
+              appState.activeShots = liveShots;
+            }
+          }
+          if (data.livePosition === 'prone' || data.livePosition === 'standing') {
+            appState.position = data.livePosition;
+            var btnProne = document.getElementById('btnPosProne');
+            var btnStanding = document.getElementById('btnPosStanding');
+            var hint = document.getElementById('activeZoneHint');
+            if (appState.position === 'prone') {
+              btnProne.className = 'mode-btn active';
+              btnStanding.className = 'mode-btn';
+              hint.textContent = 'Lamades';
+            } else {
+              btnStanding.className = 'mode-btn standing-active';
+              btnProne.className = 'mode-btn';
+              hint.textContent = 'Püsti';
+            }
+          }
+          if (data.liveAthlete) {
+            var sel = document.getElementById('selectAthlete');
+            if (sel) {
+              var matched = false;
+              for (var k = 0; k < sel.options.length; k++) {
+                if (sel.options[k].value === data.liveAthlete) {
+                  sel.value = data.liveAthlete;
+                  matched = true;
+                  break;
+                }
+              }
+              if (!matched) {
+                sel.value = 'Muu';
+                document.getElementById('inputCustomAthlete').value = data.liveAthlete;
+              }
+              handleAthleteChange();
+            }
+          }
+          if (typeof data.liveWindDir === 'number') {
+            appState.windDir = data.liveWindDir;
+          }
+          if (typeof data.liveWindSpeed === 'number') {
+            appState.windSpeed = data.liveWindSpeed;
+            syncWindSpeedInputs(appState.windSpeed);
+          }
+          updateWindDisplay(false);
+          renderAll(false);
+        } catch (err) {
+          console.warn('Live state apply error:', err);
+        } finally {
+          isApplyingRemoteCloudUpdate = false;
+        }
+      }
+
+      var shotCount = 0;
+      try {
+        shotCount = data.liveShotsJson ? JSON.parse(data.liveShotsJson).length : appState.activeShots.length;
+      } catch (e) {}
+      var who = data.liveAthlete || getSelectedAthleteName();
+      var timeLabel = data.updatedTimeStr || formatEstonianDateTime(new Date()).split(' ').pop();
+
+      setCloudStatusUI(
+        'Sünkroonis (' + cleanRoom + ')',
+        'ok',
+        '📡 <strong>' + escapeHtml(cleanRoom) + '</strong> • Live: <strong>' + escapeHtml(who) + '</strong> (' + shotCount + ' lasku) • Kell ' + escapeHtml(timeLabel)
+      );
     }
 
     function connectToCloudRoom(roomCode) {
@@ -1796,8 +2204,12 @@
         localStorage.setItem(CLOUD_ROOM_STORAGE_KEY, cleanRoom);
       } catch (e) {}
 
+      setCloudStatusUI('Ühendan...', 'syncing', '📡 Ühendamine reaalajas ruumiga <strong>' + escapeHtml(cleanRoom) + '</strong>...');
+
+      // Always connect Cross-Environment WebSocket Live Relay (works on GitHub Pages + Android + Preview)
+      connectWebSocketLiveRelay(cleanRoom);
+
       if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
-        setCloudStatusUI('Kohalik režiim', 'offline', '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong>: pilveühendus pole selles keskkonnas saadaval (andmed salvestatakse telefoni).');
         return;
       }
 
@@ -1805,8 +2217,6 @@
         try { cloudRoomUnsubscribe(); } catch (e) {}
         cloudRoomUnsubscribe = null;
       }
-
-      setCloudStatusUI('Ühendan...', 'syncing', '📡 Ühendamine pilveruumiga <strong>' + escapeHtml(cleanRoom) + '</strong>...');
 
       // RULE 1 Strict Public Path: /artifacts/{appId}/public/data/biathlonCloudRooms/{cleanRoom}
       var roomDocRef = window.fbExports.doc(
@@ -1823,123 +2233,14 @@
         roomDocRef,
         function (docSnap) {
           if (!docSnap.exists()) {
-            setCloudStatusUI('Sünkroonis', 'ok', '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong> on valmis! Märgi lask või vajuta "Saada pilve".');
-            pushLiveStateToCloud('init');
+            setCloudStatusUI('Sünkroonis (' + cleanRoom + ')', 'ok', '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong> on valmis! Märgi lask või vajuta "Saada pilve".');
             return;
           }
-
           var data = docSnap.data();
-          if (!data) return;
-
-          var isFromOtherDevice = data.senderSessionId && data.senderSessionId !== window.deviceSessionId;
-          var remoteUpdatedAt = Number(data.updatedAt) || 0;
-
-          // 1. Merge Saved Series from shared room
-          if (data.savedSeriesJson) {
-            try {
-              var remoteSeries = JSON.parse(data.savedSeriesJson);
-              if (Array.isArray(remoteSeries)) {
-                var mergedMap = {};
-                var mergedList = [];
-                var combined = remoteSeries.concat(appState.savedSeries || []);
-                for (var i = 0; i < combined.length; i++) {
-                  var item = combined[i];
-                  if (item && item.id && !mergedMap[item.id]) {
-                    mergedMap[item.id] = true;
-                    mergedList.push(item);
-                  }
-                }
-                if (data.deletedIdsJson) {
-                  var delIds = JSON.parse(data.deletedIdsJson);
-                  if (Array.isArray(delIds) && delIds.length > 0) {
-                    var delSet = {};
-                    for (var d = 0; d < delIds.length; d++) delSet[delIds[d]] = true;
-                    mergedList = mergedList.filter(function (s) { return !delSet[s.id]; });
-                  }
-                }
-                appState.savedSeries = mergedList;
-                persistSavedSeries();
-                renderSavedSeriesList();
-              }
-            } catch (e) {}
-          }
-
-          // 2. Apply Real-Time Live Shots if enabled and coming from another device
-          if (appState.cloudLiveEnabled && isFromOtherDevice && remoteUpdatedAt > lastAppliedCloudTimestamp) {
-            lastAppliedCloudTimestamp = remoteUpdatedAt;
-            isApplyingRemoteCloudUpdate = true;
-            try {
-              if (data.liveShotsJson) {
-                var liveShots = JSON.parse(data.liveShotsJson);
-                if (Array.isArray(liveShots)) {
-                  appState.activeShots = liveShots;
-                }
-              }
-              if (data.livePosition === 'prone' || data.livePosition === 'standing') {
-                appState.position = data.livePosition;
-                var btnProne = document.getElementById('btnPosProne');
-                var btnStanding = document.getElementById('btnPosStanding');
-                var hint = document.getElementById('activeZoneHint');
-                if (appState.position === 'prone') {
-                  btnProne.className = 'mode-btn active';
-                  btnStanding.className = 'mode-btn';
-                  hint.textContent = 'Lamades';
-                } else {
-                  btnStanding.className = 'mode-btn standing-active';
-                  btnProne.className = 'mode-btn';
-                  hint.textContent = 'Püsti';
-                }
-              }
-              if (data.liveAthlete) {
-                var sel = document.getElementById('selectAthlete');
-                if (sel) {
-                  var matched = false;
-                  for (var k = 0; k < sel.options.length; k++) {
-                    if (sel.options[k].value === data.liveAthlete) {
-                      sel.value = data.liveAthlete;
-                      matched = true;
-                      break;
-                    }
-                  }
-                  if (!matched) {
-                    sel.value = 'Muu';
-                    document.getElementById('inputCustomAthlete').value = data.liveAthlete;
-                  }
-                  handleAthleteChange();
-                }
-              }
-              if (typeof data.liveWindDir === 'number') {
-                appState.windDir = data.liveWindDir;
-              }
-              if (typeof data.liveWindSpeed === 'number') {
-                appState.windSpeed = data.liveWindSpeed;
-                syncWindSpeedInputs(appState.windSpeed);
-              }
-              updateWindDisplay();
-              renderAll();
-            } catch (err) {
-              console.warn('Live state apply error:', err);
-            } finally {
-              isApplyingRemoteCloudUpdate = false;
-            }
-          }
-
-          var shotCount = 0;
-          try {
-            shotCount = data.liveShotsJson ? JSON.parse(data.liveShotsJson).length : appState.activeShots.length;
-          } catch (e) {}
-          var who = data.liveAthlete || getSelectedAthleteName();
-          var timeLabel = data.updatedTimeStr || formatEstonianDateTime(new Date()).split(' ').pop();
-
-          setCloudStatusUI(
-            'Sünkroonis (' + cleanRoom + ')',
-            'ok',
-            '📡 <strong>' + escapeHtml(cleanRoom) + '</strong> • Live: <strong>' + escapeHtml(who) + '</strong> (' + shotCount + ' lasku) • Kell ' + escapeHtml(timeLabel)
-          );
+          applyIncomingCloudRoomData(data, cleanRoom, false);
         },
         function (err) {
           console.warn('Cloud room snapshot error:', err);
-          setCloudStatusUI('Ühenduse viga', 'offline', '⚠️ Pilveruumi <strong>' + escapeHtml(cleanRoom) + '</strong> sünkroonimine ebaõnnestus.');
         }
       );
     }
@@ -1949,27 +2250,19 @@
 
     function pushLiveStateToCloud(reason) {
       if (isApplyingRemoteCloudUpdate) return;
-      if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
-        return;
-      }
 
       var cleanRoom = getActiveCloudRoomCode();
-      var roomDocRef = window.fbExports.doc(
-        window.fbDb,
-        'artifacts',
-        window.fbAppId,
-        'public',
-        'data',
-        'biathlonCloudRooms',
-        cleanRoom
-      );
-
       var now = new Date();
+      var revId = window.deviceSessionId + '-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+      lastAppliedRevisionId = revId;
+      liveSentCount++;
+
       var payload = {
         roomCode: cleanRoom,
+        revisionId: revId,
         updatedAt: Date.now(),
         updatedTimeStr: formatEstonianDateTime(now).split(' ').pop(),
-        updatedByUserId: window.fbAuth.currentUser.uid,
+        updatedByUserId: (window.fbAuth && window.fbAuth.currentUser) ? window.fbAuth.currentUser.uid : window.deviceSessionId,
         senderSessionId: window.deviceSessionId,
         reason: reason || 'update',
         liveAthlete: getSelectedAthleteName(),
@@ -1977,13 +2270,34 @@
         liveWindDir: appState.windDir,
         liveWindSpeed: appState.windSpeed,
         liveShotsJson: JSON.stringify(appState.activeShots || []),
-        savedSeriesJson: JSON.stringify((appState.savedSeries || []).slice(0, 40)),
-        deletedIdsJson: JSON.stringify(deletedSeriesIdsLog.slice(-50))
+        savedSeriesJson: JSON.stringify((appState.savedSeries || []).slice(0, 30)),
+        deletedIdsJson: JSON.stringify(deletedSeriesIdsLog.slice(-40))
       };
 
-      window.fbExports.setDoc(roomDocRef, payload, { merge: true }).catch(function (err) {
-        console.warn('Cloud push error:', err);
-      });
+      // 1. Broadcast immediately over Port-443 HTTPS + WebSocket Live Relay
+      publishToWebSocketLiveRelay(cleanRoom, payload);
+
+      // 2. Also persist to Firestore if available in this environment
+      if (window.firebaseEnabled && window.fbDb && window.fbAuth && window.fbAuth.currentUser && window.fbExports) {
+        var roomDocRef = window.fbExports.doc(
+          window.fbDb,
+          'artifacts',
+          window.fbAppId,
+          'public',
+          'data',
+          'biathlonCloudRooms',
+          cleanRoom
+        );
+        window.fbExports.setDoc(roomDocRef, payload, { merge: true }).catch(function (err) {
+          console.warn('Cloud push error:', err);
+        });
+      }
+
+      setCloudStatusUI(
+        'Sünkroonis (' + cleanRoom + ')',
+        'ok',
+        '📡 <strong>' + escapeHtml(cleanRoom) + '</strong> • Saadetud: <strong>' + escapeHtml(payload.liveAthlete) + '</strong> (' + appState.activeShots.length + ' lasku) • Kell ' + escapeHtml(payload.updatedTimeStr)
+      );
     }
 
     function changeCloudRoom(newRoomVal) {
@@ -2183,7 +2497,7 @@
       return '🚩 Kella ' + windDir + ' • ' + Number(windSpeed).toFixed(1) + ' m/s';
     }
 
-    function updateWindDisplay() {
+    function updateWindDisplay(shouldSyncCloud) {
       var dir = appState.windDir;
       var speed = appState.windSpeed;
       var isCalm = dir === 0 || speed <= 0;
@@ -2348,7 +2662,7 @@
       if (typeof refreshCachedTargetPng === 'function') {
         refreshCachedTargetPng();
       }
-      if (typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
+      if (shouldSyncCloud !== false && typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
         pushLiveStateToCloud('wind-change');
       }
     }
@@ -2510,6 +2824,7 @@
           appState.activeShots[pointerState.draggingShotIndex] = { x: coords.x, y: coords.y };
           renderTarget();
           renderAnalytics();
+          pushLiveStateToCloud('shot-drag');
         }
 
         var shotNum = pointerState.draggingShotIndex >= 0
@@ -2546,24 +2861,20 @@
           hideTouchPreview();
           return;
         }
-        if (appState.moveShotsMode) {
-          evt.preventDefault();
-        }
+        evt.preventDefault();
         var t = evt.touches[0];
         handleStart(t.clientX, t.clientY, true);
       }, { passive: false });
 
       svg.addEventListener('touchmove', function (evt) {
         if (!pointerState.isDown || evt.touches.length === 0) return;
-        if (appState.moveShotsMode) {
-          evt.preventDefault();
-        }
+        evt.preventDefault();
         var t = evt.touches[0];
         handleMove(t.clientX, t.clientY, true);
       }, { passive: false });
 
       svg.addEventListener('touchend', function (evt) {
-        if (pointerState.isDown && !pointerState.isScrollingGesture) {
+        if (pointerState.isDown) {
           evt.preventDefault();
           handleEnd();
         } else {
@@ -2882,7 +3193,7 @@
     // =========================================================================
     // RENDERING TARGET & ANALYTICS
     // =========================================================================
-    function renderAll() {
+    function renderAll(shouldSyncCloud) {
       renderTarget();
       renderAnalytics();
       renderShotPills();
@@ -2912,7 +3223,7 @@
       if (typeof refreshCachedTargetPng === 'function') {
         refreshCachedTargetPng();
       }
-      if (typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
+      if (shouldSyncCloud !== false && typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
         pushLiveStateToCloud('shots-update');
       }
     }
@@ -3917,56 +4228,36 @@
     function syncWithCloud(direction) {
       var roomCode = getActiveCloudRoomCode();
 
-      if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
-        setCloudStatusUI('Kohalik', 'offline', '📡 Ruum <strong>' + escapeHtml(roomCode) + '</strong>: salvestatud telefoni mällu.');
-        showToast('💾 Salvestatud telefoni mällu (Ruum: ' + roomCode + ')');
-        return;
-      }
-
       setCloudStatusUI('Sünkroonin...', 'syncing', '⏳ Sünkroonimine pilveruumiga <strong>' + escapeHtml(roomCode) + '</strong>...');
 
       if (direction === 'pull') {
-        var roomDocRef = window.fbExports.doc(
-          window.fbDb,
-          'artifacts',
-          window.fbAppId,
-          'public',
-          'data',
-          'biathlonCloudRooms',
-          roomCode
-        );
-        window.fbExports.getDoc(roomDocRef).then(function (docSnap) {
-          if (!docSnap.exists()) {
-            setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
-            showToast('ℹ️ Ruumis "' + roomCode + '" pole veel andmeid.');
-            return;
-          }
-          lastAppliedCloudTimestamp = 0;
-          var data = docSnap.data();
-          if (data && data.liveShotsJson) {
-            isApplyingRemoteCloudUpdate = true;
-            try {
-              appState.activeShots = JSON.parse(data.liveShotsJson) || [];
-              if (data.savedSeriesJson) {
-                appState.savedSeries = JSON.parse(data.savedSeriesJson) || appState.savedSeries;
-                persistSavedSeries();
-              }
-              renderAll();
-            } catch (e) {}
-            isApplyingRemoteCloudUpdate = false;
-          }
+        pollNtfyLatestRoomState(roomCode, true);
+        if (window.firebaseEnabled && window.fbDb && window.fbAuth && window.fbAuth.currentUser && window.fbExports) {
+          var roomDocRef = window.fbExports.doc(
+            window.fbDb,
+            'artifacts',
+            window.fbAppId,
+            'public',
+            'data',
+            'biathlonCloudRooms',
+            roomCode
+          );
+          window.fbExports.getDoc(roomDocRef).then(function (docSnap) {
+            if (docSnap.exists()) {
+              applyIncomingCloudRoomData(docSnap.data(), roomCode, true);
+            }
+          }).catch(function () {});
+        }
+        setTimeout(function () {
           setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
           showToast('📥 Tõmmatud pilveruumist "' + roomCode + '"!');
-        }).catch(function () {
-          setCloudStatusUI('Ühenduse viga', 'offline');
-        });
+        }, 350);
       } else {
-        connectToCloudRoom(roomCode);
         pushLiveStateToCloud('manual-push');
         setTimeout(function () {
           setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
-          showToast('☁️ Saadetud pilveruumi "' + roomCode + '" (' + appState.activeShots.length + ' aktiivset lasku, ' + appState.savedSeries.length + ' seeriat)!');
-        }, 350);
+          showToast('☁️ Saadetud pilveruumi "' + roomCode + '" (' + appState.activeShots.length + ' lasku)!');
+        }, 250);
       }
     }
 
