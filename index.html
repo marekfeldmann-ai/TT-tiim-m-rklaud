@@ -1299,7 +1299,7 @@
           💾 Salvesta seeria
         </button>
         <button type="button" onclick="shareActiveTargetWhatsAppImage()" class="action-btn btn-wa-primary">
-          🟢 Jaga (WhatsApp)
+          🟢 Jaga pilt (WhatsApp)
         </button>
       </div>
 
@@ -1980,6 +1980,9 @@
         if (svgLine1) svgLine1.textContent = 'TUUL: KELL ' + dir;
         if (svgLine2) svgLine2.textContent = speed.toFixed(1) + ' m/s (' + desc + ')';
       }
+      if (typeof refreshCachedTargetPng === 'function') {
+        refreshCachedTargetPng();
+      }
     }
 
     // =========================================================================
@@ -2398,6 +2401,9 @@
         selectEl.value = athleteName;
       }
       handleAthleteChange();
+      if (typeof refreshCachedTargetPng === 'function') {
+        refreshCachedTargetPng();
+      }
       showToast('🎯 Laskja: ' + athleteName);
     }
 
@@ -2462,6 +2468,10 @@
         } else {
           btnClearLabel.textContent = 'Kustuta lask';
         }
+      }
+
+      if (typeof refreshCachedTargetPng === 'function') {
+        refreshCachedTargetPng();
       }
     }
 
@@ -3074,9 +3084,38 @@
     function shareSeriesObjWhatsAppById(id) {
       var found = findSeriesById(id);
       if (!found) return;
-      var text = formatWhatsAppSummaryText(found);
-      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-      window.open(waUrl, '_blank');
+      loadSavedSeriesAsActive(id);
+      setTimeout(function () {
+        shareActiveTargetWhatsAppImage();
+      }, 120);
+    }
+
+    var cachedTargetPngFile = null;
+    var cachedTargetPngDataUrl = null;
+    var cachedTargetTimer = null;
+
+    function refreshCachedTargetPng() {
+      if (cachedTargetTimer) clearTimeout(cachedTargetTimer);
+      if (!appState.activeShots || appState.activeShots.length === 0) {
+        cachedTargetPngFile = null;
+        cachedTargetPngDataUrl = null;
+        return;
+      }
+      cachedTargetTimer = setTimeout(function () {
+        renderTargetCanvasImage(function (canvas, athlete) {
+          try {
+            cachedTargetPngDataUrl = canvas.toDataURL('image/png');
+            if (canvas.toBlob) {
+              canvas.toBlob(function (blob) {
+                if (blob) {
+                  var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
+                  cachedTargetPngFile = new File([blob], fileName, { type: 'image/png' });
+                }
+              }, 'image/png');
+            }
+          } catch (e) {}
+        });
+      }, 60);
     }
 
     function renderTargetCanvasImage(callback) {
@@ -3151,36 +3190,49 @@
         showToast('Märgi vähemalt 1 lask enne jagamist!');
         return;
       }
-      var snap = getCurrentSeriesSnapshot();
-      var summaryText = formatWhatsAppSummaryText(snap);
 
+      // 1. Instant synchronous share using pre-rendered PNG file (strictly files: [file], NO URL or text!)
+      if (cachedTargetPngFile && navigator.canShare && navigator.canShare({ files: [cachedTargetPngFile] })) {
+        navigator.share({
+          files: [cachedTargetPngFile]
+        }).then(function () {
+          showToast('🟢 Pilt saadetud!');
+        }).catch(function (err) {
+          if (err && err.name !== 'AbortError') {
+            exportTargetPng();
+          }
+        });
+        return;
+      }
+
+      // 2. Fallback if user tapped before cache finished rendering
       renderTargetCanvasImage(function (canvas, athlete) {
         if (canvas.toBlob) {
           canvas.toBlob(function (blob) {
             if (!blob) {
-              shareActiveWhatsAppTextLink();
+              exportTargetPng();
               return;
             }
             var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
             var file = new File([blob], fileName, { type: 'image/png' });
+            cachedTargetPngFile = file;
 
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
               navigator.share({
-                files: [file],
-                title: 'Tabamuste Märkimine • ' + athlete,
-                text: summaryText
-              }).catch(function () {});
-            } else if (navigator.share) {
-              navigator.share({
-                title: 'Tabamuste Märkimine • ' + athlete,
-                text: summaryText
-              }).catch(function () {});
+                files: [file]
+              }).then(function () {
+                showToast('🟢 Pilt saadetud!');
+              }).catch(function (err) {
+                if (err && err.name !== 'AbortError') {
+                  exportTargetPng();
+                }
+              });
             } else {
-              shareActiveWhatsAppTextLink();
+              exportTargetPng();
             }
           }, 'image/png');
         } else {
-          shareActiveWhatsAppTextLink();
+          exportTargetPng();
         }
       });
     }
@@ -3188,158 +3240,6 @@
     // =========================================================================
     // EXPORT (JSON BACKUP & PNG SNAPSHOT WITH IOS SAFARI SUPPORT)
     // =========================================================================
-    // 1-TAP WHATSAPP / NATIVE SHARE & PNG EXPORT
-    // =========================================================================
-    function generateTargetPngBlob(callback) {
-      var svgElement = document.getElementById('biathlonSvg');
-      var prevViewBox = svgElement.getAttribute('viewBox');
-      svgElement.setAttribute('viewBox', '-105 -105 210 210');
-
-      var serializer = new XMLSerializer();
-      var svgString = serializer.serializeToString(svgElement);
-      svgElement.setAttribute('viewBox', prevViewBox);
-
-      var svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      var url = URL.createObjectURL(svgBlob);
-
-      var img = new Image();
-      img.onload = function () {
-        var canvas = document.createElement('canvas');
-        canvas.width = 1080;
-        canvas.height = 1260;
-        var ctx = canvas.getContext('2d');
-
-        ctx.fillStyle = '#0B132B';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#0072CE';
-        ctx.fillRect(0, 0, 360, 12);
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(360, 0, 360, 12);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(720, 0, 360, 12);
-
-        ctx.drawImage(img, 40, 36, 1000, 1000);
-
-        var stats = computeAnalytics(appState.activeShots, appState.position);
-        var athlete = getSelectedAthleteName();
-        var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
-        var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
-
-        var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
-        var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
-        var hText = horizClicks === 0 ? 'Külg: 0 kl' : ('Külg: ' + horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
-        var vText = vertClicks === 0 ? 'Kõrgus: 0 kl' : ('Kõrgus: ' + vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 34px sans-serif';
-        ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1085);
-
-        ctx.fillStyle = '#38BDF8';
-        ctx.font = 'bold 25px sans-serif';
-        ctx.fillText(
-          posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
-          45,
-          1130
-        );
-
-        ctx.fillStyle = '#FDE68A';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText('Diopter (' + appState.clickStepMm + ' mm):  ' + hText + '   •   ' + vText, 45, 1172);
-
-        var notes = document.getElementById('inputNotes').value.trim();
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '21px sans-serif';
-        ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1215);
-
-        URL.revokeObjectURL(url);
-
-        var dataUrl = canvas.toDataURL('image/png');
-        if (canvas.toBlob) {
-          canvas.toBlob(function (blob) {
-            callback(blob, dataUrl, athlete);
-          }, 'image/png');
-        } else {
-          callback(null, dataUrl, athlete);
-        }
-      };
-      img.src = url;
-    }
-
-    function shareCurrentSeriesWhatsAppOrImage() {
-      var seriesObj = getActiveSeriesSnapshotObject();
-      var summaryText = buildWhatsAppSummaryText(seriesObj);
-
-      generateTargetPngBlob(function (blob, dataUrl, athlete) {
-        var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
-
-        if (blob && navigator.share && navigator.canShare) {
-          try {
-            var file = new File([blob], fileName, { type: 'image/png' });
-            if (navigator.canShare({ files: [file] })) {
-              navigator.share({
-                files: [file],
-                title: 'Tabamuste Märkimine • ' + athlete,
-                text: summaryText
-              }).then(function () {
-                showToast('🟢 Jagatud!');
-              }).catch(function (err) {
-                if (err && err.name !== 'AbortError') {
-                  openWhatsAppUrl(summaryText);
-                }
-              });
-              return;
-            }
-          } catch (e) {}
-        }
-
-        if (navigator.share) {
-          navigator.share({
-            title: 'Tabamuste Märkimine • ' + athlete,
-            text: summaryText
-          }).catch(function (err) {
-            if (err && err.name !== 'AbortError') {
-              openWhatsAppUrl(summaryText);
-            }
-          });
-          return;
-        }
-
-        // Desktop fallback: download PNG + open WhatsApp Web/App with summary & live link
-        triggerDataUrlDownload(dataUrl, fileName);
-        openWhatsAppUrl(summaryText);
-      });
-    }
-
-    function shareDirectWhatsAppText() {
-      var seriesObj = getActiveSeriesSnapshotObject();
-      var summaryText = buildWhatsAppSummaryText(seriesObj);
-      openWhatsAppUrl(summaryText);
-    }
-
-    function shareSelectedDropdownSeries() {
-      var dropdown = document.getElementById('savedSeriesDropdown');
-      if (!dropdown || !dropdown.value) {
-        showToast('Vali nimekirjast salvestatud seeria!');
-        return;
-      }
-      shareSavedSeriesById(dropdown.value);
-    }
-
-    function shareSavedSeriesById(id) {
-      var found = findSeriesById(id);
-      if (!found) return;
-      loadSavedSeriesAsActive(id);
-      setTimeout(function () {
-        shareCurrentSeriesWhatsAppOrImage();
-      }, 60);
-    }
-
-    function openWhatsAppUrl(text) {
-      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-      window.open(waUrl, '_blank');
-    }
-
     function triggerDataUrlDownload(dataUrl, fileName) {
       var link = document.createElement('a');
       link.download = fileName;
