@@ -1628,6 +1628,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', function () {
+      autoEscapeAndroidInAppBrowser();
       initWindClockDial();
       loadSavedSeriesFromStorage();
       checkUrlSharedSeries();
@@ -1637,6 +1638,19 @@
       updateWindDisplay();
       renderAll();
     });
+
+    // Automatically breaks out of WhatsApp/Messenger in-app WebView on Android right on load
+    function autoEscapeAndroidInAppBrowser() {
+      var ua = navigator.userAgent || '';
+      var isAndroid = /Android/i.test(ua);
+      if (!isAndroid) return;
+
+      var isInAppWebView = /WhatsApp|FBAN|FBAV|Instagram|Line|MicroMessenger|; wv\)/i.test(ua) || !navigator.share;
+      if (isInAppWebView && window.location.protocol.indexOf('http') === 0) {
+        var cleanUrl = window.location.href.replace(/^https?:\/\//i, '');
+        window.location.replace('intent://' + cleanUrl + '#Intent;scheme=https;package=com.android.chrome;end');
+      }
+    }
 
     function loadSavedSeriesFromStorage() {
       try {
@@ -3124,86 +3138,66 @@
       launchWhatsAppMessage(text);
     }
 
-    // Pre-cached PNG File so Android navigator.share fires in 0ms without losing user gesture
-    var cachedPngFile = null;
+    // Pre-cached PNG bytes so Android navigator.share fires in 0ms with a fresh File object
+    var cachedPngBytes = null;
+    var cachedPngFileName = 'marklaud.png';
     var cachedPngDataUrl = '';
 
-    function dataUrlToFileSync(dataUrl, fileName) {
+    function dataUrlToBytesSync(dataUrl) {
       var parts = dataUrl.split(',');
       var byteString = atob(parts[1]);
-      var ab = new ArrayBuffer(byteString.length);
-      var ia = new Uint8Array(ab);
+      var ia = new Uint8Array(byteString.length);
       for (var i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
       }
-      return new File([ab], fileName, { type: 'image/png' });
+      return ia;
     }
 
     function refreshCachedTargetPng() {
       try {
         if (!appState.activeShots || appState.activeShots.length === 0) {
-          cachedPngFile = null;
+          cachedPngBytes = null;
           cachedPngDataUrl = '';
           return;
         }
         var res = renderTargetCanvasSync();
         cachedPngDataUrl = res.canvas.toDataURL('image/png');
-        var cleanName = 'marklaud-' + res.athlete.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
-        cachedPngFile = dataUrlToFileSync(cachedPngDataUrl, cleanName);
+        cachedPngFileName = 'marklaud-' + res.athlete.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+        cachedPngBytes = dataUrlToBytesSync(cachedPngDataUrl);
       } catch (e) {}
     }
 
-    // Sends ONLY the PNG image file (no link) via Android/iOS native share menu to WhatsApp
+    // Sends ONLY the PNG image file (no link) via Android/iOS native share menu to WhatsApp (Bypasses modal)
     function shareDirectPngToWhatsApp() {
       if (appState.activeShots.length === 0) {
         showToast('Märgi vähemalt 1 lask enne pildi saatmist!');
         return;
       }
 
-      if (!cachedPngFile || !cachedPngDataUrl) {
+      if (!cachedPngBytes || !cachedPngDataUrl) {
         refreshCachedTargetPng();
       }
 
-      // 1. Try native Web Share API with files on BOTH Android and iOS
-      if (navigator.share && cachedPngFile) {
-        var canShareFiles = true;
-        if (navigator.canShare) {
-          try {
-            canShareFiles = navigator.canShare({ files: [cachedPngFile] });
-          } catch (e) {
-            canShareFiles = false;
-          }
-        }
-
-        if (canShareFiles) {
-          navigator.share({
-            files: [cachedPngFile]
-          }).then(function () {
-            showToast('📷 Pilt saadetud!');
-          }).catch(function (err) {
-            if (err && err.name === 'AbortError') return;
-            openShareFallbackModal();
-          });
-          return;
-        }
+      if (navigator.share && cachedPngBytes) {
+        var freshFile = new File([cachedPngBytes], cachedPngFileName, { type: 'image/png' });
+        navigator.share({
+          files: [freshFile]
+        }).then(function () {
+          showToast('📷 Pilt saadetud!');
+        }).catch(function (err) {
+          if (err && err.name === 'AbortError') return;
+          // If browser blocked file sharing, jump straight to Chrome without showing modal
+          openAppInAndroidChrome();
+        });
+        return;
       }
 
-      // 2. Fallback modal preview (where you can also long-press the target image -> "Share image" -> WhatsApp)
-      openShareFallbackModal();
+      // Bypass modal and jump straight to Chrome if opened inside an in-app browser
+      openAppInAndroidChrome();
     }
 
     function openShareFallbackModal() {
-      var modal = document.getElementById('shareFallbackModal');
-      var previewImg = document.getElementById('shareModalPreviewImg');
-      if (!cachedPngDataUrl) {
-        refreshCachedTargetPng();
-      }
-      if (previewImg && cachedPngDataUrl) {
-        previewImg.src = cachedPngDataUrl;
-      }
-      if (modal) {
-        modal.classList.remove('hidden');
-      }
+      openAppInAndroidChrome();
     }
 
     function closeShareFallbackModal() {
@@ -3248,6 +3242,30 @@
       ctx.strokeStyle = '#CBD5E1';
       ctx.lineWidth = 10;
       ctx.strokeRect(5, 5, 990, 990);
+      ctx.restore();
+
+      var athlete = getSelectedAthleteName();
+
+      // Shooter Name Badge at Top of Target Plate
+      ctx.save();
+      ctx.font = '800 32px sans-serif';
+      var nameUpper = athlete.toUpperCase();
+      var textWidth = ctx.measureText(nameUpper).width;
+      var pillW = Math.max(280, textWidth + 64);
+      var pillH = 54;
+      var pillX = cx - pillW / 2;
+      var pillY = 22;
+
+      ctx.fillStyle = '#0B132B';
+      ctx.fillRect(pillX, pillY, pillW, pillH);
+      ctx.strokeStyle = '#0072CE';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(pillX, pillY, pillW, pillH);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(nameUpper, cx, pillY + pillH / 2 + 1);
       ctx.restore();
 
       // Clock Numbers (12, 3, 6, 9)
@@ -3440,7 +3458,6 @@
       }
       drawShotsLayerOnCanvas(appState.activeShots, '#FF2A85', '#FFFFFF', false);
 
-      var athlete = getSelectedAthleteName();
       return { canvas: canvas, athlete: athlete };
     }
 
