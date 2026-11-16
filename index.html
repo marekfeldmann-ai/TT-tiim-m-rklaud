@@ -1163,38 +1163,38 @@
       </div>
 
       <!-- CLEAN 4-BUTTON PRIMARY ACTION BAR -->
-      <div class="action-bar-5" style="grid-template-columns: repeat(2, 1fr);">
-        <button type="button" onclick="startNewSeries()" class="action-btn btn-new">
-          ➕ Uus seeria
-        </button>
-        <button type="button" id="btnClear" onclick="clearStepByStep()" class="action-btn btn-clear">
-          ↩ <span id="btnClearLabel">Kustuta lask</span>
-        </button>
-        <button type="button" id="btnSave" onclick="saveCurrentSeries()" class="action-btn btn-save">
-          💾 Salvesta seeria
-        </button>
-        <button type="button" onclick="shareDirectPngToWhatsApp()" class="action-btn btn-wa-primary">
-          📷 Saada PILT (WhatsApp)
-        </button>
-      </div>
+    <div class="action-bar-5" style="grid-template-columns: repeat(2, 1fr);">
+      <button type="button" onclick="startNewSeries()" class="action-btn" style="background-color: var(--gold); color: #090D16; border-color: #FCD34D;">
+        ➕ Uus seeria
+      </button>
+      <button type="button" id="btnClear" onclick="clearStepByStep()" class="action-btn" style="background-color: #EF4444; color: #FFFFFF; border-color: #F87171;">
+        ↩ <span id="btnClearLabel">Kustuta lask</span>
+      </button>
+      <button type="button" id="btnSave" onclick="saveCurrentSeries()" class="action-btn" style="background-color: var(--est-blue); color: #FFFFFF; border-color: var(--sky);">
+        💾 Salvesta seeria
+      </button>
+      <button type="button" onclick="shareDirectPngToWhatsApp()" class="action-btn" style="background-color: #16A34A; color: #FFFFFF; border-color: #4ADE80;">
+        📷 Saada PILT (WhatsApp)
+      </button>
+    </div>
 
-      <!-- Secondary PNG Save Row (Text+Link Removed) -->
-      <div style="width:100%; max-width:500px; margin-top:6px;">
-        <button type="button" onclick="exportTargetPng()" class="small-btn" style="width:100%; min-height:44px; justify-content:center;">
-          💾 Salvesta PNG telefoni
-        </button>
-      </div>
+    <!-- Secondary PNG Save Row -->
+    <div style="width:100%; max-width:500px; margin-top:6px;">
+      <button type="button" onclick="exportTargetPng()" class="small-btn" style="width:100%; min-height:44px; justify-content:center; background:var(--bg-panel); border:1px solid var(--border); color:#CBD5E1;">
+        💾 Salvesta PNG telefoni
+      </button>
+    </div>
 
-      <!-- Hidden Undo Button & Shot Pills Strip kept in DOM for logic compatibility -->
-      <button type="button" id="btnUndo" onclick="undoLastShot()" class="hidden"></button>
-      <div id="shotPillsContainer" class="hidden"></div>
+    <!-- Hidden Undo Button & Shot Pills Strip kept in DOM for logic compatibility -->
+    <button type="button" id="btnUndo" onclick="undoLastShot()" class="hidden"></button>
+    <div id="shotPillsContainer" class="hidden"></div>
 
-    </section>
+  </section>
 
-    <!-- RIGHT COLUMN: Diopter Summary First, Wind Clock, and Saved Series Dropdown -->
-    <section class="right-col">
+  <!-- RIGHT COLUMN: Diopter Summary First, Wind Clock, and Saved Series Dropdown -->
+  <section class="right-col">
 
-      <!-- 1. DIOPTRI KORREKTSIOON (50m) - MOVED TO TOP OF RIGHT COLUMN FOR IMMEDIATE FEEDBACK -->
+    <!-- 1. DIOPTRI KORREKTSIOON (50m) -->
       <div class="panel-card">
         <div class="panel-header">
           <div class="panel-title-wrap">
@@ -1362,39 +1362,36 @@
             <h2 class="panel-title">SALVESTATUD SEERIAD (<span id="savedCountBadge">0</span>)</h2>
           </div>
           <div style="display:flex; gap:6px;">
-            <button type="button" onclick="exportAllJson()" class="small-btn">Eksport</button>
-            <label class="small-btn">
+            <button type="button" onclick="exportAllJson()" class="small-btn" style="background:var(--bg-panel); border:1px solid var(--border);">Eksport</button>
+            <label class="small-btn" style="background:var(--bg-panel); border:1px solid var(--border); cursor:pointer; display:inline-flex; align-items:center;">
               Import
               <input type="file" id="importJsonInput" accept=".json" onchange="importJsonFile(event)" class="hidden" />
             </label>
           </div>
         </div>
 
-        <div style="margin-bottom:10px;">
-          <input type="text" id="inputNotes" placeholder="Märkus / Laskemoon (valikuline)..." class="form-input" style="min-height:42px;" />
-        </div>
-
         <!-- Date & Time Dropdown + Always-Visible Pop-up Buttons -->
-        <div class="dropdown-box" style="margin-bottom:0;">
-          <label for="savedSeriesDropdown" class="field-label" style="color:#FDE68A;">
+        <div class="dropdown-box" style="margin-bottom:0; background:var(--bg-panel); border:1px solid var(--border); border-radius:14px; padding:12px;">
+          <label for="savedSeriesDropdown" class="field-label" style="color:#FDE68A; display:block; margin-bottom:6px; font-size:12px; font-weight:700;">
             Vali salvestatud seeria (Kuupäev ja kellaaeg):
           </label>
-          <select id="savedSeriesDropdown" class="form-select"></select>
+          <select id="savedSeriesDropdown" class="form-select" style="margin-bottom:10px;"></select>
 
-          <div class="popup-btn-grid">
-            <button type="button" onclick="popSelectedDropdownOnTarget('compare')" class="btn-pop-yellow">
-              🎯 Kuva võrdlus (Kollane)
+          <div class="popup-btn-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button type="button" onclick="popSelectedDropdownOnTarget('compare')" class="btn-pop-yellow" style="min-height:46px; border-radius:10px; font-size:13px;">
+              🎯 Kuva võrdlus
             </button>
-            <button type="button" onclick="popSelectedDropdownOnTarget('active')" class="btn-pop-pink">
-              Ava seeria (Roosa)
+            <button type="button" onclick="popSelectedDropdownOnTarget('active')" class="btn-pop-pink" style="min-height:46px; border-radius:10px; font-size:13px; background:#DB2777; color:#FFFFFF; border:none; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px;">
+              <span>Ava (Roosa)</span>
             </button>
           </div>
+
           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; margin-top:8px;">
-            <button type="button" onclick="shareSelectedDropdownWhatsApp()" class="small-btn" style="min-height:42px; background:#16A34A; color:#FFF; border-color:#4ADE80;">
-              🟢 Jaga valitud seeriat
+            <button type="button" onclick="shareSelectedDropdownWhatsApp()" class="small-btn" style="min-height:44px; background:#16A34A; color:#FFF; border:1px solid #4ADE80; border-radius:10px; font-weight:800; justify-content:center;">
+              🟢 Jaga seeriat
             </button>
-            <button type="button" onclick="toggleMultiDeletePanel()" class="small-btn" style="min-height:42px; color:#FCA5A5;">
-              🗑 Kustuta...
+            <button type="button" onclick="toggleMultiDeletePanel()" class="small-btn" style="min-height:44px; background:rgba(239,68,68,0.15); color:#FCA5A5; border:1px solid rgba(239,68,68,0.4); border-radius:10px; font-weight:800; justify-content:center;">
+              🗑 Kustuta
             </button>
           </div>
 
@@ -2391,8 +2388,6 @@
       renderAll();
       showToast('🗑 Kustutatud ' + deletedCount + ' seeria(t)');
     }
-      deleteSavedSeries(dropdown.value);
-    }
 
     function setClickStep(stepMm) {
       appState.clickStepMm = stepMm;
@@ -2872,7 +2867,6 @@
       var savedDir = isCalm ? 0 : appState.windDir;
       var savedSpeed = isCalm ? 0.0 : appState.windSpeed;
       var windBadge = formatWindBadgeString(savedDir, savedSpeed);
-      var notes = document.getElementById('inputNotes').value.trim() || 'Treeningseeria';
 
       var newSeries = {
         id: 'ser-' + Date.now(),
@@ -2882,7 +2876,7 @@
         windDir: savedDir,
         windSpeed: savedSpeed,
         wind: windBadge,
-        notes: notes,
+        notes: '',
         shots: JSON.parse(JSON.stringify(appState.activeShots))
       };
 
@@ -2930,7 +2924,6 @@
         syncWindSpeedInputs(found.windSpeed);
       }
       updateWindDisplay();
-      document.getElementById('inputNotes').value = found.notes || '';
       renderAll();
       showToast('Laaditud aktiivseks (Roosa): ' + found.timestamp);
     }
@@ -2952,99 +2945,6 @@
     function clearComparison() {
       appState.comparisonSeries = null;
       renderAll();
-    }
-
-    function toggleMultiDeletePanel() {
-      var panel = document.getElementById('multiDeletePanel');
-      if (!panel) return;
-      if (appState.savedSeries.length === 0) {
-        showToast('Salvestatud seeriaid pole!');
-        panel.classList.add('hidden');
-        return;
-      }
-      panel.classList.toggle('hidden');
-      if (!panel.classList.contains('hidden')) {
-        renderMultiDeleteChecklist();
-      }
-    }
-
-    function renderMultiDeleteChecklist() {
-      var container = document.getElementById('multiDeleteChecklist');
-      if (!container) return;
-      var currentDropdownVal = document.getElementById('savedSeriesDropdown') ? document.getElementById('savedSeriesDropdown').value : '';
-      container.innerHTML = '';
-
-      for (var i = 0; i < appState.savedSeries.length; i++) {
-        var sItem = appState.savedSeries[i];
-        var dStats = computeAnalytics(sItem.shots, sItem.position);
-        var posShort = sItem.position === 'prone' ? 'Lamades' : 'Püsti';
-        var isPrechecked = (sItem.id === currentDropdownVal);
-
-        var lbl = document.createElement('label');
-        lbl.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 10px; background:#111D38; border:1px solid #1F355E; border-radius:10px; font-size:12px; font-weight:700; color:#F8FAFC; cursor:pointer;';
-
-        var chk = document.createElement('input');
-        chk.type = 'checkbox';
-        chk.className = 'multi-del-chk';
-        chk.value = sItem.id;
-        chk.checked = isPrechecked;
-        chk.style.cssText = 'width:18px; height:18px; accent-color:#EF4444; flex-shrink:0;';
-        chk.onchange = updateCheckedDeleteCount;
-
-        var span = document.createElement('span');
-        span.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
-        span.textContent = sItem.timestamp + ' — ' + sItem.athlete + ' (' + posShort + ' • ' + dStats.hits + '/' + dStats.count + ')';
-
-        lbl.appendChild(chk);
-        lbl.appendChild(span);
-        container.appendChild(lbl);
-      }
-      updateCheckedDeleteCount();
-    }
-
-    function updateCheckedDeleteCount() {
-      var chks = document.querySelectorAll('.multi-del-chk:checked');
-      var badge = document.getElementById('checkedDeleteCount');
-      if (badge) badge.textContent = String(chks.length);
-    }
-
-    function toggleSelectAllDelete(selectAll) {
-      var chks = document.querySelectorAll('.multi-del-chk');
-      for (var i = 0; i < chks.length; i++) {
-        chks[i].checked = !!selectAll;
-      }
-      updateCheckedDeleteCount();
-    }
-
-    function deleteCheckedSeries() {
-      var chks = document.querySelectorAll('.multi-del-chk:checked');
-      if (!chks || chks.length === 0) {
-        showToast('Märgi vähemalt 1 seeria kustutamiseks!');
-        return;
-      }
-      var idsToRemove = {};
-      for (var i = 0; i < chks.length; i++) {
-        idsToRemove[chks[i].value] = true;
-      }
-      var removedCount = chks.length;
-      appState.savedSeries = appState.savedSeries.filter(function (s) {
-        return !idsToRemove[s.id];
-      });
-      if (appState.comparisonSeries && idsToRemove[appState.comparisonSeries.id]) {
-        appState.comparisonSeries = null;
-      }
-      persistSavedSeries();
-      renderAll();
-
-      var panel = document.getElementById('multiDeletePanel');
-      if (panel) {
-        if (appState.savedSeries.length === 0) {
-          panel.classList.add('hidden');
-        } else {
-          renderMultiDeleteChecklist();
-        }
-      }
-      showToast('🗑 Kustutatud ' + removedCount + ' seeria(t)!');
     }
 
     function deleteSavedSeries(id) {
@@ -3120,7 +3020,6 @@
               '<div style="font-size:11px; color:#94A3B8;">Hajuvus ' + stats.maxSpread.toFixed(0) + ' mm</div>' +
             '</div>' +
           '</div>' +
-          '<div style="font-size:12px; color:#CBD5E1;">' + escapeHtml(item.notes || '') + '</div>' +
           '<div class="saved-card-actions" style="grid-template-columns: repeat(4, 1fr);">' +
             '<button type="button" onclick="loadSavedSeriesAsActive(\'' + item.id + '\')" class="small-btn">Ava (Roosa)</button>' +
             '<button type="button" onclick="toggleCompareSeries(\'' + item.id + '\')" class="small-btn" style="' + (isComparing ? 'background:#FFD700; color:#090D16;' : 'color:#FDE68A; border-color:rgba(255,215,0,0.4);') + '">' +
