@@ -3085,104 +3085,304 @@
       var found = findSeriesById(id);
       if (!found) return;
       loadSavedSeriesAsActive(id);
-      setTimeout(function () {
-        shareActiveTargetWhatsAppImage();
-      }, 120);
+      // Call synchronously inside the same user tap gesture so Android Chrome allows navigator.share()
+      shareActiveTargetWhatsAppImage();
     }
 
-    var cachedTargetPngFile = null;
-    var cachedTargetPngDataUrl = null;
-    var cachedTargetTimer = null;
+    function dataUrlToSyncFile(dataUrl, fileName) {
+      var parts = dataUrl.split(',');
+      var mimeMatch = parts[0].match(/:(.*?);/);
+      var mime = mimeMatch ? mimeMatch[1] : 'image/png';
+      var bstr = atob(parts[1]);
+      var n = bstr.length;
+      var u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], fileName, { type: mime });
+    }
 
     function refreshCachedTargetPng() {
-      if (cachedTargetTimer) clearTimeout(cachedTargetTimer);
-      if (!appState.activeShots || appState.activeShots.length === 0) {
-        cachedTargetPngFile = null;
-        cachedTargetPngDataUrl = null;
-        return;
+      // No-op: target PNG is now rendered 100% synchronously on tap
+    }
+
+    // 100% Synchronous 2D Canvas Renderer (Preserves Android Chrome User Gesture Activation)
+    function renderTargetCanvasSync() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1250;
+      var ctx = canvas.getContext('2d');
+
+      // Deep Navy Background
+      ctx.fillStyle = '#0B132B';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Estonian Tricolor Top Stripe
+      ctx.fillStyle = '#0072CE';
+      ctx.fillRect(0, 0, 360, 12);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(360, 0, 360, 12);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(720, 0, 360, 12);
+
+      // Coordinate system matching SVG viewBox (-105..105 -> 1000x1000 box at (40,40))
+      var cx = 540;
+      var cy = 540;
+      var scale = 1000 / 210; // mm to canvas px
+
+      function mmX(x) { return cx + x * scale; }
+      function mmY(y) { return cy + y * scale; }
+      function mmR(r) { return r * scale; }
+
+      // White Metal Target Plate
+      ctx.save();
+      ctx.fillStyle = '#F1F5F9';
+      ctx.strokeStyle = '#CBD5E1';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(40, 40, 1000, 1000, 60);
+      } else {
+        ctx.rect(40, 40, 1000, 1000);
       }
-      cachedTargetTimer = setTimeout(function () {
-        renderTargetCanvasImage(function (canvas, athlete) {
-          try {
-            cachedTargetPngDataUrl = canvas.toDataURL('image/png');
-            if (canvas.toBlob) {
-              canvas.toBlob(function (blob) {
-                if (blob) {
-                  var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
-                  cachedTargetPngFile = new File([blob], fileName, { type: 'image/png' });
-                }
-              }, 'image/png');
-            }
-          } catch (e) {}
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Top Plate Label
+      ctx.fillStyle = '#64748B';
+      ctx.font = 'bold 23px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('LASKESUUSATAMISE 50M MÄRKLAUD', cx, mmY(-92));
+
+      // Clock Numbers (12, 3, 6, 9)
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.fillText('12', mmX(0), mmY(-85));
+      ctx.fillText('3', mmX(86), mmY(0));
+      ctx.fillText('6', mmX(0), mmY(86));
+      ctx.fillText('9', mmX(-86), mmY(0));
+
+      // Outer Paper Rings (1 & 2)
+      if (appState.showPaperRings) {
+        ctx.strokeStyle = '#94A3B8';
+        ctx.lineWidth = 2.2;
+        [77.5, 67.5].forEach(function (r) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, mmR(r), 0, Math.PI * 2);
+          ctx.stroke();
         });
-      }, 60);
+      }
+
+      // 115mm Standing Hit Zone (r = 57.5 mm)
+      ctx.beginPath();
+      ctx.arc(cx, cy, mmR(57.5), 0, Math.PI * 2);
+      ctx.fillStyle = '#0F172A';
+      ctx.fill();
+      ctx.lineWidth = appState.position === 'standing' ? 7 : 4;
+      ctx.strokeStyle = appState.position === 'standing' ? '#38BDF8' : '#1E293B';
+      ctx.stroke();
+
+      // Inner Paper Rings (3, 4, 5)
+      if (appState.showPaperRings) {
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2;
+        [47.5, 37.5, 27.5].forEach(function (r) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, mmR(r), 0, Math.PI * 2);
+          ctx.stroke();
+        });
+      }
+
+      // 45mm Prone Hit Zone (r = 22.5 mm)
+      ctx.beginPath();
+      ctx.arc(cx, cy, mmR(22.5), 0, Math.PI * 2);
+      ctx.fillStyle = '#05080F';
+      ctx.fill();
+      ctx.lineWidth = appState.position === 'prone' ? 6 : 3;
+      ctx.strokeStyle = appState.position === 'prone' ? '#38BDF8' : '#475569';
+      ctx.stroke();
+
+      // Center Paper Rings (7 & 8) + Numbers
+      if (appState.showPaperRings) {
+        ctx.strokeStyle = '#64748B';
+        ctx.lineWidth = 2;
+        [17.5, 7.5].forEach(function (r) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, mmR(r), 0, Math.PI * 2);
+          ctx.stroke();
+        });
+
+        ctx.font = 'bold 17px sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.fillText('1', cx, mmY(-72.5));
+        ctx.fillText('2', cx, mmY(-62.5));
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillText('3', cx, mmY(-52.5));
+        ctx.fillText('4', cx, mmY(-42.5));
+        ctx.fillText('5', cx, mmY(-32.5));
+        ctx.fillText('8', cx, mmY(-12.5));
+      }
+
+      // Crosshairs
+      ctx.save();
+      ctx.strokeStyle = '#64748B';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([9, 9]);
+      ctx.beginPath();
+      ctx.moveTo(mmX(-80), cy);
+      ctx.lineTo(mmX(80), cy);
+      ctx.moveTo(cx, mmY(-80));
+      ctx.lineTo(cx, mmY(80));
+      ctx.stroke();
+      ctx.restore();
+
+      // MPI Group Circle & Crosshair
+      var showMPI = document.getElementById('chkShowMPI') && document.getElementById('chkShowMPI').checked;
+      if (showMPI && appState.activeShots.length >= 2) {
+        var mpiStats = computeAnalytics(appState.activeShots, appState.position);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(mmX(mpiStats.mpiX), mmY(mpiStats.mpiY), mmR(Math.max(4, mpiStats.boundingRadius + CALIBER_RADIUS_MM)), 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 42, 133, 0.10)';
+        ctx.fill();
+        ctx.strokeStyle = '#FF2A85';
+        ctx.lineWidth = 3.2;
+        ctx.setLineDash([11, 9]);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.strokeStyle = '#38BDF8';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(mmX(mpiStats.mpiX - 4.5), mmY(mpiStats.mpiY));
+        ctx.lineTo(mmX(mpiStats.mpiX + 4.5), mmY(mpiStats.mpiY));
+        ctx.moveTo(mmX(mpiStats.mpiX), mmY(mpiStats.mpiY - 4.5));
+        ctx.lineTo(mmX(mpiStats.mpiX), mmY(mpiStats.mpiY + 4.5));
+        ctx.stroke();
+      }
+
+      // Helper to draw shots with overlap callout pills on canvas
+      function drawShotsLayerOnCanvas(shots, fillHex, textHex, isComparison) {
+        if (!shots || shots.length === 0) return;
+        var OVERLAP_MM = 4.5;
+        var clusters = [];
+
+        for (var i = 0; i < shots.length; i++) {
+          var s = shots[i];
+          var assigned = null;
+          for (var c = 0; c < clusters.length; c++) {
+            if (hypot2D(s.x - clusters[c].anchorX, s.y - clusters[c].anchorY) < OVERLAP_MM) {
+              assigned = clusters[c];
+              break;
+            }
+          }
+          var rank = 0;
+          if (assigned) {
+            rank = assigned.members.length;
+            assigned.members.push({ number: i + 1, x: s.x, y: s.y });
+          } else {
+            assigned = { anchorX: s.x, anchorY: s.y, members: [{ number: i + 1, x: s.x, y: s.y }] };
+            clusters.push(assigned);
+          }
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(mmX(s.x), mmY(s.y), mmR(6.2), 0, Math.PI * 2);
+          ctx.fillStyle = fillHex;
+          ctx.fill();
+          ctx.lineWidth = rank > 0 ? 6.5 : 5;
+          ctx.strokeStyle = isComparison ? '#090D16' : '#FFFFFF';
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        for (var k = 0; k < clusters.length; k++) {
+          var cl = clusters[k];
+          ctx.fillStyle = textHex;
+          ctx.font = 'bold 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          if (cl.members.length === 1) {
+            ctx.fillText(String(cl.members[0].number), mmX(cl.members[0].x), mmY(cl.members[0].y));
+          } else {
+            var nums = cl.members.map(function (m) { return '#' + m.number; }).join(', ');
+            ctx.font = 'bold 24px sans-serif';
+            ctx.fillText(cl.members.map(function (m) { return m.number; }).join('+'), mmX(cl.anchorX), mmY(cl.anchorY));
+
+            var dirX = cl.anchorX >= 0 ? -1 : 1;
+            var dirY = cl.anchorY >= 0 ? -1 : 1;
+            var bx = mmX(cl.anchorX + dirX * 13.5);
+            var by = mmY(cl.anchorY + dirY * 11.5);
+            var bw = Math.max(86, nums.length * 16 + 26);
+
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(mmX(cl.anchorX), mmY(cl.anchorY));
+            ctx.lineTo(bx, by);
+            ctx.stroke();
+
+            ctx.fillStyle = '#090D16';
+            ctx.strokeStyle = isComparison ? '#FFD700' : '#FF2A85';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.rect(bx - bw / 2, by - 22, bw, 44);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = isComparison ? '#FFD700' : '#FFFFFF';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText(nums, bx, by);
+          }
+        }
+      }
+
+      if (appState.comparisonSeries && appState.comparisonSeries.shots) {
+        drawShotsLayerOnCanvas(appState.comparisonSeries.shots, '#FFD700', '#090D16', true);
+      }
+      drawShotsLayerOnCanvas(appState.activeShots, '#FF2A85', '#FFFFFF', false);
+
+      // Footer Summary Block
+      var stats = computeAnalytics(appState.activeShots, appState.position);
+      var athlete = getSelectedAthleteName();
+      var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
+      var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
+      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
+      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+      var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
+      var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
+
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 34px sans-serif';
+      ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1095);
+
+      ctx.fillStyle = '#38BDF8';
+      ctx.font = 'bold 25px sans-serif';
+      ctx.fillText(
+        posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
+        45,
+        1140
+      );
+
+      ctx.fillStyle = '#FDE68A';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText('Diopter: Külg ' + hText + '   |   Kõrgus ' + vText, 45, 1180);
+
+      var notes = document.getElementById('inputNotes').value.trim();
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = '21px sans-serif';
+      ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1220);
+
+      return { canvas: canvas, athlete: athlete };
     }
 
     function renderTargetCanvasImage(callback) {
-      var svgElement = document.getElementById('biathlonSvg');
-      var prevViewBox = svgElement.getAttribute('viewBox');
-      svgElement.setAttribute('viewBox', '-105 -105 210 210');
-
-      var serializer = new XMLSerializer();
-      var svgString = serializer.serializeToString(svgElement);
-      svgElement.setAttribute('viewBox', prevViewBox);
-
-      var svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      var url = URL.createObjectURL(svgBlob);
-
-      var img = new Image();
-      img.onload = function () {
-        var canvas = document.createElement('canvas');
-        canvas.width = 1080;
-        canvas.height = 1250;
-        var ctx = canvas.getContext('2d');
-
-        ctx.fillStyle = '#0B132B';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = '#0072CE';
-        ctx.fillRect(0, 0, 360, 12);
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(360, 0, 360, 12);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(720, 0, 360, 12);
-
-        ctx.drawImage(img, 40, 40, 1000, 1000);
-
-        var stats = computeAnalytics(appState.activeShots, appState.position);
-        var athlete = getSelectedAthleteName();
-        var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
-        var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
-        var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
-        var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
-        var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
-        var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
-
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 34px sans-serif';
-        ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1095);
-
-        ctx.fillStyle = '#38BDF8';
-        ctx.font = 'bold 25px sans-serif';
-        ctx.fillText(
-          posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
-          45,
-          1140
-        );
-
-        ctx.fillStyle = '#FDE68A';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText('Diopter: Külg ' + hText + '   |   Kõrgus ' + vText, 45, 1180);
-
-        var notes = document.getElementById('inputNotes').value.trim();
-        ctx.fillStyle = '#94A3B8';
-        ctx.font = '21px sans-serif';
-        ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1220);
-
-        URL.revokeObjectURL(url);
-        callback(canvas, athlete);
-      };
-      img.src = url;
+      var res = renderTargetCanvasSync();
+      callback(res.canvas, res.athlete);
     }
 
     function shareActiveTargetWhatsAppImage() {
@@ -3191,50 +3391,35 @@
         return;
       }
 
-      // 1. Instant synchronous share using pre-rendered PNG file (strictly files: [file], NO URL or text!)
-      if (cachedTargetPngFile && navigator.canShare && navigator.canShare({ files: [cachedTargetPngFile] })) {
+      // Build PNG File 100% synchronously inside the tap gesture so Android never drops user activation
+      var rendered = renderTargetCanvasSync();
+      var dataUrl = rendered.canvas.toDataURL('image/png');
+      var safeName = rendered.athlete.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sportlane';
+      var fileName = 'marklaud-' + safeName + '.png';
+      var file = dataUrlToSyncFile(dataUrl, fileName);
+
+      if (navigator.share) {
         navigator.share({
-          files: [cachedTargetPngFile]
+          files: [file]
         }).then(function () {
-          showToast('🟢 Pilt saadetud!');
+          showToast('🟢 Pilt jagatud!');
         }).catch(function (err) {
-          if (err && err.name !== 'AbortError') {
-            exportTargetPng();
-          }
+          if (err && err.name === 'AbortError') return;
+          // Some Android browsers require title alongside files
+          navigator.share({
+            title: rendered.athlete,
+            files: [file]
+          }).catch(function (err2) {
+            if (err2 && err2.name !== 'AbortError') {
+              triggerDataUrlDownload(dataUrl, fileName);
+              showToast('📷 Pilt salvestatud seadmesse!');
+            }
+          });
         });
-        return;
+      } else {
+        triggerDataUrlDownload(dataUrl, fileName);
+        showToast('📷 Pilt salvestatud seadmesse!');
       }
-
-      // 2. Fallback if user tapped before cache finished rendering
-      renderTargetCanvasImage(function (canvas, athlete) {
-        if (canvas.toBlob) {
-          canvas.toBlob(function (blob) {
-            if (!blob) {
-              exportTargetPng();
-              return;
-            }
-            var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
-            var file = new File([blob], fileName, { type: 'image/png' });
-            cachedTargetPngFile = file;
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              navigator.share({
-                files: [file]
-              }).then(function () {
-                showToast('🟢 Pilt saadetud!');
-              }).catch(function (err) {
-                if (err && err.name !== 'AbortError') {
-                  exportTargetPng();
-                }
-              });
-            } else {
-              exportTargetPng();
-            }
-          }, 'image/png');
-        } else {
-          exportTargetPng();
-        }
-      });
     }
 
     // =========================================================================
