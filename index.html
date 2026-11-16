@@ -1259,7 +1259,7 @@
             <line x1="8" y1="0" x2="24" y2="0" stroke="#38BDF8" stroke-width="1.1"/>
             <line x1="0" y1="-24" x2="0" y2="-8" stroke="#38BDF8" stroke-width="1.1"/>
             <line x1="0" y1="8" x2="0" y2="24" stroke="#38BDF8" stroke-width="1.1"/>
-            <circle cx="0" cy="0" r="6.2" fill="#FF2A85" fill-opacity="0.85" stroke="#FFFFFF" stroke-width="1.2"/>
+            <circle cx="0" cy="0" r="4.6" fill="#FF2A85" fill-opacity="0.85" stroke="#FFFFFF" stroke-width="1.1"/>
             <g transform="translate(0, -26)">
               <rect x="-28" y="-7" width="56" height="12" rx="3.5" fill="#06101E" stroke="#38BDF8" stroke-width="0.8"/>
               <text id="touchPreviewCalloutText" x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="800" font-size="5" fill="#FFFFFF">#1 TABAMUS</text>
@@ -2599,9 +2599,9 @@
     }
 
     // Renders shots at their exact physical coordinates for accurate MPI/Spread math,
-    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 4.5 mm).
+    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 3.6 mm).
     function renderShotsWithOverlapHandling(layerEl, shots, fillHex, textHex, isComparison) {
-      var OVERLAP_THRESHOLD_MM = 4.5;
+      var OVERLAP_THRESHOLD_MM = 3.6;
       var clusters = [];
 
       // 1. Draw the physical bullet holes first (at exact x, y)
@@ -2633,10 +2633,10 @@
         var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', s.x);
         circle.setAttribute('cy', s.y);
-        circle.setAttribute('r', '6.2');
+        circle.setAttribute('r', '4.6');
         circle.setAttribute('fill', fillHex);
         circle.setAttribute('stroke', isComparison ? '#090D16' : '#FFFFFF');
-        circle.setAttribute('stroke-width', overlapRank > 0 ? '1.5' : '1.1');
+        circle.setAttribute('stroke-width', overlapRank > 0 ? '1.3' : '0.95');
         holeGroup.appendChild(circle);
 
         // If overlapping, add a subtle concentric inner ring so stacked impacts are unmistakable
@@ -2644,11 +2644,11 @@
           var innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           innerRing.setAttribute('cx', s.x);
           innerRing.setAttribute('cy', s.y);
-          innerRing.setAttribute('r', String(Math.max(2.4, 5.0 - overlapRank * 1.1)));
+          innerRing.setAttribute('r', String(Math.max(1.8, 3.6 - overlapRank * 0.85)));
           innerRing.setAttribute('fill', 'none');
           innerRing.setAttribute('stroke', '#FFFFFF');
-          innerRing.setAttribute('stroke-width', '0.7');
-          innerRing.setAttribute('stroke-dasharray', '1.5,1.2');
+          innerRing.setAttribute('stroke-width', '0.6');
+          innerRing.setAttribute('stroke-dasharray', '1.3,1.0');
           holeGroup.appendChild(innerRing);
         }
 
@@ -2669,11 +2669,11 @@
           txt.setAttribute('fill', textHex);
           txt.setAttribute('font-family', 'sans-serif');
           txt.setAttribute('font-weight', '800');
-          txt.setAttribute('font-size', '6.5');
+          txt.setAttribute('font-size', '5.2');
           txt.textContent = String(single.number);
           layerEl.appendChild(txt);
         } else {
-          // Multiple overlapping shots in this cluster (< 4.5 mm apart)
+          // Multiple overlapping shots in this cluster (< 3.6 mm apart)
           var numsList = [];
           for (var m = 0; m < cluster.members.length; m++) {
             numsList.push('#' + cluster.members[m].number);
@@ -2689,7 +2689,7 @@
           centerTxt.setAttribute('fill', textHex);
           centerTxt.setAttribute('font-family', 'sans-serif');
           centerTxt.setAttribute('font-weight', '800');
-          centerTxt.setAttribute('font-size', '5.8');
+          centerTxt.setAttribute('font-size', '4.6');
           centerTxt.textContent = cluster.members.map(function (it) { return it.number; }).join('+');
           layerEl.appendChild(centerTxt);
 
@@ -3402,7 +3402,7 @@
       // Helper to draw shots with overlap callout pills on canvas
       function drawShotsLayerOnCanvas(shots, fillHex, textHex, isComparison) {
         if (!shots || shots.length === 0) return;
-        var OVERLAP_MM = 4.5;
+        var OVERLAP_MM = 3.6;
         var clusters = [];
 
         for (var i = 0; i < shots.length; i++) {
@@ -3425,10 +3425,10 @@
 
           ctx.save();
           ctx.beginPath();
-          ctx.arc(mmX(s.x), mmY(s.y), mmR(6.2), 0, Math.PI * 2);
+          ctx.arc(mmX(s.x), mmY(s.y), mmR(4.6), 0, Math.PI * 2);
           ctx.fillStyle = fillHex;
           ctx.fill();
-          ctx.lineWidth = rank > 0 ? 6.5 : 5;
+          ctx.lineWidth = rank > 0 ? 5.5 : 4;
           ctx.strokeStyle = isComparison ? '#090D16' : '#FFFFFF';
           ctx.stroke();
           ctx.restore();
@@ -3437,14 +3437,14 @@
         for (var k = 0; k < clusters.length; k++) {
           var cl = clusters[k];
           ctx.fillStyle = textHex;
-          ctx.font = 'bold 28px sans-serif';
+          ctx.font = 'bold 22px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           if (cl.members.length === 1) {
             ctx.fillText(String(cl.members[0].number), mmX(cl.members[0].x), mmY(cl.members[0].y));
           } else {
             var nums = cl.members.map(function (m) { return '#' + m.number; }).join(', ');
-            ctx.font = 'bold 24px sans-serif';
+            ctx.font = 'bold 19px sans-serif';
             ctx.fillText(cl.members.map(function (m) { return m.number; }).join('+'), mmX(cl.anchorX), mmY(cl.anchorY));
 
             var dirX = cl.anchorX >= 0 ? -1 : 1;
