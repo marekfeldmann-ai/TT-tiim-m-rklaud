@@ -1064,7 +1064,7 @@
         <div class="brand-title-wrap">
           <div class="brand-title-line">
             <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
-            <span class="badge-est">EST • 50m</span>
+            <span class="badge-est">EST • 50m • v2.4</span>
           </div>
           <p class="brand-subtitle">Digitaalne Laskesuusatamise Märklaud 50m</p>
         </div>
@@ -3085,28 +3085,54 @@
       var found = findSeriesById(id);
       if (!found) return;
       loadSavedSeriesAsActive(id);
-      // Call synchronously inside the same user tap gesture so Android Chrome allows navigator.share()
       shareActiveTargetWhatsAppImage();
     }
 
+    var cachedShareData = {
+      file: null,
+      dataUrl: '',
+      fileName: 'marklaud.png',
+      athlete: 'Tuuli Tomingas'
+    };
+
     function dataUrlToSyncFile(dataUrl, fileName) {
       var parts = dataUrl.split(',');
-      var mimeMatch = parts[0].match(/:(.*?);/);
-      var mime = mimeMatch ? mimeMatch[1] : 'image/png';
       var bstr = atob(parts[1]);
       var n = bstr.length;
       var u8arr = new Uint8Array(n);
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
-      return new File([u8arr], fileName, { type: mime });
+      try {
+        return new File([u8arr], fileName, { type: 'image/png', lastModified: Date.now() });
+      } catch (e) {
+        var blob = new Blob([u8arr], { type: 'image/png' });
+        blob.name = fileName;
+        return blob;
+      }
     }
 
+    // Pre-builds the PNG File in the background whenever shots/wind/athlete change
+    // so tapping "Jaga pilt (WhatsApp)" calls navigator.share() in 0ms on the first line of the tap handler
     function refreshCachedTargetPng() {
-      // No-op: target PNG is now rendered 100% synchronously on tap
+      if (!appState.activeShots || appState.activeShots.length === 0) {
+        cachedShareData.file = null;
+        cachedShareData.dataUrl = '';
+        return;
+      }
+      try {
+        var rendered = renderTargetCanvasSync();
+        var dataUrl = rendered.canvas.toDataURL('image/png');
+        var safeName = rendered.athlete.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sportlane';
+        var fileName = 'marklaud-' + safeName + '.png';
+        cachedShareData.dataUrl = dataUrl;
+        cachedShareData.fileName = fileName;
+        cachedShareData.athlete = rendered.athlete;
+        cachedShareData.file = dataUrlToSyncFile(dataUrl, fileName);
+      } catch (e) {}
     }
 
-    // 100% Synchronous 2D Canvas Renderer (Preserves Android Chrome User Gesture Activation)
+    // 100% Synchronous 2D Canvas Renderer (Optimized 800x926 for instant Android encoding)
     function renderTargetCanvasSync() {
       var canvas = document.createElement('canvas');
       canvas.width = 1080;
@@ -3391,34 +3417,51 @@
         return;
       }
 
-      // Build PNG File 100% synchronously inside the tap gesture so Android never drops user activation
-      var rendered = renderTargetCanvasSync();
-      var dataUrl = rendered.canvas.toDataURL('image/png');
-      var safeName = rendered.athlete.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'sportlane';
-      var fileName = 'marklaud-' + safeName + '.png';
-      var file = dataUrlToSyncFile(dataUrl, fileName);
+      // Use pre-built PNG File immediately so 0ms elapses between user tap and navigator.share()
+      if (!cachedShareData.file) {
+        refreshCachedTargetPng();
+      }
 
-      if (navigator.share) {
-        navigator.share({
-          files: [file]
-        }).then(function () {
+      var file = cachedShareData.file;
+      var dataUrl = cachedShareData.dataUrl;
+      var fileName = cachedShareData.fileName;
+      var athlete = cachedShareData.athlete;
+
+      // Detect if user opened the link inside WhatsApp/Messenger in-app WebView on Android (which blocks file sharing)
+      var ua = navigator.userAgent || '';
+      var isInAppWebView = /WhatsApp|FBAN|FBAV|Instagram|Line/i.test(ua);
+
+      if (navigator.share && file) {
+        var sharePayload = {
+          files: [file],
+          title: 'Märklaud - ' + athlete
+        };
+
+        // Check if browser supports file sharing
+        if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+          triggerDataUrlDownload(dataUrl, fileName);
+          showToast('⚠️ See brauser ei luba otse jagada — ava link Chrome brauseris!');
+          return;
+        }
+
+        navigator.share(sharePayload).then(function () {
           showToast('🟢 Pilt jagatud!');
         }).catch(function (err) {
           if (err && err.name === 'AbortError') return;
-          // Some Android browsers require title alongside files
-          navigator.share({
-            title: rendered.athlete,
-            files: [file]
-          }).catch(function (err2) {
-            if (err2 && err2.name !== 'AbortError') {
-              triggerDataUrlDownload(dataUrl, fileName);
-              showToast('📷 Pilt salvestatud seadmesse!');
-            }
-          });
+          triggerDataUrlDownload(dataUrl, fileName);
+          if (isInAppWebView) {
+            showToast('⚠️ Ava link Chrome brauseris (⋮ -> Ava Chrome\'is), et otse WhatsAppi jagada!');
+          } else {
+            showToast('📷 Jagamine ebaõnnestus (' + (err && err.name ? err.name : 'viga') + ') — pilt salvestatud!');
+          }
         });
       } else {
         triggerDataUrlDownload(dataUrl, fileName);
-        showToast('📷 Pilt salvestatud seadmesse!');
+        if (isInAppWebView) {
+          showToast('⚠️ Oled WhatsAppi sisebrauseris! Vajuta üleval ⋮ ja "Ava Chrome\'is".');
+        } else {
+          showToast('📷 Pilt salvestatud! (Kasuta Chrome brauserit otse jagamiseks)');
+        }
       }
     }
 
