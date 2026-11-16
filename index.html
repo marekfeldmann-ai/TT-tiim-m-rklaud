@@ -1298,15 +1298,18 @@
         <button type="button" id="btnSave" onclick="saveCurrentSeries()" class="action-btn btn-save">
           💾 Salvesta seeria
         </button>
-        <button type="button" onclick="shareActiveWhatsAppTextLink()" class="action-btn btn-wa-primary">
-          🟢 Jaga (WhatsApp)
+        <button type="button" onclick="shareDirectPngToWhatsApp()" class="action-btn btn-wa-primary">
+          📷 Saada PILT (WhatsApp)
         </button>
       </div>
 
-      <!-- Secondary Quick-Export Row -->
-      <div style="width:100%; max-width:580px; margin-top:6px;">
-        <button type="button" onclick="exportTargetPng()" class="small-btn" style="width:100%; min-height:42px; justify-content:center;">
-          📷 Laadi pilt (PNG)
+      <!-- Secondary Quick-Export & Text-Share Row -->
+      <div style="width:100%; max-width:580px; margin-top:6px; display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <button type="button" onclick="shareActiveWhatsAppTextLink()" class="small-btn" style="min-height:44px; justify-content:center; background:#0F5132; border-color:#22C55E; color:#FFFFFF;">
+          💬 Saada TEKST + LINK
+        </button>
+        <button type="button" onclick="exportTargetPng()" class="small-btn" style="min-height:44px; justify-content:center;">
+          💾 Salvesta PNG telefoni
         </button>
       </div>
 
@@ -3124,8 +3127,105 @@
       launchWhatsAppMessage(text);
     }
 
+    // Pre-cached PNG File so Android navigator.share fires in 0ms without losing user gesture
+    var cachedPngFile = null;
+    var cachedPngDataUrl = '';
+
+    function dataUrlToFileSync(dataUrl, fileName) {
+      var parts = dataUrl.split(',');
+      var byteString = atob(parts[1]);
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new File([ab], fileName, { type: 'image/png' });
+    }
+
+    function refreshCachedTargetPng() {
+      try {
+        if (!appState.activeShots || appState.activeShots.length === 0) {
+          cachedPngFile = null;
+          cachedPngDataUrl = '';
+          return;
+        }
+        var res = renderTargetCanvasSync();
+        cachedPngDataUrl = res.canvas.toDataURL('image/png');
+        var cleanName = 'marklaud-' + res.athlete.toLowerCase().replace(/[^a-z0-9]/g, '-') + '.png';
+        cachedPngFile = dataUrlToFileSync(cachedPngDataUrl, cleanName);
+      } catch (e) {}
+    }
+
+    // Sends ONLY the PNG image file (no link) via Android/iOS native share menu to WhatsApp
+    function shareDirectPngToWhatsApp() {
+      if (appState.activeShots.length === 0) {
+        showToast('Märgi vähemalt 1 lask enne pildi saatmist!');
+        return;
+      }
+
+      if (!cachedPngFile) {
+        refreshCachedTargetPng();
+      }
+
+      // 1. Check if browser supports native File sharing (Chrome on Android & Safari on iOS do)
+      if (navigator.share && cachedPngFile) {
+        var canShareFiles = true;
+        if (navigator.canShare) {
+          try {
+            canShareFiles = navigator.canShare({ files: [cachedPngFile] });
+          } catch (e) {
+            canShareFiles = false;
+          }
+        }
+
+        if (canShareFiles) {
+          navigator.share({
+            files: [cachedPngFile]
+          }).then(function () {
+            showToast('📷 Pilt saadetud!');
+          }).catch(function (err) {
+            if (err && err.name === 'AbortError') return;
+            openShareFallbackModal();
+          });
+          return;
+        }
+      }
+
+      // 2. If opened inside WhatsApp's in-app mini-browser (which blocks PNG sharing), show 1-tap "Ava Chrome'is" modal
+      openShareFallbackModal();
+    }
+
+    function openShareFallbackModal() {
+      var modal = document.getElementById('shareFallbackModal');
+      var previewImg = document.getElementById('shareModalPreviewImg');
+      if (!cachedPngDataUrl) {
+        refreshCachedTargetPng();
+      }
+      if (previewImg && cachedPngDataUrl) {
+        previewImg.src = cachedPngDataUrl;
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeShareFallbackModal() {
+      var modal = document.getElementById('shareFallbackModal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function openAppInAndroidChrome() {
+      var snap = getCurrentSeriesSnapshot();
+      var fullShareUrl = encodeSeriesShareUrl(snap);
+      var noProto = fullShareUrl.replace(/^https?:\/\//i, '');
+      var intentUrl = 'intent://' + noProto + '#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href = intentUrl;
+    }
+
     function shareActiveTargetWhatsAppImage() {
-      shareActiveWhatsAppTextLink();
+      shareDirectPngToWhatsApp();
     }
 
     // 100% Synchronous 2D Canvas Renderer for PNG Download
