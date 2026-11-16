@@ -1064,7 +1064,7 @@
         <div class="brand-title-wrap">
           <div class="brand-title-line">
             <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
-            <span class="badge-est">EST • 50m • v2.4</span>
+            <span class="badge-est">EST • 50m • v2.5</span>
           </div>
           <p class="brand-subtitle">Digitaalne Laskesuusatamise Märklaud 50m</p>
         </div>
@@ -1532,6 +1532,28 @@
   <!-- Toast Notification -->
   <div id="toastBanner" class="toast-banner">
     <span id="toastMessage">Teade</span>
+  </div>
+
+  <!-- Android Share Fallback / Open-in-Chrome Modal (Shown only if current browser blocks PNG Web Share) -->
+  <div id="shareFallbackModal" class="hidden" style="position:fixed; inset:0; z-index:90; background:rgba(6,12,26,0.88); display:flex; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#111D38; border:2px solid #38BDF8; border-radius:20px; max-width:420px; width:100%; padding:18px; box-shadow:0 20px 50px rgba(0,0,0,0.85); text-align:center;">
+      <div style="font-size:17px; font-weight:800; color:#FFFFFF; margin-bottom:6px;">📲 Jaga märklauda WhatsAppis</div>
+      <p id="shareModalReasonText" style="font-size:13px; color:#CBD5E1; margin:0 0 12px 0; line-height:1.4;">
+        Sinu praegune brauser ei luba pildifaili otse teise äppi saata (nt WhatsAppi sisebrauser).
+      </p>
+      <img id="shareModalPreviewImg" src="" alt="Märklaud" style="width:100%; max-height:240px; object-fit:contain; border-radius:12px; border:1px solid #2D4A7C; margin-bottom:12px; background:#0B132B;" />
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button type="button" onclick="openAppInAndroidChrome()" class="action-btn" style="background:#0072CE; border-color:#38BDF8; min-height:48px;">
+          🌐 Ava Google Chrome'is (pildi otse jagamiseks)
+        </button>
+        <button type="button" onclick="shareActiveWhatsAppTextLink()" class="action-btn btn-wa-primary" style="min-height:48px;">
+          🟢 Ava WhatsApp kohe (Saada tulemus + link)
+        </button>
+        <button type="button" onclick="closeShareFallbackModal()" class="small-btn" style="min-height:42px; justify-content:center;">
+          Sulge aken
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -3089,13 +3111,13 @@
     }
 
     var cachedShareData = {
-      file: null,
+      u8arr: null,
       dataUrl: '',
       fileName: 'marklaud.png',
       athlete: 'Tuuli Tomingas'
     };
 
-    function dataUrlToSyncFile(dataUrl, fileName) {
+    function dataUrlToUint8Array(dataUrl) {
       var parts = dataUrl.split(',');
       var bstr = atob(parts[1]);
       var n = bstr.length;
@@ -3103,20 +3125,25 @@
       while (n--) {
         u8arr[n] = bstr.charCodeAt(n);
       }
+      return u8arr;
+    }
+
+    function createFreshPngFile() {
+      if (!cachedShareData.u8arr) return null;
       try {
-        return new File([u8arr], fileName, { type: 'image/png', lastModified: Date.now() });
+        return new File([cachedShareData.u8arr], cachedShareData.fileName, {
+          type: 'image/png',
+          lastModified: Date.now()
+        });
       } catch (e) {
-        var blob = new Blob([u8arr], { type: 'image/png' });
-        blob.name = fileName;
-        return blob;
+        return null;
       }
     }
 
-    // Pre-builds the PNG File in the background whenever shots/wind/athlete change
-    // so tapping "Jaga pilt (WhatsApp)" calls navigator.share() in 0ms on the first line of the tap handler
+    // Pre-builds the PNG bytes in the background whenever shots/wind/athlete change
     function refreshCachedTargetPng() {
       if (!appState.activeShots || appState.activeShots.length === 0) {
-        cachedShareData.file = null;
+        cachedShareData.u8arr = null;
         cachedShareData.dataUrl = '';
         return;
       }
@@ -3128,8 +3155,38 @@
         cachedShareData.dataUrl = dataUrl;
         cachedShareData.fileName = fileName;
         cachedShareData.athlete = rendered.athlete;
-        cachedShareData.file = dataUrlToSyncFile(dataUrl, fileName);
+        cachedShareData.u8arr = dataUrlToUint8Array(dataUrl);
       } catch (e) {}
+    }
+
+    function openShareFallbackModal(reasonText) {
+      var modal = document.getElementById('shareFallbackModal');
+      var img = document.getElementById('shareModalPreviewImg');
+      var txt = document.getElementById('shareModalReasonText');
+      if (img && cachedShareData.dataUrl) {
+        img.src = cachedShareData.dataUrl;
+      }
+      if (txt && reasonText) {
+        txt.textContent = reasonText;
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeShareFallbackModal() {
+      var modal = document.getElementById('shareFallbackModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Jumps out of WhatsApp/Messenger in-app browser directly into Google Chrome on Android
+    // with the exact current shots (?s=...) preserved!
+    function openAppInAndroidChrome() {
+      var snap = getCurrentSeriesSnapshot();
+      var fullShareUrl = encodeSeriesShareUrl(snap);
+      var noProtocol = fullShareUrl.replace(/^https?:\/\//i, '');
+      var intentUrl = 'intent://' + noProtocol + '#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href = intentUrl;
     }
 
     // 100% Synchronous 2D Canvas Renderer (Optimized 800x926 for instant Android encoding)
@@ -3417,52 +3474,32 @@
         return;
       }
 
-      // Use pre-built PNG File immediately so 0ms elapses between user tap and navigator.share()
-      if (!cachedShareData.file) {
+      if (!cachedShareData.u8arr) {
         refreshCachedTargetPng();
       }
 
-      var file = cachedShareData.file;
-      var dataUrl = cachedShareData.dataUrl;
-      var fileName = cachedShareData.fileName;
-      var athlete = cachedShareData.athlete;
+      var file = createFreshPngFile();
 
-      // Detect if user opened the link inside WhatsApp/Messenger in-app WebView on Android (which blocks file sharing)
-      var ua = navigator.userAgent || '';
-      var isInAppWebView = /WhatsApp|FBAN|FBAV|Instagram|Line/i.test(ua);
-
+      // 1. Try native OS file share (opens Android/iOS Share Sheet with WhatsApp)
       if (navigator.share && file) {
-        var sharePayload = {
-          files: [file],
-          title: 'Märklaud - ' + athlete
-        };
-
-        // Check if browser supports file sharing
-        if (navigator.canShare && !navigator.canShare({ files: [file] })) {
-          triggerDataUrlDownload(dataUrl, fileName);
-          showToast('⚠️ See brauser ei luba otse jagada — ava link Chrome brauseris!');
-          return;
-        }
-
-        navigator.share(sharePayload).then(function () {
+        navigator.share({
+          files: [file]
+        }).then(function () {
           showToast('🟢 Pilt jagatud!');
         }).catch(function (err) {
-          if (err && err.name === 'AbortError') return;
-          triggerDataUrlDownload(dataUrl, fileName);
-          if (isInAppWebView) {
-            showToast('⚠️ Ava link Chrome brauseris (⋮ -> Ava Chrome\'is), et otse WhatsAppi jagada!');
-          } else {
-            showToast('📷 Jagamine ebaõnnestus (' + (err && err.name ? err.name : 'viga') + ') — pilt salvestatud!');
-          }
+          if (err && err.name === 'AbortError') return; // User closed the share sheet manually
+          openShareFallbackModal(
+            'Otse pildi jagamine ebaõnnestus selles brauseris (' + (err && err.name ? err.name : 'Toetus puudub') + '). Ava leht Google Chrome\'is või saada tulemus WhatsAppi:'
+          );
         });
-      } else {
-        triggerDataUrlDownload(dataUrl, fileName);
-        if (isInAppWebView) {
-          showToast('⚠️ Oled WhatsAppi sisebrauseris! Vajuta üleval ⋮ ja "Ava Chrome\'is".');
-        } else {
-          showToast('📷 Pilt salvestatud! (Kasuta Chrome brauserit otse jagamiseks)');
-        }
+        return;
       }
+
+      // 2. If navigator.share is missing (e.g., opened inside WhatsApp in-app browser or HTTP),
+      // DO NOT silently download PNG — show the 1-tap Chrome/WhatsApp launcher instead!
+      openShareFallbackModal(
+        'Oled praegu sisebrauseris (nt WhatsAppi või Messengeri sees), mis blokeerib pildifaili otse jagamise. Vajuta allolevat nuppu, et avada märklaud Google Chrome\'is:'
+      );
     }
 
     // =========================================================================
