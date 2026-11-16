@@ -639,6 +639,7 @@
       border-radius: 16px;
       cursor: crosshair;
       display: block;
+      touch-action: none !important;
     }
 
     /* 5-Button Touch Action Bar */
@@ -2583,7 +2584,7 @@
 
       var activeLayer = document.getElementById('activeShotsLayer');
       activeLayer.innerHTML = '';
-      activeLayer.setAttribute('pointer-events', appState.moveShotsMode ? 'auto' : 'none');
+      activeLayer.setAttribute('pointer-events', 'auto');
       renderShotsWithOverlapHandling(activeLayer, appState.activeShots, '#FF2A85', '#FFFFFF', false);
 
       var mpiLayer = document.getElementById('mpiLayer');
