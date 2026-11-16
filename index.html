@@ -83,15 +83,15 @@
       z-index: 30;
       background-color: rgba(11, 19, 43, 0.96);
       border-bottom: 1px solid var(--border);
-      padding: 12px 16px;
+      padding: 8px 12px;
     }
 
     .header-inner {
-      max-width: 1280px;
+      max-width: 1080px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 8px;
     }
 
     .header-top-row {
@@ -99,25 +99,25 @@
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
     }
 
     .brand-title-wrap {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 0;
     }
 
     .brand-title-line {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .brand-title {
       font-family: var(--font-num);
-      font-size: 21px;
+      font-size: 18px;
       font-weight: 800;
       letter-spacing: 0.5px;
       color: #FFFFFF;
@@ -175,27 +175,28 @@
       display: flex;
       background-color: var(--bg-panel);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 4px;
+      border-radius: 12px;
+      padding: 3px;
       gap: 4px;
-      flex: 1 1 260px;
+      flex: 1 1 210px;
+      max-width: 280px;
     }
 
     .mode-btn {
       flex: 1;
-      min-height: 44px;
+      min-height: 38px;
       border: none;
-      border-radius: 10px;
+      border-radius: 9px;
       background: transparent;
       color: var(--text-muted);
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 6px 10px;
+      gap: 5px;
+      padding: 4px 8px;
       transition: background-color 0.15s, color 0.15s;
     }
 
@@ -232,19 +233,19 @@
 
     /* Main Grid Layout */
     .main-container {
-      max-width: 1280px;
+      max-width: 1080px;
       margin: 0 auto;
-      padding: 16px 12px 64px 12px;
+      padding: 12px 10px 64px 10px;
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 18px;
       align-items: start;
     }
 
     @media (min-width: 1024px) {
       .main-container {
-        grid-template-columns: 7fr 5fr;
-        padding: 20px 24px 64px 24px;
+        grid-template-columns: 6fr 6fr;
+        padding: 16px 20px 64px 20px;
       }
       .header-inner {
         flex-direction: row;
@@ -270,12 +271,12 @@
     /* 1-Tap Athlete Quick-Select Bar (Kiirvalik) */
     .quick-athlete-bar {
       width: 100%;
-      max-width: 580px;
+      max-width: 500px;
       background-color: var(--bg-panel);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
+      border-radius: 14px;
+      padding: 6px 8px;
+      margin-bottom: 8px;
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
@@ -402,13 +403,13 @@
     /* Target Top Status Bar */
     .target-status-bar {
       width: 100%;
-      max-width: 580px;
+      max-width: 500px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
+      gap: 6px;
+      margin-bottom: 8px;
     }
 
     .status-pill-group {
@@ -498,12 +499,12 @@
     /* Target Board Container */
     .target-board-card {
       width: 100%;
-      max-width: 580px;
+      max-width: 500px;
       aspect-ratio: 1 / 1;
       background-color: var(--bg-card);
       border: 2px solid var(--border);
-      border-radius: 24px;
-      padding: 10px;
+      border-radius: 22px;
+      padding: 8px;
       position: relative;
       display: flex;
       align-items: center;
@@ -643,222 +644,9 @@
     /* 5-Button Touch Action Bar */
     .action-bar-5 {
       width: 100%;
-      max-width: 580px;
+      max-width: 500px;
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    @media (min-width: 600px) {
-      .action-bar-5 {
-        grid-template-columns: repeat(5, 1fr);
-      }
-    }
-
-    .action-btn {
-      min-height: 54px;
-      padding: 10px 8px;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 14px;
-      color: #FFFFFF;
-      border: 2px solid transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      text-align: center;
-    }
-
-    .action-btn:disabled {
-      opacity: 0.4;
-      pointer-events: none;
-    }
-
-    .btn-new {
-      background-color: #0284C7;
-      border-color: rgba(125, 211, 252, 0.4);
-    }
-
-    .btn-undo, .btn-clear {
-      background-color: #1E293B;
-      border-color: #475569;
-    }
-
-    .btn-save {
-      background-color: var(--est-blue);
-      border-color: rgba(125, 211, 252, 0.45);
-    }
-
-    .btn-png {
-      background-color: #059669;
-      border-color: rgba(110, 231, 183, 0.4);
-    }
-
-    .whatsapp-bar {
-      width: 100%;
-      max-width: 580px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .btn-wa-primary {
-      background-color: #16A34A;
-      border-color: #4ADE80;
-    }
-
-    .btn-wa-text {
-      background-color: #0F5132;
-      border-color: #22C55E;
-    }
-
-    @media (max-width: 599px) {
-      .btn-new {
-        grid-column: span 2;
-      }
-      .btn-png {
-        grid-column: span 2;
-      }
-      .whatsapp-bar {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Shot Pills Strip */
-    .shot-strip-card {
-      width: 100%;
-      max-width: 580px;
-      margin-top: 12px;
-      background-color: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-    }
-
-    .shot-pills-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      min-height: 42px;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .shot-pill-btn {
-      min-height: 42px;
-      padding: 6px 10px;
-      border-radius: 12px;
-      border: 2px solid #475569;
-      background-color: #1E293B;
-      color: #F8FAFC;
-      font-weight: 700;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-
-    .shot-pill-btn.hit {
-      background-color: rgba(255, 42, 133, 0.16);
-      border-color: rgba(255, 42, 133, 0.55);
-    }
-
-    .shot-pill-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background-color: var(--pink);
-      color: #FFFFFF;
-      font-size: 12px;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Right Column Cards */
-    .panel-card {
-      background-color: var(--bg-card);
-      border: 2px solid var(--border);
-      border-radius: 20px;
-      padding: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    }
-
-    .panel-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding-bottom: 10px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .panel-title-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .panel-bar {
-      width: 8px;
-      height: 20px;
-      border-radius: 99px;
-      display: inline-block;
-    }
-
-    .panel-title {
-      font-family: var(--font-num);
-      font-size: 17px;
-      font-weight: 800;
-      margin: 0;
-      letter-spacing: 0.4px;
-    }
-
-    .small-btn {
-      min-height: 38px;
-      padding: 6px 12px;
-      border-radius: 10px;
-      background-color: #1E293B;
-      border: 1px solid #334155;
-      color: #E2E8F0;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Saved Series Dropdown Box */
-    .dropdown-box {
-      background-color: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .field-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .popup-btn-grid {
-      display: grid;
-      grid-template-columns: 1fr;
       gap: 8px;
       margin-top: 10px;
     }
@@ -1154,11 +942,10 @@
             <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
             <span class="badge-est">EST • 50m</span>
           </div>
-          <p class="brand-subtitle">Digitaalne Laskesuusatamise Märklaud 50m</p>
         </div>
 
         <!-- Position Toggle & Compact Header Controls -->
-        <div class="mode-switcher" style="max-width:340px;">
+        <div class="mode-switcher">
           <button id="btnPosProne" type="button" onclick="setPositionMode('prone')" class="mode-btn active">
             ● Lamades
           </button>
@@ -1392,7 +1179,7 @@
       </div>
 
       <!-- Secondary PNG Save Row (Text+Link Removed) -->
-      <div style="width:100%; max-width:580px; margin-top:6px;">
+      <div style="width:100%; max-width:500px; margin-top:6px;">
         <button type="button" onclick="exportTargetPng()" class="small-btn" style="width:100%; min-height:44px; justify-content:center;">
           💾 Salvesta PNG telefoni
         </button>
@@ -1606,9 +1393,28 @@
             <button type="button" onclick="shareSelectedDropdownWhatsApp()" class="small-btn" style="min-height:42px; background:#16A34A; color:#FFF; border-color:#4ADE80;">
               🟢 Jaga valitud seeriat
             </button>
-            <button type="button" onclick="deleteSelectedDropdownSeries()" class="small-btn" style="min-height:42px; color:#FCA5A5;">
-              🗑 Kustuta
+            <button type="button" onclick="toggleMultiDeletePanel()" class="small-btn" style="min-height:42px; color:#FCA5A5;">
+              🗑 Kustuta...
             </button>
+          </div>
+
+          <!-- Multi-Select Delete Panel -->
+          <div id="multiDeletePanel" class="hidden" style="margin-top:10px; padding:10px; background:#060C1A; border:1px solid #EF4444; border-radius:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-size:12px; font-weight:800; color:#FCA5A5;">Vali kustutatavad seeriad:</span>
+              <button type="button" onclick="toggleSelectAllDeleteSeries()" class="small-btn" style="min-height:30px; padding:2px 8px; font-size:11px;">
+                Vali kõik
+              </button>
+            </div>
+            <div id="multiDeleteChecklist" style="max-height:170px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:10px;"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+              <button type="button" onclick="confirmDeleteSelectedSeries()" class="small-btn" style="min-height:40px; background:#DC2626; color:#FFFFFF; border-color:#F87171;">
+                🗑 Kustuta märgitud
+              </button>
+              <button type="button" onclick="toggleMultiDeletePanel(false)" class="small-btn" style="min-height:40px;">
+                Tühista
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2498,11 +2304,93 @@
     }
 
     function deleteSelectedDropdownSeries() {
-      var dropdown = document.getElementById('savedSeriesDropdown');
-      if (!dropdown || !dropdown.value) {
-        showToast('Vali nimekirjast seeria, mida kustutada!');
+      toggleMultiDeletePanel();
+    }
+
+    function toggleMultiDeletePanel(forceState) {
+      var panel = document.getElementById('multiDeletePanel');
+      if (!panel) return;
+      if (appState.savedSeries.length === 0) {
+        showToast('Salvestatud seeriaid pole!');
+        panel.classList.add('hidden');
         return;
       }
+      var shouldOpen = typeof forceState === 'boolean' ? forceState : panel.classList.contains('hidden');
+      if (shouldOpen) {
+        renderMultiDeleteChecklist();
+        panel.classList.remove('hidden');
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    function renderMultiDeleteChecklist() {
+      var container = document.getElementById('multiDeleteChecklist');
+      if (!container) return;
+      var currentDropdownEl = document.getElementById('savedSeriesDropdown');
+      var preselectedId = currentDropdownEl ? currentDropdownEl.value : '';
+      container.innerHTML = '';
+
+      for (var i = 0; i < appState.savedSeries.length; i++) {
+        var s = appState.savedSeries[i];
+        var stats = computeAnalytics(s.shots, s.position);
+        var posShort = s.position === 'prone' ? 'Lamades' : 'Püsti';
+        var label = document.createElement('label');
+        label.style.cssText = 'display:flex; align-items:center; gap:8px; padding:7px 8px; background:#111D38; border:1px solid #1F355E; border-radius:8px; font-size:12px; font-weight:700; color:#E2E8F0; cursor:pointer;';
+
+        var chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'multi-del-chk';
+        chk.value = s.id;
+        chk.checked = (s.id === preselectedId);
+        chk.style.cssText = 'width:18px; height:18px; accent-color:#EF4444; flex-shrink:0;';
+
+        var span = document.createElement('span');
+        span.textContent = s.timestamp + ' — ' + s.athlete + ' (' + posShort + ' • ' + stats.hits + '/' + stats.count + ')';
+
+        label.appendChild(chk);
+        label.appendChild(span);
+        container.appendChild(label);
+      }
+    }
+
+    function toggleSelectAllDeleteSeries() {
+      var boxes = document.querySelectorAll('#multiDeleteChecklist .multi-del-chk');
+      if (!boxes.length) return;
+      var allChecked = true;
+      for (var i = 0; i < boxes.length; i++) {
+        if (!boxes[i].checked) {
+          allChecked = false;
+          break;
+        }
+      }
+      for (var j = 0; j < boxes.length; j++) {
+        boxes[j].checked = !allChecked;
+      }
+    }
+
+    function confirmDeleteSelectedSeries() {
+      var boxes = document.querySelectorAll('#multiDeleteChecklist .multi-del-chk:checked');
+      if (!boxes.length) {
+        showToast('Märgi vähemalt 1 seeria kustutamiseks!');
+        return;
+      }
+      var idsToRemove = {};
+      for (var i = 0; i < boxes.length; i++) {
+        idsToRemove[boxes[i].value] = true;
+      }
+      var deletedCount = boxes.length;
+      appState.savedSeries = appState.savedSeries.filter(function (s) {
+        return !idsToRemove[s.id];
+      });
+      if (appState.comparisonSeries && idsToRemove[appState.comparisonSeries.id]) {
+        appState.comparisonSeries = null;
+      }
+      persistSavedSeries();
+      toggleMultiDeletePanel(false);
+      renderAll();
+      showToast('🗑 Kustutatud ' + deletedCount + ' seeria(t)');
+    }
       deleteSavedSeries(dropdown.value);
     }
 
@@ -3066,6 +2954,99 @@
       renderAll();
     }
 
+    function toggleMultiDeletePanel() {
+      var panel = document.getElementById('multiDeletePanel');
+      if (!panel) return;
+      if (appState.savedSeries.length === 0) {
+        showToast('Salvestatud seeriaid pole!');
+        panel.classList.add('hidden');
+        return;
+      }
+      panel.classList.toggle('hidden');
+      if (!panel.classList.contains('hidden')) {
+        renderMultiDeleteChecklist();
+      }
+    }
+
+    function renderMultiDeleteChecklist() {
+      var container = document.getElementById('multiDeleteChecklist');
+      if (!container) return;
+      var currentDropdownVal = document.getElementById('savedSeriesDropdown') ? document.getElementById('savedSeriesDropdown').value : '';
+      container.innerHTML = '';
+
+      for (var i = 0; i < appState.savedSeries.length; i++) {
+        var sItem = appState.savedSeries[i];
+        var dStats = computeAnalytics(sItem.shots, sItem.position);
+        var posShort = sItem.position === 'prone' ? 'Lamades' : 'Püsti';
+        var isPrechecked = (sItem.id === currentDropdownVal);
+
+        var lbl = document.createElement('label');
+        lbl.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 10px; background:#111D38; border:1px solid #1F355E; border-radius:10px; font-size:12px; font-weight:700; color:#F8FAFC; cursor:pointer;';
+
+        var chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.className = 'multi-del-chk';
+        chk.value = sItem.id;
+        chk.checked = isPrechecked;
+        chk.style.cssText = 'width:18px; height:18px; accent-color:#EF4444; flex-shrink:0;';
+        chk.onchange = updateCheckedDeleteCount;
+
+        var span = document.createElement('span');
+        span.style.cssText = 'flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;';
+        span.textContent = sItem.timestamp + ' — ' + sItem.athlete + ' (' + posShort + ' • ' + dStats.hits + '/' + dStats.count + ')';
+
+        lbl.appendChild(chk);
+        lbl.appendChild(span);
+        container.appendChild(lbl);
+      }
+      updateCheckedDeleteCount();
+    }
+
+    function updateCheckedDeleteCount() {
+      var chks = document.querySelectorAll('.multi-del-chk:checked');
+      var badge = document.getElementById('checkedDeleteCount');
+      if (badge) badge.textContent = String(chks.length);
+    }
+
+    function toggleSelectAllDelete(selectAll) {
+      var chks = document.querySelectorAll('.multi-del-chk');
+      for (var i = 0; i < chks.length; i++) {
+        chks[i].checked = !!selectAll;
+      }
+      updateCheckedDeleteCount();
+    }
+
+    function deleteCheckedSeries() {
+      var chks = document.querySelectorAll('.multi-del-chk:checked');
+      if (!chks || chks.length === 0) {
+        showToast('Märgi vähemalt 1 seeria kustutamiseks!');
+        return;
+      }
+      var idsToRemove = {};
+      for (var i = 0; i < chks.length; i++) {
+        idsToRemove[chks[i].value] = true;
+      }
+      var removedCount = chks.length;
+      appState.savedSeries = appState.savedSeries.filter(function (s) {
+        return !idsToRemove[s.id];
+      });
+      if (appState.comparisonSeries && idsToRemove[appState.comparisonSeries.id]) {
+        appState.comparisonSeries = null;
+      }
+      persistSavedSeries();
+      renderAll();
+
+      var panel = document.getElementById('multiDeletePanel');
+      if (panel) {
+        if (appState.savedSeries.length === 0) {
+          panel.classList.add('hidden');
+        } else {
+          renderMultiDeleteChecklist();
+        }
+      }
+      showToast('🗑 Kustutatud ' + removedCount + ' seeria(t)!');
+    }
+
     function deleteSavedSeries(id) {
       appState.savedSeries = appState.savedSeries.filter(function (s) { return s.id !== id; });
       if (appState.comparisonSeries && appState.comparisonSeries.id === id) {
@@ -3106,6 +3087,11 @@
         if (previousDropdownVal && findSeriesById(previousDropdownVal)) {
           dropdownEl.value = previousDropdownVal;
         }
+      }
+
+      var multiPanel = document.getElementById('multiDeletePanel');
+      if (multiPanel && !multiPanel.classList.contains('hidden')) {
+        renderMultiDeleteChecklist();
       }
 
       listEl.innerHTML = '';
