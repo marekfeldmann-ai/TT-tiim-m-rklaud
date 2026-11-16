@@ -3083,6 +3083,21 @@
       return lines.join('\n');
     }
 
+    function launchWhatsAppMessage(text) {
+      var encoded = encodeURIComponent(text);
+      var ua = navigator.userAgent || '';
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+
+      if (isMobile) {
+        // Direct native app protocol for Android & iOS (bypasses mobile popup blockers)
+        window.location.href = 'whatsapp://send?text=' + encoded;
+      } else {
+        // Desktop (Windows / Mac) browser tab
+        var waUrl = 'https://api.whatsapp.com/send?text=' + encoded;
+        window.open(waUrl, '_blank');
+      }
+    }
+
     function shareActiveWhatsAppTextLink() {
       if (appState.activeShots.length === 0) {
         showToast('Märgi vähemalt 1 lask enne jagamist!');
@@ -3090,8 +3105,7 @@
       }
       var snap = getCurrentSeriesSnapshot();
       var text = formatWhatsAppSummaryText(snap);
-      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-      window.open(waUrl, '_blank');
+      launchWhatsAppMessage(text);
     }
 
     function shareSelectedDropdownWhatsApp() {
@@ -3107,8 +3121,7 @@
       var found = findSeriesById(id);
       if (!found) return;
       var text = formatWhatsAppSummaryText(found);
-      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
-      window.open(waUrl, '_blank');
+      launchWhatsAppMessage(text);
     }
 
     function shareActiveTargetWhatsAppImage() {
