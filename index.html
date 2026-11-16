@@ -3164,11 +3164,8 @@
         refreshCachedTargetPng();
       }
 
-      var ua = navigator.userAgent || '';
-      var isAndroid = /Android/i.test(ua);
-
-      // 1. Try native Web Share API with files if supported and not blocked on Android
-      if (!isAndroid && navigator.share && cachedPngFile) {
+      // 1. Try native Web Share API with files on BOTH Android and iOS
+      if (navigator.share && cachedPngFile) {
         var canShareFiles = true;
         if (navigator.canShare) {
           try {
@@ -3191,7 +3188,7 @@
         }
       }
 
-      // 2. For Android & browsers where direct file share is restricted: open modal preview so user can long-press / save
+      // 2. Fallback modal preview (where you can also long-press the target image -> "Share image" -> WhatsApp)
       openShareFallbackModal();
     }
 
@@ -3244,19 +3241,13 @@
       function mmY(y) { return cy + y * scale; }
       function mmR(r) { return r * scale; }
 
-      // White Metal Target Plate (Full 1000x1000 Square)
+      // White Metal Target Plate (Full 1000x1000 Square - Universal Android/iOS Canvas)
       ctx.save();
       ctx.fillStyle = '#F1F5F9';
+      ctx.fillRect(0, 0, 1000, 1000);
       ctx.strokeStyle = '#CBD5E1';
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      if (ctx.roundRect) {
-        ctx.roundRect(0, 0, 1000, 1000, 48);
-      } else {
-        ctx.rect(0, 0, 1000, 1000);
-      }
-      ctx.fill();
-      ctx.stroke();
+      ctx.lineWidth = 10;
+      ctx.strokeRect(5, 5, 990, 990);
       ctx.restore();
 
       // Clock Numbers (12, 3, 6, 9)
