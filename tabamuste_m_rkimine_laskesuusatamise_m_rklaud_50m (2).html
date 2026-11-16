@@ -1,4 +1,3428 @@
-index.html
+<!DOCTYPE html>
+<html lang="et">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0B132B" />
+  <title>TABAMUSTE MÄRKIMINE — Digitaalne Laskesuusatamise Märklaud 50m</title>
+  <style>
+    /* ==========================================================================
+       ZERO-DEPENDENCY CROSS-BROWSER CSS (NO CDN REQUIRED - NEVER FLASHES WHITE)
+       ========================================================================== */
+    :root {
+      --bg-deep: #0B132B;
+      --bg-card: #111D38;
+      --bg-panel: #0A1124;
+      --border: #1F355E;
+      --border-light: #2D4A7C;
+      --est-blue: #0072CE;
+      --sky: #38BDF8;
+      --pink: #FF2A85;
+      --gold: #FFD700;
+      --emerald: #10B981;
+      --rose: #EF4444;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --text-dim: #64748B;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-num: "Trebuchet MS", "Arial Narrow", Impact, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #0B132B;
+      background-image: radial-gradient(circle at 50% 0%, #152A50 0%, #0B132B 75%);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overscroll-behavior-y: contain;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Estonian Tricolor Top Accent Bar */
+    .estonian-stripe {
+      height: 8px;
+      width: 100%;
+      background: linear-gradient(90deg, #0072CE 0%, #0072CE 33.33%, #000000 33.33%, #000000 66.66%, #FFFFFF 66.66%, #FFFFFF 100%);
+    }
+
+    /* Prevent iOS Safari auto-zoom on form controls */
+    input, select, textarea, button {
+      font-family: inherit;
+      font-size: 16px;
+    }
+
+    .touch-none-surface {
+      touch-action: none !important;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Allow smooth vertical page scrolling on Android/iOS when swiping over the target */
+    .touch-pan-surface {
+      touch-action: pan-y pinch-zoom !important;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Header Layout */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background-color: rgba(11, 19, 43, 0.96);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .header-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title-line {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-family: var(--font-num);
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
+      margin: 0;
+    }
+
+    .badge-est {
+      background: rgba(0, 114, 206, 0.25);
+      color: #7DD3FC;
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .header-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      justify-content: space-between;
+    }
+
+    .athlete-select-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 220px;
+    }
+
+    .form-select, .form-input {
+      background-color: var(--bg-panel);
+      color: #FFFFFF;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      min-height: 48px;
+      padding: 8px 12px;
+      font-weight: 600;
+      width: 100%;
+      outline: none;
+    }
+
+    .form-select:focus, .form-input:focus {
+      border-color: var(--sky);
+    }
+
+    .mode-switcher {
+      display: flex;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 4px;
+      gap: 4px;
+      flex: 1 1 260px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      min-height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 10px;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .mode-btn.active {
+      background-color: var(--est-blue);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0, 114, 206, 0.45);
+    }
+
+    .header-btn {
+      min-height: 48px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background-color: var(--bg-card);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .header-btn:active, .mode-btn:active, .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    .header-btn-new {
+      background-color: #0284C7;
+      border-color: #38BDF8;
+    }
+
+    /* Main Grid Layout */
+    .main-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 12px 64px 12px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (min-width: 1024px) {
+      .main-container {
+        grid-template-columns: 7fr 5fr;
+        padding: 20px 24px 64px 24px;
+      }
+      .header-inner {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      width: 100%;
+    }
+
+    /* 1-Tap Athlete Quick-Select Bar (Kiirvalik) */
+    .quick-athlete-bar {
+      width: 100%;
+      max-width: 580px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quick-athlete-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-right: 4px;
+      letter-spacing: 0.4px;
+    }
+
+    .athlete-pill-btn {
+      min-height: 40px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #334155;
+      background-color: #152238;
+      color: #CBD5E1;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .athlete-pill-btn.active {
+      background-color: var(--est-blue);
+      border-color: var(--sky);
+      color: #FFFFFF;
+      box-shadow: 0 2px 10px rgba(0, 114, 206, 0.45);
+    }
+
+    /* Target Top Status Bar */
+    .target-status-bar {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .status-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dot-pink {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--pink);
+      border: 2px solid #FFFFFF;
+      display: inline-block;
+    }
+
+    .dot-gold {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--gold);
+      display: inline-block;
+    }
+
+    .compare-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background-color: rgba(245, 158, 11, 0.16);
+      border: 2px solid rgba(255, 215, 0, 0.5);
+      color: #FDE68A;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .compare-pill.visible {
+      display: inline-flex;
+    }
+
+    .compare-close-btn {
+      background: rgba(255, 215, 0, 0.25);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mpi-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 40px;
+    }
+
+    .mpi-toggle-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--est-blue);
+    }
+
+    /* Target Board Container */
+    .target-board-card {
+      width: 100%;
+      max-width: 580px;
+      aspect-ratio: 1 / 1;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 10px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Target Corner Overlay Badges */
+    .target-overlay-left {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 10;
+      background-color: rgba(10, 17, 36, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .wind-arrow-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background-color: #0F172A;
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sky);
+      transition: transform 0.2s ease;
+    }
+
+    .target-overlay-right {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .zoom-btn {
+      min-height: 46px;
+      padding: 6px 12px;
+      border-radius: 14px;
+      background-color: rgba(10, 17, 36, 0.92);
+      border: 2px solid rgba(56, 189, 248, 0.55);
+      color: #7DD3FC;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .move-toggle-btn {
+      min-height: 40px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .move-toggle-btn.active {
+      background-color: rgba(245, 158, 11, 0.2);
+      border: 2px solid var(--gold);
+      color: #FDE68A;
+    }
+
+    .hit-counter-box {
+      background-color: rgba(10, 17, 36, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 5px 12px;
+      text-align: right;
+      min-height: 46px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .touch-live-banner {
+      display: none;
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      background-color: var(--est-blue);
+      color: #FFFFFF;
+      border: 2px solid #FFFFFF;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 800;
+      font-size: 13px;
+      white-space: nowrap;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+    }
+
+    .touch-live-banner.visible {
+      display: inline-flex;
+    }
+
+    .target-bottom-hint {
+      position: absolute;
+      bottom: 10px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748B;
+      pointer-events: none;
+    }
+
+    #biathlonSvg {
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      cursor: crosshair;
+      display: block;
+    }
+
+    /* 5-Button Touch Action Bar */
+    .action-bar-5 {
+      width: 100%;
+      max-width: 580px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 600px) {
+      .action-bar-5 {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    .action-btn {
+      min-height: 54px;
+      padding: 10px 8px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 14px;
+      color: #FFFFFF;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-align: center;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .btn-new {
+      background-color: #0284C7;
+      border-color: rgba(125, 211, 252, 0.4);
+    }
+
+    .btn-undo, .btn-clear {
+      background-color: #1E293B;
+      border-color: #475569;
+    }
+
+    .btn-save {
+      background-color: var(--est-blue);
+      border-color: rgba(125, 211, 252, 0.45);
+    }
+
+    .btn-png {
+      background-color: #059669;
+      border-color: rgba(110, 231, 183, 0.4);
+    }
+
+    .whatsapp-bar {
+      width: 100%;
+      max-width: 580px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-wa-primary {
+      background-color: #16A34A;
+      border-color: #4ADE80;
+    }
+
+    .btn-wa-text {
+      background-color: #0F5132;
+      border-color: #22C55E;
+    }
+
+    @media (max-width: 599px) {
+      .btn-new {
+        grid-column: span 2;
+      }
+      .btn-png {
+        grid-column: span 2;
+      }
+      .whatsapp-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Shot Pills Strip */
+    .shot-strip-card {
+      width: 100%;
+      max-width: 580px;
+      margin-top: 12px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .shot-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 42px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .shot-pill-btn {
+      min-height: 42px;
+      padding: 6px 10px;
+      border-radius: 12px;
+      border: 2px solid #475569;
+      background-color: #1E293B;
+      color: #F8FAFC;
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .shot-pill-btn.hit {
+      background-color: rgba(255, 42, 133, 0.16);
+      border-color: rgba(255, 42, 133, 0.55);
+    }
+
+    .shot-pill-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background-color: var(--pink);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Right Column Cards */
+    .panel-card {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-bar {
+      width: 8px;
+      height: 20px;
+      border-radius: 99px;
+      display: inline-block;
+    }
+
+    .panel-title {
+      font-family: var(--font-num);
+      font-size: 17px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 0.4px;
+    }
+
+    .small-btn {
+      min-height: 38px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background-color: #1E293B;
+      border: 1px solid #334155;
+      color: #E2E8F0;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Saved Series Dropdown Box */
+    .dropdown-box {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .popup-btn-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    @media (min-width: 480px) {
+      .popup-btn-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .btn-pop-yellow {
+      min-height: 52px;
+      border-radius: 12px;
+      border: none;
+      background-color: var(--gold);
+      color: #090D16;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-pop-pink {
+      min-height: 52px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 42, 133, 0.5);
+      background-color: #DB2777;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .saved-list-scroll {
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    .saved-card {
+      background-color: var(--bg-panel);
+      border: 2px solid #1E293B;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .saved-card.comparing {
+      background-color: rgba(245, 158, 11, 0.14);
+      border-color: var(--gold);
+    }
+
+    .saved-card-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px solid #1E293B;
+    }
+
+    /* Wind Clock & Flag Grid */
+    .wind-top-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    @media (min-width: 520px) {
+      .wind-top-grid {
+        grid-template-columns: 7fr 5fr;
+      }
+    }
+
+    .clock-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .clock-svg-box {
+      width: 215px;
+      height: 215px;
+    }
+
+    .flag-card {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* High-Visibility Touchscreen Wind Speed Slider */
+    input[type="range"].touch-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      background: #1E293B;
+      outline: none;
+      margin: 8px 0;
+    }
+
+    input[type="range"].touch-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 4px solid var(--est-blue);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+    }
+
+    input[type="range"].touch-slider::-moz-range-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 4px solid var(--est-blue);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .step-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background-color: var(--bg-panel);
+      border: 2px solid #334155;
+      color: #FFFFFF;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .tick-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .tick-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .preset-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .preset-btn {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 2px solid #334155;
+      background-color: var(--bg-panel);
+      color: #CBD5E1;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .preset-btn.active {
+      background-color: var(--est-blue);
+      border-color: var(--sky);
+      color: #FFFFFF;
+    }
+
+    /* Telemetry Grid Boxes */
+    .two-col-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .three-col-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .stat-box {
+      background-color: var(--bg-panel);
+      border: 1px solid #1E293B;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .stat-val-lg {
+      font-family: var(--font-num);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--sky);
+      margin: 4px 0;
+    }
+
+    /* Toast Notification */
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      max-width: 380px;
+      margin: 0 auto;
+      z-index: 60;
+      background-color: #090D16;
+      border: 2px solid var(--sky);
+      color: #FFFFFF;
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.75);
+      transform: translateY(120px);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .toast-banner.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @keyframes flagFlutter {
+      0%, 100% { transform: skewY(0deg) scaleX(1); }
+      50% { transform: skewY(-3deg) scaleX(0.96); }
+    }
+    .flag-flutter {
+      transform-origin: left center;
+      animation: flagFlutter var(--flutter-dur, 0.9s) ease-in-out infinite;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Estonian Tricolor Accent Bar -->
+  <div class="estonian-stripe"></div>
+
+  <!-- Header (Logo-Free, Clean Estonian Interface) -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-top-row">
+        <div class="brand-title-wrap">
+          <div class="brand-title-line">
+            <h1 class="brand-title">TABAMUSTE MÄRKIMINE</h1>
+            <span class="badge-est">EST • 50m</span>
+          </div>
+          <p class="brand-subtitle">Digitaalne Laskesuusatamise Märklaud 50m</p>
+        </div>
+
+        <!-- Position Toggle & Compact Header Controls -->
+        <div class="mode-switcher" style="max-width:340px;">
+          <button id="btnPosProne" type="button" onclick="setPositionMode('prone')" class="mode-btn active">
+            ● Lamades 45 mm
+          </button>
+          <button id="btnPosStanding" type="button" onclick="setPositionMode('standing')" class="mode-btn">
+            ◯ Püsti 115 mm
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden Athlete Select for internal state compatibility -->
+      <div class="hidden">
+        <select id="selectAthlete" onchange="handleAthleteChange()" aria-label="Sportlane">
+          <option value="Tuuli Tomingas">Tuuli Tomingas</option>
+          <option value="Hanna-Brita Kaasik">Hanna-Brita Kaasik</option>
+          <option value="Karl Rasmus Tiislar">Karl Rasmus Tiislar</option>
+          <option value="Muu">Muu sportlane...</option>
+        </select>
+      </div>
+
+      <!-- Optional Custom Athlete Input -->
+      <div id="customAthleteWrapper" class="hidden">
+        <input type="text" id="inputCustomAthlete" placeholder="Sisesta sportlase nimi..." class="form-input" />
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="main-container">
+
+    <!-- LEFT COLUMN: 50m Biathlon Target Board & Simplified Touch Bar -->
+    <section class="left-col">
+
+      <!-- 1-TAP ATHLETE QUICK-SELECT BAR -->
+      <div class="quick-athlete-bar" id="quickAthleteBar">
+        <span class="quick-athlete-label">⚡ Laskja:</span>
+        <button type="button" onclick="selectQuickAthlete('Tuuli Tomingas')" data-athlete="Tuuli Tomingas" class="athlete-pill-btn active">Tuuli Tomingas</button>
+        <button type="button" onclick="selectQuickAthlete('Hanna-Brita Kaasik')" data-athlete="Hanna-Brita Kaasik" class="athlete-pill-btn">Hanna-Brita Kaasik</button>
+        <button type="button" onclick="selectQuickAthlete('Karl Rasmus Tiislar')" data-athlete="Karl Rasmus Tiislar" class="athlete-pill-btn">Karl Rasmus Tiislar</button>
+      </div>
+
+      <!-- Compact Status Bar Above Target -->
+      <div class="target-status-bar">
+        <div class="status-pill-group">
+          <span class="status-pill">
+            <span class="dot-pink"></span>
+            Lasud: <strong id="activeShotCountLabel">0</strong>/8
+          </span>
+
+          <span id="compareLegendPill" class="compare-pill">
+            <span class="dot-gold"></span>
+            <span id="compareSeriesTitle"></span>
+            <button type="button" onclick="clearComparison()" class="compare-close-btn" title="Eemalda võrdlus">✕</button>
+          </span>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+          <button id="btnPaperRings" type="button" onclick="togglePaperRings()" class="move-toggle-btn">
+            🎯 <span id="paperRingsLabel">Paber: SEES</span>
+          </button>
+
+          <button id="btnToggleMoveMode" type="button" onclick="toggleMoveShotsMode()" class="move-toggle-btn" title="Luba või keela olemasolevate laskude lohistamine">
+            ✋ <span id="moveShotsModeLabel">Liiguta: VÄLJAS</span>
+          </button>
+
+          <label class="mpi-toggle-label" style="padding:4px 10px; min-height:38px;">
+            <input type="checkbox" id="chkShowMPI" checked onchange="renderTarget()" />
+            <span>MPI</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE 50m TARGET CARD -->
+      <div class="target-board-card touch-pan-surface">
+
+        <!-- Top-Left Wind Indicator Overlay -->
+        <div class="target-overlay-left">
+          <div id="targetWindArrow" class="wind-arrow-box">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 19V5M12 5l-5 5M12 5l5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div style="font-size:12px; line-height:1.25;">
+            <div style="color:#94A3B8; font-weight:700;">
+              🚩 Tuul <span id="targetWindClockBadge" style="color:#38BDF8;">Kell 9</span>
+            </div>
+            <div id="targetWindLabel" style="font-weight:800; color:#FFFFFF;">1.5 m/s • Vasakult</div>
+          </div>
+        </div>
+
+        <!-- Top-Right Zoom Toggle & Hit Counter -->
+        <div class="target-overlay-right">
+          <button id="btnTargetZoom" type="button" onclick="toggleTargetZoom()" class="zoom-btn">
+            🔍 <span id="zoomBtnText">Suum: 1x</span>
+          </button>
+          <div class="hit-counter-box">
+            <div style="font-size:10px; font-weight:800; text-transform:uppercase; color:#94A3B8;">Tabamused</div>
+            <div id="targetHitBadge" style="font-family:var(--font-num); font-size:17px; font-weight:800; color:#34D399;">0 / 0</div>
+          </div>
+        </div>
+
+        <!-- Live Touch Sighting Banner -->
+        <div id="touchLiveBanner" class="touch-live-banner">
+          <span id="touchLiveText">Lask #1 • TABAMUS</span>
+        </div>
+
+        <!-- 50M BIATHLON SVG TARGET -->
+        <svg id="biathlonSvg" viewBox="-105 -105 210 210" class="touch-pan-surface">
+          <defs>
+            <radialGradient id="plateGrad" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="92%" stop-color="#F1F5F9"/>
+              <stop offset="100%" stop-color="#CBD5E1"/>
+            </radialGradient>
+            <radialGradient id="blackZoneGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#1E293B"/>
+              <stop offset="100%" stop-color="#090D16"/>
+            </radialGradient>
+          </defs>
+
+          <!-- White Metal Target Plate -->
+          <rect x="-105" y="-105" width="210" height="210" rx="14" fill="url(#plateGrad)" />
+
+          <!-- Clean Top Label -->
+          <text x="0" y="-92" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="5" fill="#64748B" letter-spacing="0.6">LASKESUUSATAMISE 50M MÄRKLAUD</text>
+
+          <!-- Clock Reference Numbers -->
+          <g font-family="sans-serif" font-weight="700" font-size="6.5" fill="#475569" text-anchor="middle" dominant-baseline="central" pointer-events="none">
+            <text x="0" y="-85">12</text>
+            <text x="86" y="0">3</text>
+            <text x="0" y="86">6</text>
+            <text x="-86" y="0">9</text>
+          </g>
+
+          <!-- Outer Paper Rings (1 & 2) -->
+          <g id="outerPaperRingsGroup" pointer-events="none">
+            <circle cx="0" cy="0" r="77.5" fill="none" stroke="#94A3B8" stroke-width="0.45" />
+            <circle cx="0" cy="0" r="67.5" fill="none" stroke="#94A3B8" stroke-width="0.45" />
+          </g>
+
+          <!-- 115mm Standing Hit Zone (Radius 57.5 mm) -->
+          <circle id="standingZoneCircle" cx="0" cy="0" r="57.5" fill="url(#blackZoneGrad)" stroke="#0F172A" stroke-width="0.9" pointer-events="none"/>
+
+          <!-- Inner Paper Rings (3, 4, 5) -->
+          <g id="innerPaperRingsGroup" pointer-events="none">
+            <circle cx="0" cy="0" r="47.5" fill="none" stroke="#475569" stroke-width="0.4" />
+            <circle cx="0" cy="0" r="37.5" fill="none" stroke="#475569" stroke-width="0.4" />
+            <circle cx="0" cy="0" r="27.5" fill="none" stroke="#475569" stroke-width="0.4" />
+          </g>
+
+          <!-- 45mm Prone Hit Zone (Radius 22.5 mm) -->
+          <circle id="proneZoneCircle" cx="0" cy="0" r="22.5" fill="#05080F" stroke="#38BDF8" stroke-width="1.2" pointer-events="none" />
+
+          <!-- Center Zeroing Paper Rings (7 & 8) -->
+          <g id="centerPaperRingsGroup" pointer-events="none">
+            <circle cx="0" cy="0" r="17.5" fill="none" stroke="#64748B" stroke-width="0.4" />
+            <circle cx="0" cy="0" r="7.5" fill="none" stroke="#94A3B8" stroke-width="0.45" />
+          </g>
+
+          <!-- Paper Ring Numbers (1..8) -->
+          <g id="paperRingNumbers" font-family="sans-serif" font-size="3.6" font-weight="700" text-anchor="middle" dominant-baseline="central" pointer-events="none">
+            <text x="0" y="-72.5" fill="#475569">1</text>
+            <text x="0" y="-62.5" fill="#475569">2</text>
+            <text x="0" y="-52.5" fill="#94A3B8">3</text>
+            <text x="0" y="-42.5" fill="#94A3B8">4</text>
+            <text x="0" y="-32.5" fill="#94A3B8">5</text>
+            <text x="0" y="-25.0" fill="#64748B" font-size="2.8">6</text>
+            <text x="0" y="-12.5" fill="#94A3B8">8</text>
+          </g>
+
+          <!-- Crosshair Lines -->
+          <g stroke="#64748B" stroke-width="0.4" stroke-dasharray="2,2" opacity="0.75" pointer-events="none">
+            <line x1="-80" y1="0" x2="80" y2="0" />
+            <line x1="0" y1="-80" x2="0" y2="80" />
+          </g>
+          <circle cx="0" cy="0" r="1.1" fill="#E2E8F0" pointer-events="none"/>
+
+          <!-- Dynamic Layers -->
+          <g id="mpiLayer" pointer-events="none"></g>
+          <g id="comparisonShotsLayer" pointer-events="none"></g>
+          <g id="activeShotsLayer" pointer-events="none"></g>
+
+          <!-- Touch-Hold Offset Crosshair Preview above Finger -->
+          <g id="touchPreviewLayer" class="hidden" pointer-events="none">
+            <circle cx="0" cy="0" r="16" fill="none" stroke="#38BDF8" stroke-width="0.9" stroke-dasharray="2,2"/>
+            <line x1="-24" y1="0" x2="-8" y2="0" stroke="#38BDF8" stroke-width="1.1"/>
+            <line x1="8" y1="0" x2="24" y2="0" stroke="#38BDF8" stroke-width="1.1"/>
+            <line x1="0" y1="-24" x2="0" y2="-8" stroke="#38BDF8" stroke-width="1.1"/>
+            <line x1="0" y1="8" x2="0" y2="24" stroke="#38BDF8" stroke-width="1.1"/>
+            <circle cx="0" cy="0" r="6.2" fill="#FF2A85" fill-opacity="0.85" stroke="#FFFFFF" stroke-width="1.2"/>
+            <g transform="translate(0, -26)">
+              <rect x="-28" y="-7" width="56" height="12" rx="3.5" fill="#06101E" stroke="#38BDF8" stroke-width="0.8"/>
+              <text id="touchPreviewCalloutText" x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="800" font-size="5" fill="#FFFFFF">#1 TABAMUS</text>
+            </g>
+          </g>
+
+          <!-- Embedded SVG Wind Badge for PNG Exports -->
+          <g id="svgEmbeddedWindBadge" transform="translate(-100, 76)" pointer-events="none">
+            <rect x="0" y="0" width="68" height="23" rx="4.5" fill="#090D16" fill-opacity="0.9" stroke="#1E293B" stroke-width="0.6"/>
+            <g transform="translate(11.5, 11.5)">
+              <circle cx="0" cy="0" r="7.5" fill="#0F172A" stroke="#38BDF8" stroke-width="0.6"/>
+              <g id="svgWindVectorArrow" transform="rotate(0)">
+                <line x1="0" y1="4.8" x2="0" y2="-4.8" stroke="#38BDF8" stroke-width="1.3" stroke-linecap="round"/>
+                <polyline points="-2.6,-2 0,-5.2 2.6,-2" fill="none" stroke="#38BDF8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </g>
+            <text id="svgWindBadgeLine1" x="23" y="9.5" font-family="sans-serif" font-weight="800" font-size="5" fill="#38BDF8">TUUL: KELL 9</text>
+            <text id="svgWindBadgeLine2" x="23" y="17.5" font-family="sans-serif" font-weight="600" font-size="4.6" fill="#F8FAFC">1.5 m/s (Vasakult)</text>
+          </g>
+        </svg>
+
+        <div class="target-bottom-hint">
+          <span id="targetBottomModeHint">Puuduta lasu märkimiseks (max 8)</span>
+          <span id="activeZoneHint" style="color:#0284C7; font-weight:800;">Lamades: Ø 45 mm</span>
+        </div>
+      </div>
+
+      <!-- CLEAN 4-BUTTON PRIMARY ACTION BAR -->
+      <div class="action-bar-5" style="grid-template-columns: repeat(2, 1fr);">
+        <button type="button" onclick="startNewSeries()" class="action-btn btn-new">
+          ➕ Uus seeria
+        </button>
+        <button type="button" id="btnClear" onclick="clearStepByStep()" class="action-btn btn-clear">
+          ↩ <span id="btnClearLabel">Kustuta lask</span>
+        </button>
+        <button type="button" id="btnSave" onclick="saveCurrentSeries()" class="action-btn btn-save">
+          💾 Salvesta seeria
+        </button>
+        <button type="button" onclick="shareActiveTargetWhatsAppImage()" class="action-btn btn-wa-primary">
+          🟢 Jaga (WhatsApp)
+        </button>
+      </div>
+
+      <!-- Secondary Quick-Export Row -->
+      <div style="width:100%; max-width:580px; margin-top:6px;">
+        <button type="button" onclick="exportTargetPng()" class="small-btn" style="width:100%; min-height:42px; justify-content:center;">
+          📷 Laadi pilt (PNG)
+        </button>
+      </div>
+
+      <!-- Hidden Undo Button & Shot Pills Strip kept in DOM for logic compatibility -->
+      <button type="button" id="btnUndo" onclick="undoLastShot()" class="hidden"></button>
+      <div id="shotPillsContainer" class="hidden"></div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: Diopter Summary First, Wind Clock, and Saved Series Dropdown -->
+    <section class="right-col">
+
+      <!-- 1. DIOPTRI KORREKTSIOON (50m) - MOVED TO TOP OF RIGHT COLUMN FOR IMMEDIATE FEEDBACK -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-bar" style="background-color:var(--est-blue);"></span>
+            <h2 class="panel-title">DIOPTRI KORREKTSIOON (50m)</h2>
+          </div>
+          <div style="display:flex; gap:4px; background:var(--bg-panel); padding:4px; border-radius:10px; border:1px solid var(--border);">
+            <button id="btnClick25" type="button" onclick="setClickStep(2.5)" class="small-btn" style="background:var(--est-blue); color:#FFF; border:none;">2.5 mm</button>
+            <button id="btnClick30" type="button" onclick="setClickStep(3.0)" class="small-btn" style="background:transparent; border:none;">3.0 mm</button>
+          </div>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="stat-box">
+            <div class="stat-label">Külgsuund (Vasak / Parem)</div>
+            <div style="display:flex; align-items:baseline; gap:6px;">
+              <span id="diopterHorizClicks" class="stat-val-lg">0</span>
+              <span id="diopterHorizDir" style="font-size:13px; font-weight:800;">KLIKKI</span>
+            </div>
+            <div id="mpiOffsetXText" style="font-size:12px; color:var(--text-muted);">Kõrvalekalle: 0.0 mm</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-label">Kõrgus (Üles / Alla)</div>
+            <div style="display:flex; align-items:baseline; gap:6px;">
+              <span id="diopterVertClicks" class="stat-val-lg">0</span>
+              <span id="diopterVertDir" style="font-size:13px; font-weight:800;">KLIKKI</span>
+            </div>
+            <div id="mpiOffsetYText" style="font-size:12px; color:var(--text-muted);">Kõrvalekalle: 0.0 mm</div>
+          </div>
+        </div>
+
+        <div class="three-col-grid" style="text-align:center;">
+          <div class="stat-box">
+            <div class="stat-label">Tabamused</div>
+            <div id="metricHits" style="font-family:var(--font-num); font-size:18px; font-weight:800; color:#34D399; margin-top:4px;">0 / 0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Hajuvus (Max)</div>
+            <div id="metricSpread" style="font-family:var(--font-num); font-size:18px; font-weight:800; color:#FFFFFF; margin-top:4px;">0.0 mm</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Tsentrist</div>
+            <div id="metricMpiDist" style="font-family:var(--font-num); font-size:18px; font-weight:800; color:#F472B6; margin-top:4px;">0.0 mm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. SALVESTATUD SEERIAD (CLEAN DROPDOWN WORKFLOW) -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-bar" style="background-color:var(--gold);"></span>
+            <h2 class="panel-title">SALVESTATUD SEERIAD (<span id="savedCountBadge">0</span>)</h2>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" onclick="exportAllJson()" class="small-btn">Eksport</button>
+            <label class="small-btn">
+              Import
+              <input type="file" id="importJsonInput" accept=".json" onchange="importJsonFile(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <input type="text" id="inputNotes" placeholder="Märkus / Laskemoon (valikuline)..." class="form-input" style="min-height:42px;" />
+        </div>
+
+        <!-- Date & Time Dropdown + Always-Visible Pop-up Buttons -->
+        <div class="dropdown-box" style="margin-bottom:0;">
+          <label for="savedSeriesDropdown" class="field-label" style="color:#FDE68A;">
+            Vali salvestatud seeria (Kuupäev ja kellaaeg):
+          </label>
+          <select id="savedSeriesDropdown" class="form-select"></select>
+
+          <div class="popup-btn-grid">
+            <button type="button" onclick="popSelectedDropdownOnTarget('compare')" class="btn-pop-yellow">
+              🎯 Kuva võrdlus (Kollane)
+            </button>
+            <button type="button" onclick="popSelectedDropdownOnTarget('active')" class="btn-pop-pink">
+              Ava seeria (Roosa)
+            </button>
+          </div>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px; margin-top:8px;">
+            <button type="button" onclick="shareSelectedDropdownWhatsApp()" class="small-btn" style="min-height:42px; background:#16A34A; color:#FFF; border-color:#4ADE80;">
+              🟢 Jaga valitud seeriat
+            </button>
+            <button type="button" onclick="deleteSelectedDropdownSeries()" class="small-btn" style="min-height:42px; color:#FCA5A5;">
+              🗑 Kustuta
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden list container kept for JS compatibility -->
+        <div id="savedSeriesList" class="hidden"></div>
+      </div>
+
+      <!-- 3. TUULE SUUND JA KIIRUS (COMPACT CLOCK + SLIDER) -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <span class="panel-bar" style="background-color:var(--rose);"></span>
+            <h2 class="panel-title">TUULE SUUND JA KIIRUS</h2>
+          </div>
+          <span id="windSummaryPill" style="background:rgba(239,68,68,0.16); color:#FCA5A5; border:1px solid rgba(239,68,68,0.35); padding:4px 10px; border-radius:99px; font-size:12px; font-weight:800;">
+            🚩 Kell 9 • 1.5 m/s
+          </span>
+        </div>
+
+        <div class="wind-top-grid">
+          <!-- 12-Hour Interactive Wind Clock -->
+          <div class="clock-wrap">
+            <div class="clock-svg-box touch-none-surface" style="width:190px; height:190px;">
+              <svg id="windClockSvg" viewBox="-100 -100 200 200" width="100%" height="100%" class="touch-none-surface">
+                <circle cx="0" cy="0" r="95" fill="#06101E" stroke="#1F355E" stroke-width="2.5"/>
+                <circle cx="0" cy="0" r="68" fill="none" stroke="#1E293B" stroke-width="1" stroke-dasharray="3,3"/>
+                <line x1="-68" y1="0" x2="68" y2="0" stroke="#1E293B" stroke-width="1"/>
+                <line x1="0" y1="-68" x2="0" y2="68" stroke="#1E293B" stroke-width="1"/>
+
+                <g id="clockWindVectorGroup" transform="rotate(90)" pointer-events="none">
+                  <line x1="-40" y1="0" x2="34" y2="0" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" opacity="0.85"/>
+                  <polygon points="42,0 26,-8 30,0 26,8" fill="#38BDF8"/>
+                </g>
+
+                <g id="clockHoursGroup"></g>
+
+                <g onclick="setWindDir(0)" style="cursor:pointer;">
+                  <circle id="clockCenterCalmCircle" cx="0" cy="0" r="23" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+                  <text x="0" y="-3" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="800" font-size="11" fill="#E2E8F0" pointer-events="none">0</text>
+                  <text x="0" y="8" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="700" font-size="6" fill="#94A3B8" pointer-events="none">VAIKUS</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Animated Red Range Wind Flag ("Tuulelipp") -->
+          <div class="flag-card">
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted);">
+              <span>Tuulelipp</span>
+              <span id="windAngleDesc" style="color:var(--sky);">Vasakult →</span>
+            </div>
+
+            <div style="margin:6px 0; background:#060C1A; border:1px solid #1E293B; border-radius:12px; padding:4px; display:flex; justify-content:center;">
+              <svg viewBox="0 0 140 95" width="100%" height="80" style="overflow:visible;">
+                <line x1="15" y1="86" x2="125" y2="86" stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+                <line x1="42" y1="86" x2="42" y2="14" stroke="#94A3B8" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="42" cy="13" r="3" fill="#CBD5E1"/>
+                <path d="M42,58 A38,38 0 0,0 80,20" fill="none" stroke="#1E293B" stroke-width="1" stroke-dasharray="2,2"/>
+                <g id="rangeFlagPivot" transform="translate(42, 18)">
+                  <g id="rangeFlagAngleGroup" transform="rotate(55)">
+                    <g id="rangeFlagFlutterGroup" class="flag-flutter">
+                      <polygon points="0,-4 62,-2 62,3 0,5" fill="#EF4444" stroke="#FCA5A5" stroke-width="0.6"/>
+                      <polygon points="18,-3.4 30,-3 30,3.5 18,4" fill="#FFFFFF" opacity="0.85"/>
+                    </g>
+                  </g>
+                </g>
+                <text id="rangeFlagStateText" x="72" y="80" font-family="sans-serif" font-size="8.5" font-weight="700" fill="#94A3B8">Kerge tuul (~35°)</text>
+              </svg>
+            </div>
+
+            <div style="font-size:12px; color:#CBD5E1;">
+              <div style="display:flex; justify-content:space-between;">
+                <span>Tuuleparandus:</span>
+                <strong id="windCompClicksText" style="color:#FDE68A;">5 kl VASAKULE ↺</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:2px; font-size:11px; color:var(--text-muted);">
+                <span id="windDriftMmText">12.0 mm paremale</span>
+                <span id="windCrossComponentText">Külg: 1.5 m/s</span>
+              </div>
+              <!-- Hidden elements kept for JS compatibility -->
+              <span id="windDirDetailText" class="hidden"></span>
+              <span id="windSpeedDetailText" class="hidden"></span>
+              <span id="windVertDriftMmText" class="hidden"></span>
+              <span id="windHoldoverHint" class="hidden"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clean Wind Speed Slider (Removed Cluttered Tick Marks & Number Input) -->
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <label for="inputWindSpeedSlider" style="font-size:13px; font-weight:800;">
+              Tuule kiirus: <span id="windSpeedSliderValue" style="color:var(--sky); font-size:16px;">1.5 m/s</span>
+            </label>
+            <input type="number" id="inputWindSpeedNumber" value="1.5" class="hidden" />
+          </div>
+
+          <div class="slider-row">
+            <button type="button" onclick="stepWindSpeed(-0.5)" class="step-btn" title="Vähenda 0.5 m/s">−</button>
+            <div style="flex:1;">
+              <input type="range" id="inputWindSpeedSlider" min="0" max="12" step="0.1" value="1.5" oninput="setWindSpeed(this.value)" class="touch-slider" />
+            </div>
+            <button type="button" onclick="stepWindSpeed(0.5)" class="step-btn" title="Suurenda 0.5 m/s">+</button>
+          </div>
+
+          <!-- Presets -->
+          <div class="preset-grid-5">
+            <button type="button" id="btnPreset0" onclick="setWindSpeed(0)" class="preset-btn">0 m/s</button>
+            <button type="button" id="btnPreset15" onclick="setWindSpeed(1.5)" class="preset-btn active">1.5 m/s</button>
+            <button type="button" id="btnPreset30" onclick="setWindSpeed(3.0)" class="preset-btn">3.0 m/s</button>
+            <button type="button" id="btnPreset50" onclick="setWindSpeed(5.0)" class="preset-btn">5.0 m/s</button>
+            <button type="button" id="btnPreset70" onclick="setWindSpeed(7.0)" class="preset-btn">7.0+ m/s</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastBanner" class="toast-banner">
+    <span id="toastMessage">Teade</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ZERO-DEPENDENCY VANILLA JAVASCRIPT (COMPATIBLE WITH ALL BROWSERS & IOS)
+    // =========================================================================
+    var STORAGE_KEY = 'tt_biathlon_saved_series_v6';
+    var GITHUB_PAGES_BASE = 'https://marekfeldmann-ai.github.io/TT-tiim-m-rklaud/';
+    var MAX_SHOTS = 8;
+    var CALIBER_RADIUS_MM = 2.8;
+    var PRONE_RADIUS_MM = 22.5;
+    var STANDING_RADIUS_MM = 57.5;
+    var WIND_DRIFT_MM_PER_MS = 8.0;
+    var VERTICAL_WIND_FACTOR = 2.2;
+
+    var appState = {
+      position: 'prone',
+      showPaperRings: true,
+      targetZoomed: false,
+      moveShotsMode: false,
+      clickStepMm: 2.5,
+      windDir: 9,
+      lastNonZeroWindDir: 9,
+      windSpeed: 1.5,
+      activeShots: [],
+      comparisonSeries: null,
+      savedSeries: []
+    };
+
+    var pointerState = {
+      isDown: false,
+      draggingShotIndex: -1,
+      currentX: 0,
+      currentY: 0,
+      startClientX: 0,
+      startClientY: 0,
+      isScrollingGesture: false
+    };
+
+    var clockHourDescriptions = {
+      0: 'Tuulevaikus',
+      12: 'Vastutuul',
+      1: 'Eest paremalt',
+      2: 'Eest paremalt',
+      3: 'Paremalt',
+      4: 'Tagant paremalt',
+      5: 'Tagant paremalt',
+      6: 'Taganttuul',
+      7: 'Tagant vasakult',
+      8: 'Eest vasakult',
+      9: 'Vasakult',
+      10: 'Eest vasakult',
+      11: 'Eest vasakult'
+    };
+
+    function hypot2D(dx, dy) {
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function pad2(n) {
+      return n < 10 ? '0' + n : String(n);
+    }
+
+    function formatEstonianDateTime(dateObj) {
+      var dd = pad2(dateObj.getDate());
+      var mm = pad2(dateObj.getMonth() + 1);
+      var yyyy = dateObj.getFullYear();
+      var hh = pad2(dateObj.getHours());
+      var min = pad2(dateObj.getMinutes());
+      var ss = pad2(dateObj.getSeconds());
+      return dd + '.' + mm + '.' + yyyy + ' ' + hh + ':' + min + ':' + ss;
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+      initWindClockDial();
+      loadSavedSeriesFromStorage();
+      checkUrlSharedSeries();
+      setupTargetInteractions();
+      syncWindSpeedInputs(appState.windSpeed);
+      syncQuickAthletePills();
+      updateWindDisplay();
+      renderAll();
+    });
+
+    function loadSavedSeriesFromStorage() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            appState.savedSeries = parsed;
+          }
+        }
+      } catch (e) {
+        appState.savedSeries = [];
+      }
+
+      if (!appState.savedSeries || appState.savedSeries.length === 0) {
+        appState.savedSeries = [
+          {
+            id: 'sample-1',
+            athlete: 'Tuuli Tomingas',
+            position: 'prone',
+            timestamp: '15.11.2026 10:15:22',
+            windDir: 9,
+            windSpeed: 1.5,
+            wind: '🚩 Kella 9 • 1.5 m/s',
+            notes: 'Lapua Polar Biathlon • Pealelaskmine 1. seeria',
+            shots: [
+              { x: -8.2, y: -6.4 },
+              { x: -11.5, y: -4.1 },
+              { x: -6.0, y: -9.2 },
+              { x: -9.4, y: -3.5 },
+              { x: -7.8, y: -7.0 }
+            ]
+          },
+          {
+            id: 'sample-2',
+            athlete: 'Hanna-Brita Kaasik',
+            position: 'standing',
+            timestamp: '15.11.2026 09:42:10',
+            windDir: 3,
+            windSpeed: 3.5,
+            wind: '🚩 Kella 3 • 3.5 m/s',
+            notes: 'Komplekstreening • Püsti kiirlaskmine',
+            shots: [
+              { x: 14.0, y: -18.5 },
+              { x: -22.4, y: 12.0 },
+              { x: 8.5, y: 24.2 },
+              { x: -11.0, y: -8.0 },
+              { x: 31.0, y: 5.5 }
+            ]
+          },
+          {
+            id: 'sample-3',
+            athlete: 'Karl Rasmus Tiislar',
+            position: 'prone',
+            timestamp: '14.11.2026 15:20:05',
+            windDir: 0,
+            windSpeed: 0.0,
+            wind: '🚩 Kella 0 • 0.0 m/s',
+            notes: 'Otepää • Kontrolltreening lamades',
+            shots: [
+              { x: 3.2, y: 4.1 },
+              { x: -2.5, y: 6.0 },
+              { x: 5.0, y: -1.8 },
+              { x: 1.4, y: 3.5 },
+              { x: -1.8, y: 2.0 }
+            ]
+          }
+        ];
+        persistSavedSeries();
+      }
+    }
+
+    function persistSavedSeries() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState.savedSeries));
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // WIND CLOCK & SLIDER
+    // =========================================================================
+    function initWindClockDial() {
+      var group = document.getElementById('clockHoursGroup');
+      if (!group) return;
+      group.innerHTML = '';
+
+      var radius = 73;
+      for (var h = 1; h <= 12; h++) {
+        (function (hour) {
+          var angleRad = ((hour * 30 - 90) * Math.PI) / 180;
+          var cx = Math.cos(angleRad) * radius;
+          var cy = Math.sin(angleRad) * radius;
+
+          var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.style.cursor = 'pointer';
+          var selectHour = function (e) {
+            if (e && e.preventDefault) e.preventDefault();
+            setWindDir(hour);
+          };
+          g.addEventListener('mousedown', selectHour);
+          g.addEventListener('touchstart', selectHour, { passive: false });
+
+          var hitZone = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          hitZone.setAttribute('cx', cx.toFixed(1));
+          hitZone.setAttribute('cy', cy.toFixed(1));
+          hitZone.setAttribute('r', '18');
+          hitZone.setAttribute('fill', 'transparent');
+
+          var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('id', 'clockHourBtn-' + hour);
+          circle.setAttribute('cx', cx.toFixed(1));
+          circle.setAttribute('cy', cy.toFixed(1));
+          circle.setAttribute('r', hour % 3 === 0 ? '14.5' : '12.5');
+          circle.setAttribute('fill', '#0F172A');
+          circle.setAttribute('stroke', '#334155');
+          circle.setAttribute('stroke-width', '1.8');
+
+          var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('id', 'clockHourTxt-' + hour);
+          text.setAttribute('x', cx.toFixed(1));
+          text.setAttribute('y', cy.toFixed(1));
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('dominant-baseline', 'central');
+          text.setAttribute('font-family', 'sans-serif');
+          text.setAttribute('font-weight', '800');
+          text.setAttribute('font-size', hour % 3 === 0 ? '11' : '9.5');
+          text.setAttribute('fill', '#CBD5E1');
+          text.setAttribute('pointer-events', 'none');
+          text.textContent = String(hour);
+
+          g.appendChild(hitZone);
+          g.appendChild(circle);
+          g.appendChild(text);
+          group.appendChild(g);
+        })(h);
+      }
+    }
+
+    function setWindDir(clockHour) {
+      var hour = Number(clockHour);
+      appState.windDir = hour;
+      if (hour > 0) {
+        appState.lastNonZeroWindDir = hour;
+      }
+      if (hour === 0) {
+        appState.windSpeed = 0;
+        syncWindSpeedInputs(0);
+      } else if (appState.windSpeed === 0) {
+        appState.windSpeed = 1.5;
+        syncWindSpeedInputs(1.5);
+      }
+      updateWindDisplay();
+    }
+
+    function stepWindSpeed(delta) {
+      var next = Math.max(0, Math.min(12, Math.round((appState.windSpeed + delta) * 10) / 10));
+      setWindSpeed(next);
+    }
+
+    function setWindSpeed(val) {
+      var speed = parseFloat(val);
+      if (isNaN(speed)) speed = 0;
+      speed = Math.max(0, Math.min(12, Math.round(speed * 10) / 10));
+      appState.windSpeed = speed;
+
+      if (speed > 0 && appState.windDir === 0) {
+        appState.windDir = appState.lastNonZeroWindDir || 9;
+      }
+
+      syncWindSpeedInputs(speed);
+      updateWindDisplay();
+    }
+
+    function syncWindSpeedInputs(speed) {
+      var slider = document.getElementById('inputWindSpeedSlider');
+      var numInput = document.getElementById('inputWindSpeedNumber');
+      var labelVal = document.getElementById('windSpeedSliderValue');
+
+      if (slider) {
+        slider.value = speed;
+        var pct = Math.min(100, Math.max(0, (speed / 12) * 100));
+        var activeColor = '#0072CE';
+        if (speed >= 6.0) activeColor = '#EF4444';
+        else if (speed >= 3.5) activeColor = '#F59E0B';
+        else if (speed >= 1.5) activeColor = '#0EA5E9';
+        slider.style.background = 'linear-gradient(90deg, ' + activeColor + ' 0%, ' + activeColor + ' ' + pct + '%, #1E293B ' + pct + '%, #1E293B 100%)';
+      }
+      if (numInput) numInput.value = speed.toFixed(1);
+      if (labelVal) labelVal.textContent = speed.toFixed(1) + ' m/s';
+
+      var presets = [
+        { id: 'btnPreset0', val: 0 },
+        { id: 'btnPreset15', val: 1.5 },
+        { id: 'btnPreset30', val: 3.0 },
+        { id: 'btnPreset50', val: 5.0 },
+        { id: 'btnPreset70', val: 7.0 }
+      ];
+      for (var i = 0; i < presets.length; i++) {
+        var p = presets[i];
+        var el = document.getElementById(p.id);
+        if (!el) continue;
+        var active = (p.val === 7.0 && speed >= 7.0) || (p.val < 7.0 && Math.abs(speed - p.val) < 0.05);
+        el.className = active ? 'preset-btn active' : 'preset-btn';
+      }
+    }
+
+    function computeWindDriftTelemetry(windDir, windSpeed, clickStepMm) {
+      if (windDir === 0 || windSpeed <= 0) {
+        return { isCalm: true, flowAngleDeg: 0, crossWindMs: 0, driftXmm: 0, driftYmm: 0, compClicks: 0 };
+      }
+      var fromAngleDeg = (windDir % 12) * 30;
+      var fromRad = (fromAngleDeg * Math.PI) / 180;
+      var crossFactor = -Math.sin(fromRad);
+      var headFactor = Math.cos(fromRad);
+      var crossWindMs = windSpeed * Math.abs(crossFactor);
+      var driftXmm = windSpeed * crossFactor * WIND_DRIFT_MM_PER_MS;
+      var driftYmm = windSpeed * headFactor * VERTICAL_WIND_FACTOR;
+      var compClicks = Math.round(Math.abs(driftXmm) / clickStepMm);
+      var flowAngleDeg = (fromAngleDeg + 180) % 360;
+
+      return {
+        isCalm: false,
+        flowAngleDeg: flowAngleDeg,
+        crossWindMs: crossWindMs,
+        driftXmm: driftXmm,
+        driftYmm: driftYmm,
+        compClicks: compClicks
+      };
+    }
+
+    function formatWindBadgeString(windDir, windSpeed) {
+      if (!windDir || windSpeed <= 0) {
+        return '🚩 Kella 0 • 0.0 m/s';
+      }
+      return '🚩 Kella ' + windDir + ' • ' + Number(windSpeed).toFixed(1) + ' m/s';
+    }
+
+    function updateWindDisplay() {
+      var dir = appState.windDir;
+      var speed = appState.windSpeed;
+      var isCalm = dir === 0 || speed <= 0;
+      var telemetry = computeWindDriftTelemetry(dir, speed, appState.clickStepMm);
+
+      for (var h = 1; h <= 12; h++) {
+        var btn = document.getElementById('clockHourBtn-' + h);
+        var txt = document.getElementById('clockHourTxt-' + h);
+        if (!btn || !txt) continue;
+        if (!isCalm && h === dir) {
+          btn.setAttribute('fill', '#0072CE');
+          btn.setAttribute('stroke', '#38BDF8');
+          btn.setAttribute('stroke-width', '2.5');
+          txt.setAttribute('fill', '#FFFFFF');
+        } else {
+          btn.setAttribute('fill', '#0F172A');
+          btn.setAttribute('stroke', '#334155');
+          btn.setAttribute('stroke-width', '1.8');
+          txt.setAttribute('fill', '#CBD5E1');
+        }
+      }
+
+      var calmCircle = document.getElementById('clockCenterCalmCircle');
+      if (calmCircle) {
+        calmCircle.setAttribute('fill', isCalm ? '#0072CE' : '#0F172A');
+        calmCircle.setAttribute('stroke', isCalm ? '#38BDF8' : '#334155');
+      }
+
+      var clockVec = document.getElementById('clockWindVectorGroup');
+      if (clockVec) {
+        if (isCalm) {
+          clockVec.setAttribute('opacity', '0.15');
+        } else {
+          var svgRot = telemetry.flowAngleDeg - 90;
+          clockVec.setAttribute('opacity', '1');
+          clockVec.setAttribute('transform', 'rotate(' + svgRot + ')');
+        }
+      }
+
+      var liftRatio = Math.min(1, speed / 7.0);
+      var flagDegFromHoriz = Math.round(85 - liftRatio * 81);
+      var flagAngleGroup = document.getElementById('rangeFlagAngleGroup');
+      var flagFlutterGroup = document.getElementById('rangeFlagFlutterGroup');
+      var flagStateText = document.getElementById('rangeFlagStateText');
+      var flagPivot = document.getElementById('rangeFlagPivot');
+
+      var blowsLeft = !isCalm && (dir >= 1 && dir <= 5);
+      if (flagPivot) {
+        flagPivot.setAttribute('transform', blowsLeft ? 'translate(88, 18) scale(-1, 1)' : 'translate(42, 18) scale(1, 1)');
+      }
+      if (flagAngleGroup) {
+        flagAngleGroup.setAttribute('transform', 'rotate(' + flagDegFromHoriz + ')');
+      }
+      if (flagFlutterGroup) {
+        var dur = isCalm ? '3.0s' : Math.max(0.22, 0.95 - liftRatio * 0.65).toFixed(2) + 's';
+        flagFlutterGroup.style.setProperty('--flutter-dur', dur);
+      }
+      if (flagStateText) {
+        if (isCalm) flagStateText.textContent = 'Tuulevaikus (lipp ripub)';
+        else if (speed < 2.5) flagStateText.textContent = 'Kerge tuul (~' + (90 - flagDegFromHoriz) + '° tõus)';
+        else if (speed < 5.0) flagStateText.textContent = 'Keskmine tuul (~' + (90 - flagDegFromHoriz) + '° tõus)';
+        else flagStateText.textContent = 'Tugev tuul (horisontaalne!)';
+      }
+
+      var desc = isCalm ? 'Tuulevaikus' : (clockHourDescriptions[dir] || ('Kell ' + dir));
+      document.getElementById('windSummaryPill').textContent = formatWindBadgeString(isCalm ? 0 : dir, isCalm ? 0 : speed);
+      document.getElementById('windAngleDesc').textContent = desc;
+      document.getElementById('windDirDetailText').textContent = isCalm ? 'Kell 0 (Vaikus)' : ('Kell ' + dir + ' (' + desc + ')');
+      document.getElementById('windSpeedDetailText').textContent = (isCalm ? 0 : speed).toFixed(1) + ' m/s';
+
+      var crossEl = document.getElementById('windCrossComponentText');
+      var driftMmEl = document.getElementById('windDriftMmText');
+      var vertDriftEl = document.getElementById('windVertDriftMmText');
+      var compClicksEl = document.getElementById('windCompClicksText');
+      var holdoverEl = document.getElementById('windHoldoverHint');
+
+      if (isCalm) {
+        crossEl.textContent = 'Külg: 0.0 m/s';
+        driftMmEl.textContent = '0.0 mm (Triiv puudub)';
+        vertDriftEl.textContent = 'Kõrgustriiv: 0.0 mm';
+        compClicksEl.textContent = '0 klikki (Parandust pole)';
+        holdoverEl.textContent = 'Sihi otse keskele';
+      } else {
+        crossEl.textContent = 'Külg: ' + telemetry.crossWindMs.toFixed(1) + ' m/s';
+        if (Math.abs(telemetry.driftXmm) < 0.8) {
+          driftMmEl.textContent = '0.0 mm (Piki tiiru)';
+        } else {
+          var driftDir = telemetry.driftXmm > 0 ? 'paremale →' : '← vasakule';
+          driftMmEl.textContent = Math.abs(telemetry.driftXmm).toFixed(1) + ' mm ' + driftDir;
+        }
+        var vertDir = telemetry.driftYmm >= 0 ? 'alla ↓' : 'üles ↑';
+        vertDriftEl.textContent = 'Kõrgustriiv: ' + Math.abs(telemetry.driftYmm).toFixed(1) + ' mm ' + vertDir;
+
+        if (telemetry.compClicks === 0) {
+          compClicksEl.textContent = '0 klikki (Paranduseta)';
+          holdoverEl.textContent = 'Tuul kella ' + dir + ' suunast';
+        } else {
+          var clickDirText = telemetry.driftXmm > 0 ? 'VASAKULE ↺' : 'PAREMALE ↻';
+          compClicksEl.textContent = telemetry.compClicks + ' klikki ' + clickDirText;
+          holdoverEl.textContent = 'Või sihi kella ' + dir + ' suunas';
+        }
+      }
+
+      var arrowEl = document.getElementById('targetWindArrow');
+      var clockBadgeEl = document.getElementById('targetWindClockBadge');
+      var labelEl = document.getElementById('targetWindLabel');
+      var svgArrow = document.getElementById('svgWindVectorArrow');
+      var svgLine1 = document.getElementById('svgWindBadgeLine1');
+      var svgLine2 = document.getElementById('svgWindBadgeLine2');
+
+      if (isCalm) {
+        arrowEl.style.transform = 'rotate(0deg)';
+        arrowEl.style.opacity = '0.35';
+        clockBadgeEl.textContent = 'Kell 0';
+        labelEl.textContent = '0.0 m/s • Vaikus';
+        if (svgArrow) svgArrow.setAttribute('transform', 'rotate(0)');
+        if (svgLine1) svgLine1.textContent = 'TUUL: KELL 0';
+        if (svgLine2) svgLine2.textContent = '0.0 m/s (Vaikus)';
+      } else {
+        arrowEl.style.transform = 'rotate(' + telemetry.flowAngleDeg + 'deg)';
+        arrowEl.style.opacity = '1';
+        clockBadgeEl.textContent = 'Kell ' + dir;
+        labelEl.textContent = speed.toFixed(1) + ' m/s • ' + desc;
+        if (svgArrow) svgArrow.setAttribute('transform', 'rotate(' + telemetry.flowAngleDeg + ')');
+        if (svgLine1) svgLine1.textContent = 'TUUL: KELL ' + dir;
+        if (svgLine2) svgLine2.textContent = speed.toFixed(1) + ' m/s (' + desc + ')';
+      }
+    }
+
+    // =========================================================================
+    // TOUCH & MOUSE TARGET INTERACTIONS (WORKS ON IPHONE SAFARI & DESKTOP)
+    // =========================================================================
+    function toggleMoveShotsMode() {
+      appState.moveShotsMode = !appState.moveShotsMode;
+      var btn = document.getElementById('btnToggleMoveMode');
+      var label = document.getElementById('moveShotsModeLabel');
+      var hint = document.getElementById('targetBottomModeHint');
+      var activeLayer = document.getElementById('activeShotsLayer');
+      var svg = document.getElementById('biathlonSvg');
+
+      if (appState.moveShotsMode) {
+        btn.className = 'move-toggle-btn active';
+        label.textContent = 'Liiguta laske: SEES';
+        if (hint) hint.textContent = 'Lohistamise režiim: puuduta ja lohista olemasolevat lasku';
+        if (activeLayer) activeLayer.setAttribute('pointer-events', 'auto');
+        if (svg) svg.className.baseVal = 'touch-none-surface';
+        showToast('✋ Laskude liigutamine SEES — lohista laske märklaual');
+      } else {
+        btn.className = 'move-toggle-btn';
+        label.textContent = 'Liiguta laske: VÄLJAS';
+        if (hint) hint.textContent = 'Puuduta lasu märkimiseks (kattuvad lasud lubatud • max 8)';
+        if (activeLayer) activeLayer.setAttribute('pointer-events', 'none');
+        if (svg) svg.className.baseVal = 'touch-pan-surface';
+        showToast('🎯 Märkimise režiim — kerimine ei märgi juhuslikult lasku!');
+      }
+    }
+
+    function toggleTargetZoom() {
+      appState.targetZoomed = !appState.targetZoomed;
+      var svg = document.getElementById('biathlonSvg');
+      var zoomText = document.getElementById('zoomBtnText');
+      var badge = document.getElementById('svgEmbeddedWindBadge');
+
+      if (appState.targetZoomed) {
+        svg.setAttribute('viewBox', '-60 -60 120 120');
+        zoomText.textContent = 'Suum: 2x';
+        if (badge) badge.setAttribute('display', 'none');
+        showToast('2x täpsussuum sees');
+      } else {
+        svg.setAttribute('viewBox', '-105 -105 210 210');
+        zoomText.textContent = 'Suum: 1x';
+        if (badge) badge.removeAttribute('display');
+      }
+    }
+
+    function clientToSvgCoords(svg, clientX, clientY) {
+      var rect = svg.getBoundingClientRect();
+      var span = appState.targetZoomed ? 120 : 210;
+      var minCoord = appState.targetZoomed ? -60 : -105;
+      var normX = (clientX - rect.left) / (rect.width || 1);
+      var normY = (clientY - rect.top) / (rect.height || 1);
+      var rawX = minCoord + normX * span;
+      var rawY = minCoord + normY * span;
+      var limit = appState.targetZoomed ? 56 : 95;
+      var x = Math.max(-limit, Math.min(limit, Number(rawX.toFixed(1))));
+      var y = Math.max(-limit, Math.min(limit, Number(rawY.toFixed(1))));
+      return { x: x, y: y };
+    }
+
+    function updateTouchPreview(x, y, shotNumber) {
+      var layer = document.getElementById('touchPreviewLayer');
+      var banner = document.getElementById('touchLiveBanner');
+      var bannerText = document.getElementById('touchLiveText');
+      var calloutText = document.getElementById('touchPreviewCalloutText');
+      if (!layer) return;
+
+      layer.classList.remove('hidden');
+      layer.setAttribute('transform', 'translate(' + x + ', ' + y + ')');
+
+      var hit = isShotHit({ x: x, y: y }, appState.position);
+      var statusWord = hit ? 'TABAMUS' : 'MÖÖDA';
+      if (calloutText) {
+        calloutText.textContent = '#' + shotNumber + ' ' + statusWord;
+        calloutText.setAttribute('fill', hit ? '#4ADE80' : '#FCA5A5');
+      }
+      if (banner && bannerText) {
+        banner.classList.add('visible');
+        bannerText.textContent = 'Lask #' + shotNumber + ': ' + statusWord + ' (' + hypot2D(x, y).toFixed(1) + ' mm tsentrist)';
+      }
+    }
+
+    function hideTouchPreview() {
+      var layer = document.getElementById('touchPreviewLayer');
+      var banner = document.getElementById('touchLiveBanner');
+      if (layer) layer.classList.add('hidden');
+      if (banner) banner.classList.remove('visible');
+    }
+
+    function setupTargetInteractions() {
+      var svg = document.getElementById('biathlonSvg');
+      if (!svg) return;
+
+      var SCROLL_SLOP_PX = 10; // Movement > 10px in normal mode is treated as page scrolling on Android/iOS
+
+      function handleStart(clientX, clientY, isTouch) {
+        var coords = clientToSvgCoords(svg, clientX, clientY);
+        var hitExistingIdx = -1;
+
+        if (appState.moveShotsMode) {
+          var bestDist = 9.5;
+          for (var i = appState.activeShots.length - 1; i >= 0; i--) {
+            var s = appState.activeShots[i];
+            var d = hypot2D(s.x - coords.x, s.y - coords.y);
+            if (d <= bestDist) {
+              bestDist = d;
+              hitExistingIdx = i;
+            }
+          }
+          if (hitExistingIdx === -1) {
+            showToast('Puuduta olemasolevat lasku selle liigutamiseks või lülita "Liiguta laske" välja!');
+            return;
+          }
+        } else {
+          if (appState.activeShots.length >= MAX_SHOTS) {
+            if (!isTouch) {
+              showToast('Maksimaalselt 8 lasku seerias! Vajuta "Uus seeria" või "Salvesta".');
+            }
+            return;
+          }
+        }
+
+        pointerState.isDown = true;
+        pointerState.isScrollingGesture = false;
+        pointerState.draggingShotIndex = hitExistingIdx;
+        pointerState.startClientX = clientX;
+        pointerState.startClientY = clientY;
+        pointerState.currentX = coords.x;
+        pointerState.currentY = coords.y;
+
+        if (!isTouch || appState.moveShotsMode) {
+          var shotNum = hitExistingIdx >= 0 ? (hitExistingIdx + 1) : (appState.activeShots.length + 1);
+          updateTouchPreview(coords.x, coords.y, shotNum);
+        }
+      }
+
+      function handleMove(clientX, clientY, isTouch) {
+        if (!pointerState.isDown) return;
+
+        // On touchscreen in normal plotting mode: if finger moves > 10px, cancel shot placement so Android scrolls cleanly
+        if (isTouch && !appState.moveShotsMode) {
+          var movedPx = hypot2D(clientX - pointerState.startClientX, clientY - pointerState.startClientY);
+          if (movedPx > SCROLL_SLOP_PX) {
+            pointerState.isScrollingGesture = true;
+            pointerState.isDown = false;
+            hideTouchPreview();
+            return;
+          }
+        }
+
+        var coords = clientToSvgCoords(svg, clientX, clientY);
+        pointerState.currentX = coords.x;
+        pointerState.currentY = coords.y;
+
+        if (pointerState.draggingShotIndex >= 0) {
+          appState.activeShots[pointerState.draggingShotIndex] = { x: coords.x, y: coords.y };
+          renderTarget();
+          renderAnalytics();
+        }
+
+        var shotNum = pointerState.draggingShotIndex >= 0
+          ? (pointerState.draggingShotIndex + 1)
+          : (appState.activeShots.length + 1);
+        updateTouchPreview(coords.x, coords.y, shotNum);
+      }
+
+      function handleEnd() {
+        if (!pointerState.isDown || pointerState.isScrollingGesture) {
+          pointerState.isDown = false;
+          pointerState.isScrollingGesture = false;
+          pointerState.draggingShotIndex = -1;
+          hideTouchPreview();
+          return;
+        }
+        if (pointerState.draggingShotIndex === -1 && appState.activeShots.length < MAX_SHOTS) {
+          appState.activeShots.push({
+            x: pointerState.currentX,
+            y: pointerState.currentY
+          });
+        }
+        pointerState.isDown = false;
+        pointerState.isScrollingGesture = false;
+        pointerState.draggingShotIndex = -1;
+        hideTouchPreview();
+        renderAll();
+      }
+
+      // Touch Events (Android / iOS)
+      svg.addEventListener('touchstart', function (evt) {
+        if (evt.touches.length > 1) {
+          pointerState.isDown = false;
+          pointerState.isScrollingGesture = true;
+          hideTouchPreview();
+          return;
+        }
+        // Only lock browser scroll when explicitly dragging shots in Move Mode
+        if (appState.moveShotsMode) {
+          evt.preventDefault();
+        }
+        var t = evt.touches[0];
+        handleStart(t.clientX, t.clientY, true);
+      }, { passive: false });
+
+      svg.addEventListener('touchmove', function (evt) {
+        if (!pointerState.isDown || evt.touches.length === 0) return;
+        if (appState.moveShotsMode) {
+          evt.preventDefault();
+        }
+        var t = evt.touches[0];
+        handleMove(t.clientX, t.clientY, true);
+      }, { passive: false });
+
+      svg.addEventListener('touchend', function (evt) {
+        if (pointerState.isDown && !pointerState.isScrollingGesture) {
+          evt.preventDefault(); // Prevents synthetic mouse click after valid tap
+          handleEnd();
+        } else {
+          pointerState.isDown = false;
+          pointerState.isScrollingGesture = false;
+          hideTouchPreview();
+        }
+      }, { passive: false });
+
+      svg.addEventListener('touchcancel', function () {
+        pointerState.isDown = false;
+        pointerState.isScrollingGesture = false;
+        pointerState.draggingShotIndex = -1;
+        hideTouchPreview();
+        renderAll();
+      });
+
+      // Mouse Events (Desktop / Laptop)
+      svg.addEventListener('mousedown', function (evt) {
+        if (evt.button !== 0) return;
+        evt.preventDefault();
+        handleStart(evt.clientX, evt.clientY, false);
+      });
+
+      window.addEventListener('mousemove', function (evt) {
+        if (!pointerState.isDown) return;
+        handleMove(evt.clientX, evt.clientY, false);
+      });
+
+      window.addEventListener('mouseup', function () {
+        if (!pointerState.isDown) return;
+        handleEnd();
+      });
+    }
+
+    function isShotHit(shot, positionMode) {
+      var distFromCenter = hypot2D(shot.x, shot.y);
+      var zoneRadius = positionMode === 'prone' ? PRONE_RADIUS_MM : STANDING_RADIUS_MM;
+      return distFromCenter <= (zoneRadius + CALIBER_RADIUS_MM * 0.65);
+    }
+
+    function computeAnalytics(shots, positionMode) {
+      var count = shots.length;
+      if (count === 0) {
+        return { count: 0, hits: 0, mpiX: 0, mpiY: 0, mpiDist: 0, maxSpread: 0, boundingRadius: 0 };
+      }
+
+      var sumX = 0, sumY = 0, hits = 0;
+      for (var i = 0; i < count; i++) {
+        var s = shots[i];
+        sumX += s.x;
+        sumY += s.y;
+        if (isShotHit(s, positionMode)) hits++;
+      }
+
+      var mpiX = sumX / count;
+      var mpiY = sumY / count;
+      var mpiDist = hypot2D(mpiX, mpiY);
+
+      var maxSpread = 0;
+      for (var a = 0; a < count; a++) {
+        for (var b = a + 1; b < count; b++) {
+          var d = hypot2D(shots[a].x - shots[b].x, shots[a].y - shots[b].y);
+          if (d > maxSpread) maxSpread = d;
+        }
+      }
+
+      var boundingRadius = 0;
+      for (var k = 0; k < count; k++) {
+        var r = hypot2D(shots[k].x - mpiX, shots[k].y - mpiY);
+        if (r > boundingRadius) boundingRadius = r;
+      }
+
+      return { count: count, hits: hits, mpiX: mpiX, mpiY: mpiY, mpiDist: mpiDist, maxSpread: maxSpread, boundingRadius: boundingRadius };
+    }
+
+    // =========================================================================
+    // UI ACTIONS & CONTROLS
+    // =========================================================================
+    function startNewSeries() {
+      appState.activeShots = [];
+      appState.comparisonSeries = null;
+      var notesEl = document.getElementById('inputNotes');
+      if (notesEl) notesEl.value = '';
+      renderAll();
+      showToast('➕ Uus seeria alustatud — märklaud on puhas!');
+    }
+
+    function setPositionMode(mode) {
+      appState.position = mode;
+      var btnProne = document.getElementById('btnPosProne');
+      var btnStanding = document.getElementById('btnPosStanding');
+      var hint = document.getElementById('activeZoneHint');
+
+      if (mode === 'prone') {
+        btnProne.className = 'mode-btn active';
+        btnStanding.className = 'mode-btn';
+        hint.textContent = 'Lamades: Ø 45 mm';
+      } else {
+        btnStanding.className = 'mode-btn active';
+        btnProne.className = 'mode-btn';
+        hint.textContent = 'Püsti: Ø 115 mm';
+      }
+      renderAll();
+    }
+
+    function togglePaperRings() {
+      appState.showPaperRings = !appState.showPaperRings;
+      document.getElementById('paperRingsLabel').textContent =
+        appState.showPaperRings ? 'Paber: SEES' : 'Paber: VÄLJAS';
+      renderTarget();
+    }
+
+    function deleteSelectedDropdownSeries() {
+      var dropdown = document.getElementById('savedSeriesDropdown');
+      if (!dropdown || !dropdown.value) {
+        showToast('Vali nimekirjast seeria, mida kustutada!');
+        return;
+      }
+      deleteSavedSeries(dropdown.value);
+    }
+
+    function setClickStep(stepMm) {
+      appState.clickStepMm = stepMm;
+      var btn25 = document.getElementById('btnClick25');
+      var btn30 = document.getElementById('btnClick30');
+      if (stepMm === 2.5) {
+        btn25.style.background = '#0072CE';
+        btn25.style.color = '#FFFFFF';
+        btn30.style.background = 'transparent';
+        btn30.style.color = '#94A3B8';
+      } else {
+        btn30.style.background = '#0072CE';
+        btn30.style.color = '#FFFFFF';
+        btn25.style.background = 'transparent';
+        btn25.style.color = '#94A3B8';
+      }
+      updateWindDisplay();
+      renderAnalytics();
+    }
+
+    function undoLastShot() {
+      if (appState.activeShots.length === 0) return;
+      var removedNum = appState.activeShots.length;
+      appState.activeShots.pop();
+      renderAll();
+      showToast('↩ Eemaldatud lask #' + removedNum);
+    }
+
+    function removeShotByIndex(idx) {
+      appState.activeShots.splice(idx, 1);
+      renderAll();
+    }
+
+    // Step-by-step cleaning of the athlete's series on the target until completely clear
+    function clearStepByStep() {
+      // 1. If active (pink) shots exist, remove them one by one from last to first
+      if (appState.activeShots.length > 0) {
+        var removedShotNum = appState.activeShots.length;
+        appState.activeShots.pop();
+        var remainingActive = appState.activeShots.length;
+        var remainingComp = (appState.comparisonSeries && appState.comparisonSeries.shots)
+          ? appState.comparisonSeries.shots.length
+          : 0;
+        renderAll();
+
+        if (remainingActive > 0) {
+          showToast('🗑 Puhastatud lask #' + removedShotNum + ' (jäänud ' + remainingActive + ' aktiivset lasku)');
+        } else if (remainingComp > 0) {
+          showToast('🗑 Aktiivne seeria puhas! Vajuta veel ' + remainingComp + 'x võrdluslaskude eemaldamiseks.');
+        } else {
+          showToast('✨ Märklaud on täielikult puhas!');
+        }
+        return;
+      }
+
+      // 2. Once active shots are 0, if a yellow comparison series is on the target, remove its shots step-by-step
+      if (appState.comparisonSeries && appState.comparisonSeries.shots && appState.comparisonSeries.shots.length > 0) {
+        var compShotNum = appState.comparisonSeries.shots.length;
+        appState.comparisonSeries.shots.pop();
+        var leftComp = appState.comparisonSeries.shots.length;
+
+        if (leftComp === 0) {
+          appState.comparisonSeries = null;
+          renderAll();
+          showToast('✨ Kõik seeriad puhastatud — märklaud on puhas!');
+        } else {
+          renderAll();
+          showToast('🗑 Eemaldatud võrdluslask #' + compShotNum + ' (jäänud ' + leftComp + ' lasku)');
+        }
+        return;
+      }
+
+      showToast('Märklaud on juba puhas!');
+    }
+
+    function selectQuickAthlete(athleteName) {
+      var selectEl = document.getElementById('selectAthlete');
+      if (selectEl) {
+        selectEl.value = athleteName;
+      }
+      handleAthleteChange();
+      showToast('🎯 Laskja: ' + athleteName);
+    }
+
+    function syncQuickAthletePills() {
+      var current = document.getElementById('selectAthlete').value;
+      var btns = document.querySelectorAll('#quickAthleteBar .athlete-pill-btn');
+      for (var i = 0; i < btns.length; i++) {
+        var b = btns[i];
+        if (b.getAttribute('data-athlete') === current) {
+          b.className = 'athlete-pill-btn active';
+        } else {
+          b.className = 'athlete-pill-btn';
+        }
+      }
+    }
+
+    function handleAthleteChange() {
+      var sel = document.getElementById('selectAthlete').value;
+      var customWrap = document.getElementById('customAthleteWrapper');
+      if (sel === 'Muu') {
+        customWrap.classList.remove('hidden');
+      } else {
+        customWrap.classList.add('hidden');
+      }
+      syncQuickAthletePills();
+    }
+
+    function getSelectedAthleteName() {
+      var sel = document.getElementById('selectAthlete').value;
+      if (sel === 'Muu') {
+        var custom = document.getElementById('inputCustomAthlete').value.trim();
+        return custom || 'Tuuli Tomingas';
+      }
+      return sel;
+    }
+
+    // =========================================================================
+    // RENDERING TARGET & ANALYTICS
+    // =========================================================================
+    function renderAll() {
+      renderTarget();
+      renderAnalytics();
+      renderShotPills();
+      renderSavedSeriesList();
+
+      var activeCount = appState.activeShots.length;
+      var compCount = (appState.comparisonSeries && appState.comparisonSeries.shots)
+        ? appState.comparisonSeries.shots.length
+        : 0;
+      var totalOnTarget = activeCount + compCount;
+
+      document.getElementById('btnUndo').disabled = activeCount === 0;
+      document.getElementById('btnClear').disabled = totalOnTarget === 0;
+      document.getElementById('activeShotCountLabel').textContent = String(activeCount);
+
+      var btnClearLabel = document.getElementById('btnClearLabel');
+      if (btnClearLabel) {
+        if (activeCount > 0) {
+          btnClearLabel.textContent = 'Kustuta (#' + activeCount + ')';
+        } else if (compCount > 0) {
+          btnClearLabel.textContent = 'Kustuta (V#' + compCount + ')';
+        } else {
+          btnClearLabel.textContent = 'Kustuta lask';
+        }
+      }
+    }
+
+    function renderTarget() {
+      var ringGroups = ['outerPaperRingsGroup', 'innerPaperRingsGroup', 'centerPaperRingsGroup', 'paperRingNumbers'];
+      for (var r = 0; r < ringGroups.length; r++) {
+        var el = document.getElementById(ringGroups[r]);
+        if (el) el.style.display = appState.showPaperRings ? 'block' : 'none';
+      }
+
+      var proneCircle = document.getElementById('proneZoneCircle');
+      var standingCircle = document.getElementById('standingZoneCircle');
+
+      if (appState.position === 'prone') {
+        proneCircle.setAttribute('stroke', '#38BDF8');
+        proneCircle.setAttribute('stroke-width', '1.3');
+        standingCircle.setAttribute('stroke', '#1E293B');
+        standingCircle.setAttribute('stroke-width', '0.8');
+      } else {
+        proneCircle.setAttribute('stroke', '#475569');
+        proneCircle.setAttribute('stroke-width', '0.6');
+        standingCircle.setAttribute('stroke', '#38BDF8');
+        standingCircle.setAttribute('stroke-width', '1.5');
+      }
+
+      var compLayer = document.getElementById('comparisonShotsLayer');
+      compLayer.innerHTML = '';
+      var compLegend = document.getElementById('compareLegendPill');
+
+      if (appState.comparisonSeries && appState.comparisonSeries.shots) {
+        compLegend.classList.add('visible');
+        document.getElementById('compareSeriesTitle').textContent =
+          appState.comparisonSeries.timestamp + ' • ' + appState.comparisonSeries.athlete;
+
+        renderShotsWithOverlapHandling(compLayer, appState.comparisonSeries.shots, '#FFD700', '#090D16', true);
+      } else {
+        compLegend.classList.remove('visible');
+      }
+
+      var activeLayer = document.getElementById('activeShotsLayer');
+      activeLayer.innerHTML = '';
+      activeLayer.setAttribute('pointer-events', appState.moveShotsMode ? 'auto' : 'none');
+      renderShotsWithOverlapHandling(activeLayer, appState.activeShots, '#FF2A85', '#FFFFFF', false);
+
+      var mpiLayer = document.getElementById('mpiLayer');
+      mpiLayer.innerHTML = '';
+      var showMPI = document.getElementById('chkShowMPI').checked;
+
+      if (showMPI && appState.activeShots.length >= 2) {
+        var stats = computeAnalytics(appState.activeShots, appState.position);
+
+        var groupCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        groupCircle.setAttribute('cx', stats.mpiX);
+        groupCircle.setAttribute('cy', stats.mpiY);
+        groupCircle.setAttribute('r', Math.max(4, stats.boundingRadius + CALIBER_RADIUS_MM));
+        groupCircle.setAttribute('fill', 'rgba(255, 42, 133, 0.08)');
+        groupCircle.setAttribute('stroke', '#FF2A85');
+        groupCircle.setAttribute('stroke-width', '0.7');
+        groupCircle.setAttribute('stroke-dasharray', '2.5,2');
+        mpiLayer.appendChild(groupCircle);
+
+        var crossSize = 4.5;
+        var hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        hLine.setAttribute('x1', stats.mpiX - crossSize);
+        hLine.setAttribute('y1', stats.mpiY);
+        hLine.setAttribute('x2', stats.mpiX + crossSize);
+        hLine.setAttribute('y2', stats.mpiY);
+        hLine.setAttribute('stroke', '#38BDF8');
+        hLine.setAttribute('stroke-width', '1.1');
+
+        var vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        vLine.setAttribute('x1', stats.mpiX);
+        vLine.setAttribute('y1', stats.mpiY - crossSize);
+        vLine.setAttribute('x2', stats.mpiX);
+        vLine.setAttribute('y2', stats.mpiY + crossSize);
+        vLine.setAttribute('stroke', '#38BDF8');
+        vLine.setAttribute('stroke-width', '1.1');
+
+        var centerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        centerDot.setAttribute('cx', stats.mpiX);
+        centerDot.setAttribute('cy', stats.mpiY);
+        centerDot.setAttribute('r', '1.4');
+        centerDot.setAttribute('fill', '#38BDF8');
+
+        mpiLayer.appendChild(hLine);
+        mpiLayer.appendChild(vLine);
+        mpiLayer.appendChild(centerDot);
+      }
+    }
+
+    // Renders shots at their exact physical coordinates for accurate MPI/Spread math,
+    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 4.5 mm).
+    function renderShotsWithOverlapHandling(layerEl, shots, fillHex, textHex, isComparison) {
+      var OVERLAP_THRESHOLD_MM = 4.5;
+      var clusters = [];
+
+      // 1. Draw the physical bullet holes first (at exact x, y)
+      for (var i = 0; i < shots.length; i++) {
+        var s = shots[i];
+        var assignedCluster = null;
+        for (var c = 0; c < clusters.length; c++) {
+          if (hypot2D(s.x - clusters[c].anchorX, s.y - clusters[c].anchorY) < OVERLAP_THRESHOLD_MM) {
+            assignedCluster = clusters[c];
+            break;
+          }
+        }
+        var overlapRank = 0;
+        if (assignedCluster) {
+          overlapRank = assignedCluster.members.length;
+          assignedCluster.members.push({ index: i, number: i + 1, x: s.x, y: s.y });
+        } else {
+          assignedCluster = {
+            anchorX: s.x,
+            anchorY: s.y,
+            members: [{ index: i, number: i + 1, x: s.x, y: s.y }]
+          };
+          clusters.push(assignedCluster);
+        }
+
+        var holeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        if (isComparison) holeGroup.setAttribute('opacity', '0.92');
+
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', s.x);
+        circle.setAttribute('cy', s.y);
+        circle.setAttribute('r', '6.2');
+        circle.setAttribute('fill', fillHex);
+        circle.setAttribute('stroke', isComparison ? '#090D16' : '#FFFFFF');
+        circle.setAttribute('stroke-width', overlapRank > 0 ? '1.5' : '1.1');
+        holeGroup.appendChild(circle);
+
+        // If overlapping, add a subtle concentric inner ring so stacked impacts are unmistakable
+        if (overlapRank > 0) {
+          var innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          innerRing.setAttribute('cx', s.x);
+          innerRing.setAttribute('cy', s.y);
+          innerRing.setAttribute('r', String(Math.max(2.4, 5.0 - overlapRank * 1.1)));
+          innerRing.setAttribute('fill', 'none');
+          innerRing.setAttribute('stroke', '#FFFFFF');
+          innerRing.setAttribute('stroke-width', '0.7');
+          innerRing.setAttribute('stroke-dasharray', '1.5,1.2');
+          holeGroup.appendChild(innerRing);
+        }
+
+        layerEl.appendChild(holeGroup);
+      }
+
+      // 2. Draw readable labels: single centered number for isolated shots,
+      // or fanned satellite number badges + combined "#1,#2" callout pill for overlapping shots
+      for (var k = 0; k < clusters.length; k++) {
+        var cluster = clusters[k];
+        if (cluster.members.length === 1) {
+          var single = cluster.members[0];
+          var txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          txt.setAttribute('x', single.x);
+          txt.setAttribute('y', single.y);
+          txt.setAttribute('text-anchor', 'middle');
+          txt.setAttribute('dominant-baseline', 'central');
+          txt.setAttribute('fill', textHex);
+          txt.setAttribute('font-family', 'sans-serif');
+          txt.setAttribute('font-weight', '800');
+          txt.setAttribute('font-size', '6.5');
+          txt.textContent = String(single.number);
+          layerEl.appendChild(txt);
+        } else {
+          // Multiple overlapping shots in this cluster (< 4.5 mm apart)
+          var numsList = [];
+          for (var m = 0; m < cluster.members.length; m++) {
+            numsList.push('#' + cluster.members[m].number);
+          }
+          var joinedNums = numsList.join(', ');
+
+          // Draw primary number on center hole
+          var centerTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          centerTxt.setAttribute('x', cluster.anchorX);
+          centerTxt.setAttribute('y', cluster.anchorY);
+          centerTxt.setAttribute('text-anchor', 'middle');
+          centerTxt.setAttribute('dominant-baseline', 'central');
+          centerTxt.setAttribute('fill', textHex);
+          centerTxt.setAttribute('font-family', 'sans-serif');
+          centerTxt.setAttribute('font-weight', '800');
+          centerTxt.setAttribute('font-size', '5.8');
+          centerTxt.textContent = cluster.members.map(function (it) { return it.number; }).join('+');
+          layerEl.appendChild(centerTxt);
+
+          // Draw high-contrast stacked callout pill next to the overlapping group
+          var dirX = cluster.anchorX >= 0 ? -1 : 1;
+          var dirY = cluster.anchorY >= 0 ? -1 : 1;
+          var badgeX = cluster.anchorX + dirX * 13.5;
+          var badgeY = cluster.anchorY + dirY * 11.5;
+          var badgeW = Math.max(18, joinedNums.length * 3.4 + 6);
+
+          var leader = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          leader.setAttribute('x1', cluster.anchorX);
+          leader.setAttribute('y1', cluster.anchorY);
+          leader.setAttribute('x2', badgeX);
+          leader.setAttribute('y2', badgeY);
+          leader.setAttribute('stroke', '#FFFFFF');
+          leader.setAttribute('stroke-width', '0.9');
+          layerEl.appendChild(leader);
+
+          var pillRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          pillRect.setAttribute('x', badgeX - badgeW / 2);
+          pillRect.setAttribute('y', badgeY - 4.8);
+          pillRect.setAttribute('width', badgeW);
+          pillRect.setAttribute('height', '9.6');
+          pillRect.setAttribute('rx', '3.2');
+          pillRect.setAttribute('fill', '#090D16');
+          pillRect.setAttribute('stroke', isComparison ? '#FFD700' : '#FF2A85');
+          pillRect.setAttribute('stroke-width', '1.1');
+          layerEl.appendChild(pillRect);
+
+          var pillTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          pillTxt.setAttribute('x', badgeX);
+          pillTxt.setAttribute('y', badgeY);
+          pillTxt.setAttribute('text-anchor', 'middle');
+          pillTxt.setAttribute('dominant-baseline', 'central');
+          pillTxt.setAttribute('fill', isComparison ? '#FFD700' : '#FFFFFF');
+          pillTxt.setAttribute('font-family', 'sans-serif');
+          pillTxt.setAttribute('font-weight', '800');
+          pillTxt.setAttribute('font-size', '4.8');
+          pillTxt.textContent = joinedNums;
+          layerEl.appendChild(pillTxt);
+        }
+      }
+    }
+
+    function renderAnalytics() {
+      var stats = computeAnalytics(appState.activeShots, appState.position);
+
+      var hitStr = stats.hits + ' / ' + stats.count;
+      document.getElementById('targetHitBadge').textContent = hitStr;
+      document.getElementById('metricHits').textContent = hitStr;
+      document.getElementById('metricSpread').textContent = stats.maxSpread.toFixed(1) + ' mm';
+      document.getElementById('metricMpiDist').textContent = stats.mpiDist.toFixed(1) + ' mm';
+
+      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
+      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+
+      var hClicksEl = document.getElementById('diopterHorizClicks');
+      var hDirEl = document.getElementById('diopterHorizDir');
+      var hOffsetEl = document.getElementById('mpiOffsetXText');
+
+      var vClicksEl = document.getElementById('diopterVertClicks');
+      var vDirEl = document.getElementById('diopterVertDir');
+      var vOffsetEl = document.getElementById('mpiOffsetYText');
+
+      if (stats.count === 0) {
+        hClicksEl.textContent = '0';
+        hDirEl.textContent = 'KLIKKI';
+        hOffsetEl.textContent = 'Kõrvalekalle: 0.0 mm';
+        vClicksEl.textContent = '0';
+        vDirEl.textContent = 'KLIKKI';
+        vOffsetEl.textContent = 'Kõrvalekalle: 0.0 mm';
+        return;
+      }
+
+      hClicksEl.textContent = String(horizClicks);
+      hDirEl.textContent = horizClicks === 0 ? 'TSENTRIS' : (stats.mpiX > 0 ? 'VASAKULE ←' : 'PAREMALE →');
+      hOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiX).toFixed(1) + ' mm ' + (stats.mpiX >= 0 ? 'paremal' : 'vasakul');
+
+      vClicksEl.textContent = String(vertClicks);
+      vDirEl.textContent = vertClicks === 0 ? 'TSENTRIS' : (stats.mpiY > 0 ? 'ÜLES ↑' : 'ALLA ↓');
+      vOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiY).toFixed(1) + ' mm ' + (stats.mpiY >= 0 ? 'all' : 'üleval');
+    }
+
+    function renderShotPills() {
+      var container = document.getElementById('shotPillsContainer');
+      if (appState.activeShots.length === 0) {
+        container.innerHTML = '<span style="font-size:13px; color:#64748B; font-style:italic;">Ühtegi lasku pole veel märgitud. Puuduta märklauda!</span>';
+        return;
+      }
+
+      container.innerHTML = '';
+      for (var idx = 0; idx < appState.activeShots.length; idx++) {
+        (function (index) {
+          var shot = appState.activeShots[index];
+          var hit = isShotHit(shot, appState.position);
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.onclick = function () { removeShotByIndex(index); };
+          btn.className = hit ? 'shot-pill-btn hit' : 'shot-pill-btn';
+          btn.innerHTML =
+            '<span class="shot-pill-num">' + (index + 1) + '</span>' +
+            '<span>' + (hit ? 'Tabamus' : 'Mööda') + '</span>' +
+            '<span style="color:#94A3B8; margin-left:2px;">✕</span>';
+          container.appendChild(btn);
+        })(idx);
+      }
+    }
+
+    // =========================================================================
+    // SAVING, DROPDOWN POP-UP & COMPARING SERIES
+    // =========================================================================
+    function saveCurrentSeries() {
+      if (appState.activeShots.length === 0) {
+        showToast('Märgi vähemalt 1 lask enne salvestamist!');
+        return;
+      }
+
+      var timestamp = formatEstonianDateTime(new Date());
+      var isCalm = appState.windDir === 0 || appState.windSpeed <= 0;
+      var savedDir = isCalm ? 0 : appState.windDir;
+      var savedSpeed = isCalm ? 0.0 : appState.windSpeed;
+      var windBadge = formatWindBadgeString(savedDir, savedSpeed);
+      var notes = document.getElementById('inputNotes').value.trim() || 'Treeningseeria';
+
+      var newSeries = {
+        id: 'ser-' + Date.now(),
+        athlete: getSelectedAthleteName(),
+        position: appState.position,
+        timestamp: timestamp,
+        windDir: savedDir,
+        windSpeed: savedSpeed,
+        wind: windBadge,
+        notes: notes,
+        shots: JSON.parse(JSON.stringify(appState.activeShots))
+      };
+
+      appState.savedSeries.unshift(newSeries);
+      persistSavedSeries();
+      renderSavedSeriesList();
+      showToast('💾 Salvestatud: ' + newSeries.timestamp);
+    }
+
+    function popSelectedDropdownOnTarget(mode) {
+      var dropdown = document.getElementById('savedSeriesDropdown');
+      if (!dropdown || !dropdown.value) {
+        showToast('Vali nimekirjast salvestatud seeria!');
+        return;
+      }
+      var id = dropdown.value;
+      if (mode === 'active') {
+        loadSavedSeriesAsActive(id);
+      } else {
+        var found = findSeriesById(id);
+        if (found) {
+          appState.comparisonSeries = JSON.parse(JSON.stringify(found));
+          renderAll();
+          showToast('🎯 Kuvatud märklaual (Kollane): ' + found.timestamp);
+        }
+      }
+    }
+
+    function findSeriesById(id) {
+      for (var i = 0; i < appState.savedSeries.length; i++) {
+        if (appState.savedSeries[i].id === id) return appState.savedSeries[i];
+      }
+      return null;
+    }
+
+    function loadSavedSeriesAsActive(id) {
+      var found = findSeriesById(id);
+      if (!found) return;
+
+      appState.activeShots = JSON.parse(JSON.stringify(found.shots));
+      setPositionMode(found.position);
+      if (typeof found.windDir === 'number') appState.windDir = found.windDir;
+      if (typeof found.windSpeed === 'number') {
+        appState.windSpeed = found.windSpeed;
+        syncWindSpeedInputs(found.windSpeed);
+      }
+      updateWindDisplay();
+      document.getElementById('inputNotes').value = found.notes || '';
+      renderAll();
+      showToast('Laaditud aktiivseks (Roosa): ' + found.timestamp);
+    }
+
+    function toggleCompareSeries(id) {
+      if (appState.comparisonSeries && appState.comparisonSeries.id === id) {
+        appState.comparisonSeries = null;
+        showToast('Võrdlusseeria eemaldatud');
+      } else {
+        var found = findSeriesById(id);
+        if (found) {
+          appState.comparisonSeries = JSON.parse(JSON.stringify(found));
+          showToast('🎯 Võrdluseks valitud: ' + found.timestamp);
+        }
+      }
+      renderAll();
+    }
+
+    function clearComparison() {
+      appState.comparisonSeries = null;
+      renderAll();
+    }
+
+    function deleteSavedSeries(id) {
+      appState.savedSeries = appState.savedSeries.filter(function (s) { return s.id !== id; });
+      if (appState.comparisonSeries && appState.comparisonSeries.id === id) {
+        appState.comparisonSeries = null;
+      }
+      persistSavedSeries();
+      renderAll();
+      showToast('Seeria kustutatud');
+    }
+
+    function renderSavedSeriesList() {
+      var listEl = document.getElementById('savedSeriesList');
+      var dropdownEl = document.getElementById('savedSeriesDropdown');
+      var countBadge = document.getElementById('savedCountBadge');
+      countBadge.textContent = String(appState.savedSeries.length);
+
+      var previousDropdownVal = dropdownEl ? dropdownEl.value : '';
+
+      if (appState.savedSeries.length === 0) {
+        if (dropdownEl) {
+          dropdownEl.innerHTML = '<option value="">-- Salvestatud seeriaid pole --</option>';
+        }
+        listEl.innerHTML = '<div style="text-align:center; padding:18px; color:#64748B; font-size:13px;">Salvestatud seeriaid pole. Märgi lasud ja vajuta "Salvesta seeria".</div>';
+        return;
+      }
+
+      if (dropdownEl) {
+        dropdownEl.innerHTML = '';
+        for (var d = 0; d < appState.savedSeries.length; d++) {
+          var sItem = appState.savedSeries[d];
+          var dStats = computeAnalytics(sItem.shots, sItem.position);
+          var posShort = sItem.position === 'prone' ? 'Lamades' : 'Püsti';
+          var opt = document.createElement('option');
+          opt.value = sItem.id;
+          opt.textContent = '🕒 ' + sItem.timestamp + ' — ' + sItem.athlete + ' (' + posShort + ' • ' + dStats.hits + '/' + dStats.count + ')';
+          dropdownEl.appendChild(opt);
+        }
+        if (previousDropdownVal && findSeriesById(previousDropdownVal)) {
+          dropdownEl.value = previousDropdownVal;
+        }
+      }
+
+      listEl.innerHTML = '';
+      for (var i = 0; i < appState.savedSeries.length; i++) {
+        var item = appState.savedSeries[i];
+        var stats = computeAnalytics(item.shots, item.position);
+        var isComparing = appState.comparisonSeries && appState.comparisonSeries.id === item.id;
+        var posLabel = item.position === 'prone' ? 'Lamades 45mm' : 'Püsti 115mm';
+        var windBadge = item.wind || formatWindBadgeString(item.windDir || 0, item.windSpeed || 0);
+
+        var card = document.createElement('div');
+        card.className = isComparing ? 'saved-card comparing' : 'saved-card';
+
+        card.innerHTML =
+          '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">' +
+            '<div>' +
+              '<div style="font-size:12px; font-weight:800; color:#FDE68A;">🕒 ' + escapeHtml(item.timestamp) + '</div>' +
+              '<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:4px;">' +
+                '<strong style="font-size:14px; color:#FFF;">' + escapeHtml(item.athlete) + '</strong>' +
+                '<span style="font-size:11px; background:#1E293B; color:#7DD3FC; padding:2px 6px; border-radius:6px; font-weight:700;">' + posLabel + '</span>' +
+                '<span style="font-size:11px; background:rgba(239,68,68,0.15); color:#FCA5A5; padding:2px 6px; border-radius:6px; font-weight:700;">' + escapeHtml(windBadge) + '</span>' +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:right;">' +
+              '<div style="font-weight:800; font-size:16px; color:#34D399;">' + stats.hits + '/' + stats.count + '</div>' +
+              '<div style="font-size:11px; color:#94A3B8;">Hajuvus ' + stats.maxSpread.toFixed(0) + ' mm</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="font-size:12px; color:#CBD5E1;">' + escapeHtml(item.notes || '') + '</div>' +
+          '<div class="saved-card-actions" style="grid-template-columns: repeat(4, 1fr);">' +
+            '<button type="button" onclick="loadSavedSeriesAsActive(\'' + item.id + '\')" class="small-btn">Ava (Roosa)</button>' +
+            '<button type="button" onclick="toggleCompareSeries(\'' + item.id + '\')" class="small-btn" style="' + (isComparing ? 'background:#FFD700; color:#090D16;' : 'color:#FDE68A; border-color:rgba(255,215,0,0.4);') + '">' +
+              (isComparing ? 'Kuvatud ✓' : '🎯 Kollane') +
+            '</button>' +
+            '<button type="button" onclick="shareSeriesObjWhatsAppById(\'' + item.id + '\')" class="small-btn" style="background:#16A34A; color:#FFF; border-color:#4ADE80;">🟢 Jaga</button>' +
+            '<button type="button" onclick="deleteSavedSeries(\'' + item.id + '\')" class="small-btn" style="color:#FCA5A5;">Kustuta</button>' +
+          '</div>';
+
+        listEl.appendChild(card);
+      }
+    }
+
+    // =========================================================================
+    // WHATSAPP TRACKSIDE SHARING & INTERACTIVE URL PARAMETER (?s=...)
+    // =========================================================================
+    function buildShareableSeriesPayload(seriesObj) {
+      var compactShots = [];
+      for (var i = 0; i < seriesObj.shots.length; i++) {
+        compactShots.push([
+          Number(seriesObj.shots[i].x.toFixed(1)),
+          Number(seriesObj.shots[i].y.toFixed(1))
+        ]);
+      }
+      return {
+        a: seriesObj.athlete,
+        p: seriesObj.position === 'standing' ? 's' : 'p',
+        t: seriesObj.timestamp,
+        wd: seriesObj.windDir || 0,
+        ws: seriesObj.windSpeed || 0,
+        n: seriesObj.notes || '',
+        xy: compactShots
+      };
+    }
+
+    function encodeSeriesShareUrl(seriesObj) {
+      try {
+        var payload = buildShareableSeriesPayload(seriesObj);
+        var jsonStr = JSON.stringify(payload);
+        var b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+        var baseUrl = 'https://marekfeldmann-ai.github.io/TT-tiim-m-rklaud/';
+        if (window.location.hostname && window.location.hostname.indexOf('github.io') !== -1) {
+          baseUrl = window.location.origin + window.location.pathname;
+        }
+        return baseUrl + '?s=' + encodeURIComponent(b64);
+      } catch (e) {
+        return 'https://marekfeldmann-ai.github.io/TT-tiim-m-rklaud/';
+      }
+    }
+
+    function checkUrlSharedSeries() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var encoded = params.get('s');
+        if (!encoded) return;
+        var jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(encoded))));
+        var data = JSON.parse(jsonStr);
+        if (!data || !Array.isArray(data.xy)) return;
+
+        var loadedShots = [];
+        for (var i = 0; i < data.xy.length && i < MAX_SHOTS; i++) {
+          loadedShots.push({
+            x: Number(data.xy[i][0]) || 0,
+            y: Number(data.xy[i][1]) || 0
+          });
+        }
+
+        appState.activeShots = loadedShots;
+        setPositionMode(data.p === 's' ? 'standing' : 'prone');
+        appState.windDir = Number(data.wd) || 0;
+        appState.windSpeed = Number(data.ws) || 0;
+        if (data.a) {
+          var sel = document.getElementById('selectAthlete');
+          var matched = false;
+          for (var k = 0; k < sel.options.length; k++) {
+            if (sel.options[k].value === data.a) {
+              sel.value = data.a;
+              matched = true;
+              break;
+            }
+          }
+          if (!matched) {
+            sel.value = 'Muu';
+            handleAthleteChange();
+            document.getElementById('inputCustomAthlete').value = data.a;
+          } else {
+            syncQuickAthletePills();
+          }
+        }
+        if (data.n) {
+          document.getElementById('inputNotes').value = data.n;
+        }
+        showToast('📲 Jagatud seeria laaditud märklauale: ' + (data.a || 'Sportlane'));
+      } catch (e) {}
+    }
+
+    function getCurrentSeriesSnapshot() {
+      var isCalm = appState.windDir === 0 || appState.windSpeed <= 0;
+      return {
+        athlete: getSelectedAthleteName(),
+        position: appState.position,
+        timestamp: formatEstonianDateTime(new Date()),
+        windDir: isCalm ? 0 : appState.windDir,
+        windSpeed: isCalm ? 0 : appState.windSpeed,
+        notes: document.getElementById('inputNotes').value.trim(),
+        shots: JSON.parse(JSON.stringify(appState.activeShots))
+      };
+    }
+
+    function formatWhatsAppSummaryText(seriesObj) {
+      var stats = computeAnalytics(seriesObj.shots, seriesObj.position);
+      var posLabel = seriesObj.position === 'prone' ? 'Lamades (45mm)' : 'Püsti (115mm)';
+      var windLabel = formatWindBadgeString(seriesObj.windDir, seriesObj.windSpeed);
+      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
+      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+      var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE ←' : 'PAREMALE →'));
+      var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES ↑' : 'ALLA ↓'));
+      var shareUrl = encodeSeriesShareUrl(seriesObj);
+
+      var lines = [
+        '🎯 *TABAMUSTE MÄRKIMINE — ' + seriesObj.athlete + '*',
+        '🕒 ' + seriesObj.timestamp + ' • ' + posLabel,
+        '✅ Tabamused: *' + stats.hits + '/' + stats.count + '* (Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm)',
+        '🔧 Diopter: Külg *' + hText + '* | Kõrgus *' + vText + '*',
+        windLabel
+      ];
+      if (seriesObj.notes) {
+        lines.push('📝 ' + seriesObj.notes);
+      }
+      lines.push('📲 Ava märklaud: ' + shareUrl);
+      return lines.join('\n');
+    }
+
+    function shareActiveWhatsAppTextLink() {
+      if (appState.activeShots.length === 0) {
+        showToast('Märgi vähemalt 1 lask enne jagamist!');
+        return;
+      }
+      var snap = getCurrentSeriesSnapshot();
+      var text = formatWhatsAppSummaryText(snap);
+      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+      window.open(waUrl, '_blank');
+    }
+
+    function shareSelectedDropdownWhatsApp() {
+      var dropdown = document.getElementById('savedSeriesDropdown');
+      if (!dropdown || !dropdown.value) {
+        showToast('Vali nimekirjast salvestatud seeria!');
+        return;
+      }
+      shareSeriesObjWhatsAppById(dropdown.value);
+    }
+
+    function shareSeriesObjWhatsAppById(id) {
+      var found = findSeriesById(id);
+      if (!found) return;
+      var text = formatWhatsAppSummaryText(found);
+      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+      window.open(waUrl, '_blank');
+    }
+
+    function renderTargetCanvasImage(callback) {
+      var svgElement = document.getElementById('biathlonSvg');
+      var prevViewBox = svgElement.getAttribute('viewBox');
+      svgElement.setAttribute('viewBox', '-105 -105 210 210');
+
+      var serializer = new XMLSerializer();
+      var svgString = serializer.serializeToString(svgElement);
+      svgElement.setAttribute('viewBox', prevViewBox);
+
+      var svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      var url = URL.createObjectURL(svgBlob);
+
+      var img = new Image();
+      img.onload = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1250;
+        var ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#0B132B';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#0072CE';
+        ctx.fillRect(0, 0, 360, 12);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(360, 0, 360, 12);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(720, 0, 360, 12);
+
+        ctx.drawImage(img, 40, 40, 1000, 1000);
+
+        var stats = computeAnalytics(appState.activeShots, appState.position);
+        var athlete = getSelectedAthleteName();
+        var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
+        var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
+        var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
+        var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+        var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
+        var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 34px sans-serif';
+        ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1095);
+
+        ctx.fillStyle = '#38BDF8';
+        ctx.font = 'bold 25px sans-serif';
+        ctx.fillText(
+          posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
+          45,
+          1140
+        );
+
+        ctx.fillStyle = '#FDE68A';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText('Diopter: Külg ' + hText + '   |   Kõrgus ' + vText, 45, 1180);
+
+        var notes = document.getElementById('inputNotes').value.trim();
+        ctx.fillStyle = '#94A3B8';
+        ctx.font = '21px sans-serif';
+        ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1220);
+
+        URL.revokeObjectURL(url);
+        callback(canvas, athlete);
+      };
+      img.src = url;
+    }
+
+    function shareActiveTargetWhatsAppImage() {
+      if (appState.activeShots.length === 0) {
+        showToast('Märgi vähemalt 1 lask enne jagamist!');
+        return;
+      }
+      var snap = getCurrentSeriesSnapshot();
+      var summaryText = formatWhatsAppSummaryText(snap);
+
+      renderTargetCanvasImage(function (canvas, athlete) {
+        if (canvas.toBlob) {
+          canvas.toBlob(function (blob) {
+            if (!blob) {
+              shareActiveWhatsAppTextLink();
+              return;
+            }
+            var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
+            var file = new File([blob], fileName, { type: 'image/png' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({
+                files: [file],
+                title: 'Tabamuste Märkimine • ' + athlete,
+                text: summaryText
+              }).catch(function () {});
+            } else if (navigator.share) {
+              navigator.share({
+                title: 'Tabamuste Märkimine • ' + athlete,
+                text: summaryText
+              }).catch(function () {});
+            } else {
+              shareActiveWhatsAppTextLink();
+            }
+          }, 'image/png');
+        } else {
+          shareActiveWhatsAppTextLink();
+        }
+      });
+    }
+
+    // =========================================================================
+    // EXPORT (JSON BACKUP & PNG SNAPSHOT WITH IOS SAFARI SUPPORT)
+    // =========================================================================
+    // 1-TAP WHATSAPP / NATIVE SHARE & PNG EXPORT
+    // =========================================================================
+    function generateTargetPngBlob(callback) {
+      var svgElement = document.getElementById('biathlonSvg');
+      var prevViewBox = svgElement.getAttribute('viewBox');
+      svgElement.setAttribute('viewBox', '-105 -105 210 210');
+
+      var serializer = new XMLSerializer();
+      var svgString = serializer.serializeToString(svgElement);
+      svgElement.setAttribute('viewBox', prevViewBox);
+
+      var svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      var url = URL.createObjectURL(svgBlob);
+
+      var img = new Image();
+      img.onload = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1260;
+        var ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#0B132B';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#0072CE';
+        ctx.fillRect(0, 0, 360, 12);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(360, 0, 360, 12);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(720, 0, 360, 12);
+
+        ctx.drawImage(img, 40, 36, 1000, 1000);
+
+        var stats = computeAnalytics(appState.activeShots, appState.position);
+        var athlete = getSelectedAthleteName();
+        var posText = appState.position === 'prone' ? 'Lamades (45 mm)' : 'Püsti (115 mm)';
+        var windText = formatWindBadgeString(appState.windDir, appState.windSpeed);
+
+        var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
+        var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+        var hText = horizClicks === 0 ? 'Külg: 0 kl' : ('Külg: ' + horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE' : 'PAREMALE'));
+        var vText = vertClicks === 0 ? 'Kõrgus: 0 kl' : ('Kõrgus: ' + vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES' : 'ALLA'));
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 34px sans-serif';
+        ctx.fillText('TABAMUSTE MÄRKIMINE • ' + athlete, 45, 1085);
+
+        ctx.fillStyle = '#38BDF8';
+        ctx.font = 'bold 25px sans-serif';
+        ctx.fillText(
+          posText + '  |  Tabamused: ' + stats.hits + '/' + stats.count + '  |  Hajuvus: ' + stats.maxSpread.toFixed(1) + ' mm  |  ' + windText,
+          45,
+          1130
+        );
+
+        ctx.fillStyle = '#FDE68A';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText('Diopter (' + appState.clickStepMm + ' mm):  ' + hText + '   •   ' + vText, 45, 1172);
+
+        var notes = document.getElementById('inputNotes').value.trim();
+        ctx.fillStyle = '#94A3B8';
+        ctx.font = '21px sans-serif';
+        ctx.fillText(notes || (formatEstonianDateTime(new Date()) + ' • 50m Märklaud'), 45, 1215);
+
+        URL.revokeObjectURL(url);
+
+        var dataUrl = canvas.toDataURL('image/png');
+        if (canvas.toBlob) {
+          canvas.toBlob(function (blob) {
+            callback(blob, dataUrl, athlete);
+          }, 'image/png');
+        } else {
+          callback(null, dataUrl, athlete);
+        }
+      };
+      img.src = url;
+    }
+
+    function shareCurrentSeriesWhatsAppOrImage() {
+      var seriesObj = getActiveSeriesSnapshotObject();
+      var summaryText = buildWhatsAppSummaryText(seriesObj);
+
+      generateTargetPngBlob(function (blob, dataUrl, athlete) {
+        var fileName = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
+
+        if (blob && navigator.share && navigator.canShare) {
+          try {
+            var file = new File([blob], fileName, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              navigator.share({
+                files: [file],
+                title: 'Tabamuste Märkimine • ' + athlete,
+                text: summaryText
+              }).then(function () {
+                showToast('🟢 Jagatud!');
+              }).catch(function (err) {
+                if (err && err.name !== 'AbortError') {
+                  openWhatsAppUrl(summaryText);
+                }
+              });
+              return;
+            }
+          } catch (e) {}
+        }
+
+        if (navigator.share) {
+          navigator.share({
+            title: 'Tabamuste Märkimine • ' + athlete,
+            text: summaryText
+          }).catch(function (err) {
+            if (err && err.name !== 'AbortError') {
+              openWhatsAppUrl(summaryText);
+            }
+          });
+          return;
+        }
+
+        // Desktop fallback: download PNG + open WhatsApp Web/App with summary & live link
+        triggerDataUrlDownload(dataUrl, fileName);
+        openWhatsAppUrl(summaryText);
+      });
+    }
+
+    function shareDirectWhatsAppText() {
+      var seriesObj = getActiveSeriesSnapshotObject();
+      var summaryText = buildWhatsAppSummaryText(seriesObj);
+      openWhatsAppUrl(summaryText);
+    }
+
+    function shareSelectedDropdownSeries() {
+      var dropdown = document.getElementById('savedSeriesDropdown');
+      if (!dropdown || !dropdown.value) {
+        showToast('Vali nimekirjast salvestatud seeria!');
+        return;
+      }
+      shareSavedSeriesById(dropdown.value);
+    }
+
+    function shareSavedSeriesById(id) {
+      var found = findSeriesById(id);
+      if (!found) return;
+      loadSavedSeriesAsActive(id);
+      setTimeout(function () {
+        shareCurrentSeriesWhatsAppOrImage();
+      }, 60);
+    }
+
+    function openWhatsAppUrl(text) {
+      var waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+      window.open(waUrl, '_blank');
+    }
+
+    function triggerDataUrlDownload(dataUrl, fileName) {
+      var link = document.createElement('a');
+      link.download = fileName;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportAllJson() {
+      var dataStr = JSON.stringify(appState.savedSeries, null, 2);
+      var blob = new Blob([dataStr], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'biathlon-seeriad-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('JSON varukoopia alla laaditud');
+    }
+
+    function importJsonFile(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          var imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            appState.savedSeries = imported;
+            persistSavedSeries();
+            renderAll();
+            showToast('Imporditud ' + appState.savedSeries.length + ' seeriat!');
+          } else {
+            showToast('Vigane JSON faili formaat');
+          }
+        } catch (err) {
+          showToast('JSON faili lugemine ebaõnnestus');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function exportTargetPng() {
+      renderTargetCanvasImage(function (canvas, athlete) {
+        var pngUrl = canvas.toDataURL('image/png');
+        var link = document.createElement('a');
+        link.download = 'marklaud-' + athlete.toLowerCase().replace(/\s+/g, '-') + '.png';
+        link.href = pngUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('📷 Märklaua PNG pilt salvestatud!');
+      });
+    }
+
+    var toastTimer = null;
+    function showToast(message) {
+      var banner = document.getElementById('toastBanner');
+      var msgEl = document.getElementById('toastMessage');
+      msgEl.textContent = message;
+      banner.classList.add('visible');
+
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        banner.classList.remove('visible');
+      }, 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>index.html
 <html lang="et">
 <head>
   <meta charset="UTF-8" />
