@@ -1327,8 +1327,8 @@
             <h2 class="panel-title">DIOPTRI KORREKTSIOON (50m)</h2>
           </div>
           <div style="display:flex; gap:4px; background:var(--bg-panel); padding:4px; border-radius:10px; border:1px solid var(--border);">
-            <button id="btnClick25" type="button" onclick="setClickStep(2.5)" class="small-btn" style="background:var(--est-blue); color:#FFF; border:none;">2.5 mm</button>
-            <button id="btnClick30" type="button" onclick="setClickStep(3.0)" class="small-btn" style="background:transparent; border:none;">3.0 mm</button>
+            <button id="btnClick25" type="button" onclick="setClickStep(5.0)" class="small-btn" style="background:var(--est-blue); color:#FFF; border:none;">Tavarežiim</button>
+            <button id="btnClick30" type="button" onclick="setClickStep(6.0)" class="small-btn" style="background:transparent; border:none;">6.0 mm</button>
           </div>
         </div>
 
@@ -1566,15 +1566,15 @@
     var CALIBER_RADIUS_MM = 2.8;
     var PRONE_RADIUS_MM = 22.5;
     var STANDING_RADIUS_MM = 57.5;
-    var WIND_DRIFT_MM_PER_MS = 8.0;
-    var VERTICAL_WIND_FACTOR = 2.2;
+    var WIND_DRIFT_MM_PER_MS = 5.0;
+    var VERTICAL_WIND_FACTOR = 1.8;
 
     var appState = {
       position: 'prone',
       showPaperRings: true,
       targetZoomed: false,
       moveShotsMode: false,
-      clickStepMm: 2.5,
+      clickStepMm: 5.0,
       windDir: 9,
       lastNonZeroWindDir: 9,
       windSpeed: 1.5,
@@ -2016,6 +2016,9 @@
         if (svgLine1) svgLine1.textContent = 'TUUL: KELL ' + dir;
         if (svgLine2) svgLine2.textContent = speed.toFixed(1) + ' m/s (' + desc + ')';
       }
+      if (typeof renderAnalytics === 'function') {
+        renderAnalytics();
+      }
       if (typeof refreshCachedTargetPng === 'function') {
         refreshCachedTargetPng();
       }
@@ -2361,7 +2364,7 @@
       appState.clickStepMm = stepMm;
       var btn25 = document.getElementById('btnClick25');
       var btn30 = document.getElementById('btnClick30');
-      if (stepMm === 2.5) {
+      if (stepMm === 5.0) {
         btn25.style.background = '#0072CE';
         btn25.style.color = '#FFFFFF';
         btn30.style.background = 'transparent';
@@ -2737,6 +2740,7 @@
 
     function renderAnalytics() {
       var stats = computeAnalytics(appState.activeShots, appState.position);
+      var windTel = computeWindDriftTelemetry(appState.windDir, appState.windSpeed, appState.clickStepMm);
 
       var hitStr = stats.hits + ' / ' + stats.count;
       document.getElementById('targetHitBadge').textContent = hitStr;
@@ -2744,8 +2748,11 @@
       document.getElementById('metricSpread').textContent = stats.maxSpread.toFixed(1) + ' mm';
       document.getElementById('metricMpiDist').textContent = stats.mpiDist.toFixed(1) + ' mm';
 
-      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
-      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
+      var totalOffsetX = (stats.count > 0 ? stats.mpiX : 0) + windTel.driftXmm;
+      var totalOffsetY = (stats.count > 0 ? stats.mpiY : 0) + windTel.driftYmm;
+
+      var horizClicks = Math.round(Math.abs(totalOffsetX) / appState.clickStepMm);
+      var vertClicks = Math.round(Math.abs(totalOffsetY) / appState.clickStepMm);
 
       var hClicksEl = document.getElementById('diopterHorizClicks');
       var hDirEl = document.getElementById('diopterHorizDir');
@@ -2755,7 +2762,7 @@
       var vDirEl = document.getElementById('diopterVertDir');
       var vOffsetEl = document.getElementById('mpiOffsetYText');
 
-      if (stats.count === 0) {
+      if (stats.count === 0 && windTel.isCalm) {
         hClicksEl.textContent = '0';
         hDirEl.textContent = 'KLIKKI';
         hOffsetEl.textContent = 'Kõrvalekalle: 0.0 mm';
@@ -2766,12 +2773,20 @@
       }
 
       hClicksEl.textContent = String(horizClicks);
-      hDirEl.textContent = horizClicks === 0 ? 'TSENTRIS' : (stats.mpiX > 0 ? 'VASAKULE ←' : 'PAREMALE →');
-      hOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiX).toFixed(1) + ' mm ' + (stats.mpiX >= 0 ? 'paremal' : 'vasakul');
+      hDirEl.textContent = horizClicks === 0 ? 'TSENTRIS' : (totalOffsetX > 0 ? 'VASAKULE ←' : 'PAREMALE →');
+      if (windTel.isCalm) {
+        hOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiX).toFixed(1) + ' mm ' + (stats.mpiX >= 0 ? 'paremal' : 'vasakul');
+      } else {
+        hOffsetEl.textContent = 'Kokku: ' + Math.abs(totalOffsetX).toFixed(1) + ' mm (MPI ' + Math.abs(stats.mpiX).toFixed(1) + ' + Tuul ' + Math.abs(windTel.driftXmm).toFixed(1) + ')';
+      }
 
       vClicksEl.textContent = String(vertClicks);
-      vDirEl.textContent = vertClicks === 0 ? 'TSENTRIS' : (stats.mpiY > 0 ? 'ÜLES ↑' : 'ALLA ↓');
-      vOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiY).toFixed(1) + ' mm ' + (stats.mpiY >= 0 ? 'all' : 'üleval');
+      vDirEl.textContent = vertClicks === 0 ? 'TSENTRIS' : (totalOffsetY > 0 ? 'ÜLES ↑' : 'ALLA ↓');
+      if (windTel.isCalm) {
+        vOffsetEl.textContent = 'Keskkoht: ' + Math.abs(stats.mpiY).toFixed(1) + ' mm ' + (stats.mpiY >= 0 ? 'all' : 'üleval');
+      } else {
+        vOffsetEl.textContent = 'Kokku: ' + Math.abs(totalOffsetY).toFixed(1) + ' mm (MPI ' + Math.abs(stats.mpiY).toFixed(1) + ' + Tuul ' + Math.abs(windTel.driftYmm).toFixed(1) + ')';
+      }
     }
 
     function renderShotPills() {
@@ -3075,12 +3090,15 @@
 
     function formatWhatsAppSummaryText(seriesObj) {
       var stats = computeAnalytics(seriesObj.shots, seriesObj.position);
+      var windTel = computeWindDriftTelemetry(seriesObj.windDir || 0, seriesObj.windSpeed || 0, appState.clickStepMm);
+      var totalX = (stats.count > 0 ? stats.mpiX : 0) + windTel.driftXmm;
+      var totalY = (stats.count > 0 ? stats.mpiY : 0) + windTel.driftYmm;
       var posLabel = seriesObj.position === 'prone' ? 'Lamades (45mm)' : 'Püsti (115mm)';
       var windLabel = formatWindBadgeString(seriesObj.windDir, seriesObj.windSpeed);
-      var horizClicks = Math.round(Math.abs(stats.mpiX) / appState.clickStepMm);
-      var vertClicks = Math.round(Math.abs(stats.mpiY) / appState.clickStepMm);
-      var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (stats.mpiX > 0 ? 'VASAKULE ←' : 'PAREMALE →'));
-      var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (stats.mpiY > 0 ? 'ÜLES ↑' : 'ALLA ↓'));
+      var horizClicks = Math.round(Math.abs(totalX) / appState.clickStepMm);
+      var vertClicks = Math.round(Math.abs(totalY) / appState.clickStepMm);
+      var hText = horizClicks === 0 ? '0' : (horizClicks + ' kl ' + (totalX > 0 ? 'VASAKULE ←' : 'PAREMALE →'));
+      var vText = vertClicks === 0 ? '0' : (vertClicks + ' kl ' + (totalY > 0 ? 'ÜLES ↑' : 'ALLA ↓'));
       var shareUrl = encodeSeriesShareUrl(seriesObj);
 
       var lines = [
