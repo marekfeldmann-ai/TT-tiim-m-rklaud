@@ -1259,7 +1259,7 @@
             <line x1="8" y1="0" x2="24" y2="0" stroke="#38BDF8" stroke-width="1.1"/>
             <line x1="0" y1="-24" x2="0" y2="-8" stroke="#38BDF8" stroke-width="1.1"/>
             <line x1="0" y1="8" x2="0" y2="24" stroke="#38BDF8" stroke-width="1.1"/>
-            <circle cx="0" cy="0" r="4.6" fill="#FF2A85" fill-opacity="0.85" stroke="#FFFFFF" stroke-width="1.1"/>
+            <circle cx="0" cy="0" r="3.6" fill="#FF2A85" fill-opacity="0.85" stroke="#FFFFFF" stroke-width="1.0"/>
             <g transform="translate(0, -26)">
               <rect x="-28" y="-7" width="56" height="12" rx="3.5" fill="#06101E" stroke="#38BDF8" stroke-width="0.8"/>
               <text id="touchPreviewCalloutText" x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="800" font-size="5" fill="#FFFFFF">#1 TABAMUS</text>
@@ -2599,9 +2599,9 @@
     }
 
     // Renders shots at their exact physical coordinates for accurate MPI/Spread math,
-    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 3.6 mm).
+    // while adding clear offset/stacked number badges and multi-hit callouts when shots overlap (< 3.0 mm).
     function renderShotsWithOverlapHandling(layerEl, shots, fillHex, textHex, isComparison) {
-      var OVERLAP_THRESHOLD_MM = 3.6;
+      var OVERLAP_THRESHOLD_MM = 3.0;
       var clusters = [];
 
       // 1. Draw the physical bullet holes first (at exact x, y)
@@ -2633,10 +2633,10 @@
         var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         circle.setAttribute('cx', s.x);
         circle.setAttribute('cy', s.y);
-        circle.setAttribute('r', '4.6');
+        circle.setAttribute('r', '3.6');
         circle.setAttribute('fill', fillHex);
         circle.setAttribute('stroke', isComparison ? '#090D16' : '#FFFFFF');
-        circle.setAttribute('stroke-width', overlapRank > 0 ? '1.3' : '0.95');
+        circle.setAttribute('stroke-width', overlapRank > 0 ? '1.15' : '0.85');
         holeGroup.appendChild(circle);
 
         // If overlapping, add a subtle concentric inner ring so stacked impacts are unmistakable
@@ -2644,11 +2644,11 @@
           var innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
           innerRing.setAttribute('cx', s.x);
           innerRing.setAttribute('cy', s.y);
-          innerRing.setAttribute('r', String(Math.max(1.8, 3.6 - overlapRank * 0.85)));
+          innerRing.setAttribute('r', String(Math.max(1.4, 2.8 - overlapRank * 0.65)));
           innerRing.setAttribute('fill', 'none');
           innerRing.setAttribute('stroke', '#FFFFFF');
-          innerRing.setAttribute('stroke-width', '0.6');
-          innerRing.setAttribute('stroke-dasharray', '1.3,1.0');
+          innerRing.setAttribute('stroke-width', '0.55');
+          innerRing.setAttribute('stroke-dasharray', '1.1,0.9');
           holeGroup.appendChild(innerRing);
         }
 
@@ -2669,11 +2669,11 @@
           txt.setAttribute('fill', textHex);
           txt.setAttribute('font-family', 'sans-serif');
           txt.setAttribute('font-weight', '800');
-          txt.setAttribute('font-size', '5.2');
+          txt.setAttribute('font-size', '4.3');
           txt.textContent = String(single.number);
           layerEl.appendChild(txt);
         } else {
-          // Multiple overlapping shots in this cluster (< 3.6 mm apart)
+          // Multiple overlapping shots in this cluster (< 3.0 mm apart)
           var numsList = [];
           for (var m = 0; m < cluster.members.length; m++) {
             numsList.push('#' + cluster.members[m].number);
@@ -2689,16 +2689,16 @@
           centerTxt.setAttribute('fill', textHex);
           centerTxt.setAttribute('font-family', 'sans-serif');
           centerTxt.setAttribute('font-weight', '800');
-          centerTxt.setAttribute('font-size', '4.6');
+          centerTxt.setAttribute('font-size', '3.8');
           centerTxt.textContent = cluster.members.map(function (it) { return it.number; }).join('+');
           layerEl.appendChild(centerTxt);
 
           // Draw high-contrast stacked callout pill next to the overlapping group
           var dirX = cluster.anchorX >= 0 ? -1 : 1;
           var dirY = cluster.anchorY >= 0 ? -1 : 1;
-          var badgeX = cluster.anchorX + dirX * 13.5;
-          var badgeY = cluster.anchorY + dirY * 11.5;
-          var badgeW = Math.max(18, joinedNums.length * 3.4 + 6);
+          var badgeX = cluster.anchorX + dirX * 12.0;
+          var badgeY = cluster.anchorY + dirY * 10.5;
+          var badgeW = Math.max(17, joinedNums.length * 3.2 + 5.5);
 
           var leader = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           leader.setAttribute('x1', cluster.anchorX);
@@ -2706,18 +2706,18 @@
           leader.setAttribute('x2', badgeX);
           leader.setAttribute('y2', badgeY);
           leader.setAttribute('stroke', '#FFFFFF');
-          leader.setAttribute('stroke-width', '0.9');
+          leader.setAttribute('stroke-width', '0.85');
           layerEl.appendChild(leader);
 
           var pillRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
           pillRect.setAttribute('x', badgeX - badgeW / 2);
-          pillRect.setAttribute('y', badgeY - 4.8);
+          pillRect.setAttribute('y', badgeY - 4.4);
           pillRect.setAttribute('width', badgeW);
-          pillRect.setAttribute('height', '9.6');
-          pillRect.setAttribute('rx', '3.2');
+          pillRect.setAttribute('height', '8.8');
+          pillRect.setAttribute('rx', '3.0');
           pillRect.setAttribute('fill', '#090D16');
           pillRect.setAttribute('stroke', isComparison ? '#FFD700' : '#FF2A85');
-          pillRect.setAttribute('stroke-width', '1.1');
+          pillRect.setAttribute('stroke-width', '1.0');
           layerEl.appendChild(pillRect);
 
           var pillTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -2728,7 +2728,7 @@
           pillTxt.setAttribute('fill', isComparison ? '#FFD700' : '#FFFFFF');
           pillTxt.setAttribute('font-family', 'sans-serif');
           pillTxt.setAttribute('font-weight', '800');
-          pillTxt.setAttribute('font-size', '4.8');
+          pillTxt.setAttribute('font-size', '4.4');
           pillTxt.textContent = joinedNums;
           layerEl.appendChild(pillTxt);
         }
@@ -3402,7 +3402,7 @@
       // Helper to draw shots with overlap callout pills on canvas
       function drawShotsLayerOnCanvas(shots, fillHex, textHex, isComparison) {
         if (!shots || shots.length === 0) return;
-        var OVERLAP_MM = 3.6;
+        var OVERLAP_MM = 3.0;
         var clusters = [];
 
         for (var i = 0; i < shots.length; i++) {
@@ -3425,10 +3425,10 @@
 
           ctx.save();
           ctx.beginPath();
-          ctx.arc(mmX(s.x), mmY(s.y), mmR(4.6), 0, Math.PI * 2);
+          ctx.arc(mmX(s.x), mmY(s.y), mmR(3.6), 0, Math.PI * 2);
           ctx.fillStyle = fillHex;
           ctx.fill();
-          ctx.lineWidth = rank > 0 ? 5.5 : 4;
+          ctx.lineWidth = rank > 0 ? 4.5 : 3.4;
           ctx.strokeStyle = isComparison ? '#090D16' : '#FFFFFF';
           ctx.stroke();
           ctx.restore();
@@ -3437,24 +3437,24 @@
         for (var k = 0; k < clusters.length; k++) {
           var cl = clusters[k];
           ctx.fillStyle = textHex;
-          ctx.font = 'bold 22px sans-serif';
+          ctx.font = 'bold 18px sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           if (cl.members.length === 1) {
             ctx.fillText(String(cl.members[0].number), mmX(cl.members[0].x), mmY(cl.members[0].y));
           } else {
             var nums = cl.members.map(function (m) { return '#' + m.number; }).join(', ');
-            ctx.font = 'bold 19px sans-serif';
+            ctx.font = 'bold 16px sans-serif';
             ctx.fillText(cl.members.map(function (m) { return m.number; }).join('+'), mmX(cl.anchorX), mmY(cl.anchorY));
 
             var dirX = cl.anchorX >= 0 ? -1 : 1;
             var dirY = cl.anchorY >= 0 ? -1 : 1;
-            var bx = mmX(cl.anchorX + dirX * 13.5);
-            var by = mmY(cl.anchorY + dirY * 11.5);
-            var bw = Math.max(86, nums.length * 16 + 26);
+            var bx = mmX(cl.anchorX + dirX * 12.0);
+            var by = mmY(cl.anchorY + dirY * 10.5);
+            var bw = Math.max(80, nums.length * 15 + 24);
 
             ctx.strokeStyle = '#FFFFFF';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
             ctx.moveTo(mmX(cl.anchorX), mmY(cl.anchorY));
             ctx.lineTo(bx, by);
@@ -3462,14 +3462,14 @@
 
             ctx.fillStyle = '#090D16';
             ctx.strokeStyle = isComparison ? '#FFD700' : '#FF2A85';
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 3.5;
             ctx.beginPath();
-            ctx.rect(bx - bw / 2, by - 22, bw, 44);
+            ctx.rect(bx - bw / 2, by - 20, bw, 40);
             ctx.fill();
             ctx.stroke();
 
             ctx.fillStyle = isComparison ? '#FFD700' : '#FFFFFF';
-            ctx.font = 'bold 22px sans-serif';
+            ctx.font = 'bold 20px sans-serif';
             ctx.fillText(nums, bx, by);
           }
         }
