@@ -1433,16 +1433,31 @@
             🟢 Valmis
           </span>
         </div>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Treeningu / Klubi ruumi kood:</label>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <label for="inputCloudRoom" style="font-size:12px; font-weight:700; color:var(--text-muted);">Treeningu / Klubi ruumi kood:</label>
+            <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:800; color:#38BDF8; cursor:pointer;">
+              <input type="checkbox" id="chkCloudLiveShots" checked onchange="toggleCloudLiveMode(this.checked)" style="width:17px; height:17px; accent-color:#0072CE;" />
+              <span>👁️ Vaata laske reaalajas (Live)</span>
+            </label>
+          </div>
+
           <div style="display:flex; gap:8px;">
-            <input type="text" id="inputCloudRoom" value="TT-TEAM-2026" class="form-input" style="min-height:42px; font-size:14px;" />
-            <button type="button" onclick="syncWithCloud()" class="small-btn" style="background:var(--est-blue); color:#FFF; border-color:var(--sky); min-height:42px; padding:0 16px; font-weight:800;">
-              ☁️ Sünkrooni
+            <input type="text" id="inputCloudRoom" value="TT-TEAM-2026" onchange="changeCloudRoom(this.value)" class="form-input" style="min-height:42px; font-size:14px; font-weight:800; letter-spacing:0.5px; text-transform:uppercase;" />
+            <button type="button" onclick="syncWithCloud('push')" class="small-btn" style="background:var(--est-blue); color:#FFF; border-color:var(--sky); min-height:42px; padding:0 14px; font-weight:800; white-space:nowrap;">
+              ☁️ Saada pilve
+            </button>
+            <button type="button" onclick="syncWithCloud('pull')" class="small-btn" style="background:var(--bg-panel); color:#7DD3FC; border-color:var(--border-light); min-height:42px; padding:0 12px; font-weight:800; white-space:nowrap;">
+              📥 Tõmba
             </button>
           </div>
-          <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
-            Sünkrooni oma seeriad pilveruumiga, et treener või teised koondise liikmed saaksid tulemusi reaalajas jälgida.
+
+          <div id="cloudLiveActivityText" style="font-size:11px; color:#A7F3D0; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:6px 10px; line-height:1.35;">
+            📡 Ruum <strong>TT-TEAM-2026</strong>: ootab ühendust...
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-dim); font-family:monospace; word-break:break-all; gap:8px;">
+            <span>Kasutaja ID: <strong id="cloudUserIdDisplay" style="color:var(--text-muted);">Ühendamine...</strong></span>
           </div>
         </div>
       </div>
@@ -1481,9 +1496,11 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     window.firebaseEnabled = false;
+    window.fbExports = { collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot };
+
     try {
       var appId = typeof __app_id !== 'undefined' ? __app_id : 'tt-biathlon-default';
       var firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
@@ -1496,24 +1513,37 @@
         window.fbDb = db;
         window.fbAuth = auth;
         window.fbAppId = appId;
-        window.firebaseEnabled = true;
 
-        var authPromise = typeof __initial_auth_token !== 'undefined' && __initial_auth_token
+        var authPromise = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
           ? signInWithCustomToken(auth, __initial_auth_token)
           : signInAnonymously(auth);
 
-        authPromise.then(function() {
-          var userId = auth.currentUser ? auth.currentUser.uid : 'anon';
+        authPromise.then(function () {
+          if (!auth.currentUser) return;
+          var userId = auth.currentUser.uid;
           window.fbUserId = userId;
-          document.getElementById('cloudSyncTxt').textContent = 'Pilv aktiivne';
-          initCloudFirestoreListener(db, appId, userId);
-        }).catch(function(err) {
-          console.warn('Firebase auth fallback:', err);
-          document.getElementById('cloudSyncTxt').textContent = 'Kohalik (Offline)';
+          window.firebaseEnabled = true;
+
+          var uidEl = document.getElementById('cloudUserIdDisplay');
+          if (uidEl) uidEl.textContent = userId;
+
+          var badgeTxt = document.getElementById('cloudSyncTxt');
+          if (badgeTxt) badgeTxt.textContent = 'Sünkroonis (Live)';
+
+          if (typeof window.connectToCloudRoom === 'function') {
+            window.connectToCloudRoom(window.getActiveCloudRoomCode());
+          }
+        }).catch(function (err) {
+          console.warn('Firebase auth error:', err);
+          var badgeTxt = document.getElementById('cloudSyncTxt');
+          if (badgeTxt) badgeTxt.textContent = 'Kohalik';
         });
+      } else {
+        var uidElFallback = document.getElementById('cloudUserIdDisplay');
+        if (uidElFallback) uidElFallback.textContent = 'local-' + (window.deviceSessionId || 'offline');
       }
     } catch (e) {
-      console.warn('Cloud sync offline mode:', e);
+      console.warn('Cloud sync initialization skipped:', e);
     }
   </script>
 
@@ -1522,6 +1552,7 @@
     // ZERO-DEPENDENCY VANILLA JAVASCRIPT (COMPATIBLE WITH ALL BROWSERS & IOS)
     // =========================================================================
     var STORAGE_KEY = 'tt_biathlon_saved_series_v6';
+    var CLOUD_ROOM_STORAGE_KEY = 'tt_biathlon_cloud_room_v1';
     var GITHUB_PAGES_BASE = 'https://marekfeldmann-ai.github.io/TT-tiim-m-rklaud/';
     var MAX_SHOTS = 8;
     var CALIBER_RADIUS_MM = 2.8;
@@ -1529,6 +1560,11 @@
     var STANDING_RADIUS_MM = 57.5;
     var WIND_DRIFT_MM_PER_MS = 5.0;
     var VERTICAL_WIND_FACTOR = 1.8;
+
+    window.deviceSessionId = 'dev-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now().toString(36);
+    var cloudRoomUnsubscribe = null;
+    var isApplyingRemoteCloudUpdate = false;
+    var lastAppliedCloudTimestamp = 0;
 
     var appState = {
       position: 'prone',
@@ -1541,7 +1577,9 @@
       windSpeed: 1.5,
       activeShots: [],
       comparisonSeries: null,
-      savedSeries: []
+      savedSeries: [],
+      cloudLiveEnabled: true,
+      cloudRoomCode: 'TT-TEAM-2026'
     };
 
     var pointerState = {
@@ -1592,6 +1630,7 @@
       autoEscapeAndroidInAppBrowser();
       initWindClockDial();
       loadSavedSeriesFromStorage();
+      initCloudRoomInputFromStorage();
       checkUrlSharedSeries();
       setupTargetInteractions();
       syncWindSpeedInputs(appState.windSpeed);
@@ -1690,57 +1729,290 @@
       } catch (e) {}
     }
 
-    // Cloud Firestore Sync Integration (Rule 1, 2, 3 Compliant)
-    function initCloudFirestoreListener(db, appId, userId) {
+    // =========================================================================
+    // REAL-TIME MULTI-DEVICE CLOUD SYNC (PUBLIC ROOMS + LIVE SHOTS)
+    // =========================================================================
+    function sanitizeRoomCode(raw) {
+      var cleaned = String(raw || 'TT-TEAM-2026')
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9_-]/g, '-');
+      return cleaned || 'TT-TEAM-2026';
+    }
+
+    function getActiveCloudRoomCode() {
+      var input = document.getElementById('inputCloudRoom');
+      var code = sanitizeRoomCode(input ? input.value : appState.cloudRoomCode);
+      appState.cloudRoomCode = code;
+      if (input && input.value !== code) input.value = code;
+      return code;
+    }
+    window.getActiveCloudRoomCode = getActiveCloudRoomCode;
+
+    function initCloudRoomInputFromStorage() {
       try {
-        if (!window.firebaseEnabled || !db || !userId) return;
-        var colRef = collection(db, 'artifacts', appId, 'users', userId, 'savedSeries');
-        onSnapshot(colRef, function(snapshot) {
-          var cloudItems = [];
-          snapshot.forEach(function(docSnap) {
-            var d = docSnap.data();
-            if (d && d.id) {
-              cloudItems.push(d);
-            }
-          });
-          if (cloudItems.length > 0) {
-            cloudItems.sort(function(a, b) { return String(b.id).localeCompare(String(a.id)); });
-            appState.savedSeries = cloudItems;
-            persistSavedSeries();
-            renderSavedSeriesList();
-          }
-        }, function(err) {
-          console.warn('Cloud sync listener error:', err);
-        });
+        var savedRoom = localStorage.getItem(CLOUD_ROOM_STORAGE_KEY);
+        if (savedRoom) {
+          appState.cloudRoomCode = sanitizeRoomCode(savedRoom);
+          var input = document.getElementById('inputCloudRoom');
+          if (input) input.value = appState.cloudRoomCode;
+        }
       } catch (e) {}
+    }
+
+    function setCloudStatusUI(stateText, colorType, detailMsg) {
+      var badge = document.getElementById('cloudStatusBadge');
+      var headerTxt = document.getElementById('cloudSyncTxt');
+      var activityEl = document.getElementById('cloudLiveActivityText');
+
+      if (headerTxt) headerTxt.textContent = stateText;
+      if (badge) {
+        if (colorType === 'ok') {
+          badge.textContent = '🟢 ' + stateText;
+          badge.style.background = 'rgba(16,185,129,0.15)';
+          badge.style.color = '#34D399';
+          badge.style.borderColor = 'rgba(16,185,129,0.4)';
+        } else if (colorType === 'syncing') {
+          badge.textContent = '⏳ ' + stateText;
+          badge.style.background = 'rgba(245,158,11,0.15)';
+          badge.style.color = '#FDE68A';
+          badge.style.borderColor = 'rgba(245,158,11,0.4)';
+        } else {
+          badge.textContent = '⚪ ' + stateText;
+          badge.style.background = 'rgba(148,163,184,0.15)';
+          badge.style.color = '#CBD5E1';
+          badge.style.borderColor = 'rgba(148,163,184,0.3)';
+        }
+      }
+      if (activityEl && detailMsg) {
+        activityEl.innerHTML = detailMsg;
+      }
+    }
+
+    function connectToCloudRoom(roomCode) {
+      var cleanRoom = sanitizeRoomCode(roomCode);
+      appState.cloudRoomCode = cleanRoom;
+      try {
+        localStorage.setItem(CLOUD_ROOM_STORAGE_KEY, cleanRoom);
+      } catch (e) {}
+
+      if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
+        setCloudStatusUI('Kohalik režiim', 'offline', '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong>: pilveühendus pole selles keskkonnas saadaval (andmed salvestatakse telefoni).');
+        return;
+      }
+
+      if (cloudRoomUnsubscribe) {
+        try { cloudRoomUnsubscribe(); } catch (e) {}
+        cloudRoomUnsubscribe = null;
+      }
+
+      setCloudStatusUI('Ühendan...', 'syncing', '📡 Ühendamine pilveruumiga <strong>' + escapeHtml(cleanRoom) + '</strong>...');
+
+      // RULE 1 Strict Public Path: /artifacts/{appId}/public/data/biathlonCloudRooms/{cleanRoom}
+      var roomDocRef = window.fbExports.doc(
+        window.fbDb,
+        'artifacts',
+        window.fbAppId,
+        'public',
+        'data',
+        'biathlonCloudRooms',
+        cleanRoom
+      );
+
+      cloudRoomUnsubscribe = window.fbExports.onSnapshot(
+        roomDocRef,
+        function (docSnap) {
+          if (!docSnap.exists()) {
+            setCloudStatusUI('Sünkroonis', 'ok', '📡 Ruum <strong>' + escapeHtml(cleanRoom) + '</strong> on valmis! Märgi lask või vajuta "Saada pilve".');
+            pushLiveStateToCloud('init');
+            return;
+          }
+
+          var data = docSnap.data();
+          if (!data) return;
+
+          var isFromOtherDevice = data.senderSessionId && data.senderSessionId !== window.deviceSessionId;
+          var remoteUpdatedAt = Number(data.updatedAt) || 0;
+
+          // 1. Merge Saved Series from shared room
+          if (data.savedSeriesJson) {
+            try {
+              var remoteSeries = JSON.parse(data.savedSeriesJson);
+              if (Array.isArray(remoteSeries)) {
+                var mergedMap = {};
+                var mergedList = [];
+                var combined = remoteSeries.concat(appState.savedSeries || []);
+                for (var i = 0; i < combined.length; i++) {
+                  var item = combined[i];
+                  if (item && item.id && !mergedMap[item.id]) {
+                    mergedMap[item.id] = true;
+                    mergedList.push(item);
+                  }
+                }
+                if (data.deletedIdsJson) {
+                  var delIds = JSON.parse(data.deletedIdsJson);
+                  if (Array.isArray(delIds) && delIds.length > 0) {
+                    var delSet = {};
+                    for (var d = 0; d < delIds.length; d++) delSet[delIds[d]] = true;
+                    mergedList = mergedList.filter(function (s) { return !delSet[s.id]; });
+                  }
+                }
+                appState.savedSeries = mergedList;
+                persistSavedSeries();
+                renderSavedSeriesList();
+              }
+            } catch (e) {}
+          }
+
+          // 2. Apply Real-Time Live Shots if enabled and coming from another device
+          if (appState.cloudLiveEnabled && isFromOtherDevice && remoteUpdatedAt > lastAppliedCloudTimestamp) {
+            lastAppliedCloudTimestamp = remoteUpdatedAt;
+            isApplyingRemoteCloudUpdate = true;
+            try {
+              if (data.liveShotsJson) {
+                var liveShots = JSON.parse(data.liveShotsJson);
+                if (Array.isArray(liveShots)) {
+                  appState.activeShots = liveShots;
+                }
+              }
+              if (data.livePosition === 'prone' || data.livePosition === 'standing') {
+                appState.position = data.livePosition;
+                var btnProne = document.getElementById('btnPosProne');
+                var btnStanding = document.getElementById('btnPosStanding');
+                var hint = document.getElementById('activeZoneHint');
+                if (appState.position === 'prone') {
+                  btnProne.className = 'mode-btn active';
+                  btnStanding.className = 'mode-btn';
+                  hint.textContent = 'Lamades';
+                } else {
+                  btnStanding.className = 'mode-btn standing-active';
+                  btnProne.className = 'mode-btn';
+                  hint.textContent = 'Püsti';
+                }
+              }
+              if (data.liveAthlete) {
+                var sel = document.getElementById('selectAthlete');
+                if (sel) {
+                  var matched = false;
+                  for (var k = 0; k < sel.options.length; k++) {
+                    if (sel.options[k].value === data.liveAthlete) {
+                      sel.value = data.liveAthlete;
+                      matched = true;
+                      break;
+                    }
+                  }
+                  if (!matched) {
+                    sel.value = 'Muu';
+                    document.getElementById('inputCustomAthlete').value = data.liveAthlete;
+                  }
+                  handleAthleteChange();
+                }
+              }
+              if (typeof data.liveWindDir === 'number') {
+                appState.windDir = data.liveWindDir;
+              }
+              if (typeof data.liveWindSpeed === 'number') {
+                appState.windSpeed = data.liveWindSpeed;
+                syncWindSpeedInputs(appState.windSpeed);
+              }
+              updateWindDisplay();
+              renderAll();
+            } catch (err) {
+              console.warn('Live state apply error:', err);
+            } finally {
+              isApplyingRemoteCloudUpdate = false;
+            }
+          }
+
+          var shotCount = 0;
+          try {
+            shotCount = data.liveShotsJson ? JSON.parse(data.liveShotsJson).length : appState.activeShots.length;
+          } catch (e) {}
+          var who = data.liveAthlete || getSelectedAthleteName();
+          var timeLabel = data.updatedTimeStr || formatEstonianDateTime(new Date()).split(' ').pop();
+
+          setCloudStatusUI(
+            'Sünkroonis (' + cleanRoom + ')',
+            'ok',
+            '📡 <strong>' + escapeHtml(cleanRoom) + '</strong> • Live: <strong>' + escapeHtml(who) + '</strong> (' + shotCount + ' lasku) • Kell ' + escapeHtml(timeLabel)
+          );
+        },
+        function (err) {
+          console.warn('Cloud room snapshot error:', err);
+          setCloudStatusUI('Ühenduse viga', 'offline', '⚠️ Pilveruumi <strong>' + escapeHtml(cleanRoom) + '</strong> sünkroonimine ebaõnnestus.');
+        }
+      );
+    }
+    window.connectToCloudRoom = connectToCloudRoom;
+
+    var deletedSeriesIdsLog = [];
+
+    function pushLiveStateToCloud(reason) {
+      if (isApplyingRemoteCloudUpdate) return;
+      if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
+        return;
+      }
+
+      var cleanRoom = getActiveCloudRoomCode();
+      var roomDocRef = window.fbExports.doc(
+        window.fbDb,
+        'artifacts',
+        window.fbAppId,
+        'public',
+        'data',
+        'biathlonCloudRooms',
+        cleanRoom
+      );
+
+      var now = new Date();
+      var payload = {
+        roomCode: cleanRoom,
+        updatedAt: Date.now(),
+        updatedTimeStr: formatEstonianDateTime(now).split(' ').pop(),
+        updatedByUserId: window.fbAuth.currentUser.uid,
+        senderSessionId: window.deviceSessionId,
+        reason: reason || 'update',
+        liveAthlete: getSelectedAthleteName(),
+        livePosition: appState.position,
+        liveWindDir: appState.windDir,
+        liveWindSpeed: appState.windSpeed,
+        liveShotsJson: JSON.stringify(appState.activeShots || []),
+        savedSeriesJson: JSON.stringify((appState.savedSeries || []).slice(0, 40)),
+        deletedIdsJson: JSON.stringify(deletedSeriesIdsLog.slice(-50))
+      };
+
+      window.fbExports.setDoc(roomDocRef, payload, { merge: true }).catch(function (err) {
+        console.warn('Cloud push error:', err);
+      });
+    }
+
+    function changeCloudRoom(newRoomVal) {
+      var cleanRoom = sanitizeRoomCode(newRoomVal);
+      connectToCloudRoom(cleanRoom);
+      showToast('☁️ Ühendatud pilveruumiga: ' + cleanRoom);
+    }
+
+    function toggleCloudLiveMode(enabled) {
+      appState.cloudLiveEnabled = Boolean(enabled);
+      if (appState.cloudLiveEnabled) {
+        showToast('👁️ Reaalajas laskude jälgimine SEES');
+        syncWithCloud('pull');
+      } else {
+        showToast('⏸ Reaalajas laskude jälgimine VÄLJAS');
+      }
     }
 
     function saveSeriesToCloud(seriesObj) {
-      try {
-        if (!window.firebaseEnabled || !window.fbDb || !window.fbUserId) return;
-        var docRef = doc(window.fbDb, 'artifacts', window.fbAppId, 'users', window.fbUserId, 'savedSeries', seriesObj.id);
-        setDoc(docRef, seriesObj).catch(function(err) {
-          console.warn('Cloud write failed:', err);
-        });
-      } catch (e) {}
+      pushLiveStateToCloud('save-series');
     }
 
     function deleteSeriesFromCloud(seriesId) {
-      try {
-        if (!window.firebaseEnabled || !window.fbDb || !window.fbUserId) return;
-        var docRef = doc(window.fbDb, 'artifacts', window.fbAppId, 'users', window.fbUserId, 'savedSeries', seriesId);
-        deleteDoc(docRef).catch(function(err) {
-          console.warn('Cloud delete failed:', err);
-        });
-      } catch (e) {}
+      if (seriesId) deletedSeriesIdsLog.push(seriesId);
+      pushLiveStateToCloud('delete-series');
     }
 
     function triggerCloudSyncManual() {
-      if (window.firebaseEnabled) {
-        showToast('☁️ Cloud Sync sünkroniseerib pilvega reaalajas!');
-      } else {
-        showToast('💾 Salvestatud kohalikku mälu (Offline režiim)');
-      }
+      syncWithCloud('push');
     }
 
     // =========================================================================
@@ -2075,6 +2347,9 @@
       }
       if (typeof refreshCachedTargetPng === 'function') {
         refreshCachedTargetPng();
+      }
+      if (typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
+        pushLiveStateToCloud('wind-change');
       }
     }
 
@@ -2636,6 +2911,9 @@
 
       if (typeof refreshCachedTargetPng === 'function') {
         refreshCachedTargetPng();
+      }
+      if (typeof pushLiveStateToCloud === 'function' && !isApplyingRemoteCloudUpdate) {
+        pushLiveStateToCloud('shots-update');
       }
     }
 
@@ -3585,6 +3863,23 @@
       callback(res.canvas, res.athlete);
     }
 
+    function exportTargetPng() {
+      if (appState.activeShots.length === 0) {
+        showToast('Märgi vähemalt 1 lask enne PNG salvestamist!');
+        return;
+      }
+      var res = renderTargetCanvasSync();
+      var dataUrl = res.canvas.toDataURL('image/png');
+      var fileName = buildUniqueTimestampedFileName(res.athlete);
+      var a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('💾 PNG salvestatud: ' + fileName);
+    }
+
     function exportAllJson() {
       var dataStr = JSON.stringify(appState.savedSeries, null, 2);
       var blob = new Blob([dataStr], { type: 'application/json' });
@@ -3600,57 +3895,79 @@
     }
 
     function importJsonFile(event) {
-      var file = event.target.files[0];
+      var file = event && event.target && event.target.files ? event.target.files[0] : null;
       if (!file) return;
       var reader = new FileReader();
       reader.onload = function (e) {
         try {
-          var imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            appState.savedSeries = imported;
+          var parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            appState.savedSeries = parsed;
             persistSavedSeries();
             renderAll();
-            showToast('Imporditud ' + appState.savedSeries.length + ' seeriat!');
-          } else {
-            showToast('Vigane JSON faili formaat');
+            showToast('📥 Imporditud ' + parsed.length + ' seeriat!');
           }
         } catch (err) {
-          showToast('JSON faili lugemine ebaõnnestus');
+          showToast('⚠️ Vigane JSON fail!');
         }
       };
       reader.readAsText(file);
-      event.target.value = '';
     }
 
-    function exportTargetPng() {
-      renderTargetCanvasImage(function (canvas, athlete) {
-        var pngUrl = canvas.toDataURL('image/png');
-        var link = document.createElement('a');
-        link.download = buildUniqueTimestampedFileName(athlete);
-        link.href = pngUrl;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showToast('📷 Märklaua PNG pilt salvestatud!');
-      });
-    }
+    function syncWithCloud(direction) {
+      var roomCode = getActiveCloudRoomCode();
 
-    function syncWithCloud() {
-      var roomCode = document.getElementById('inputCloudRoom').value.trim() || 'TT-TEAM-2026';
-      var badge = document.getElementById('cloudStatusBadge');
-      if (badge) {
-        badge.textContent = '⏳ Sünkroonin...';
-        badge.style.background = 'rgba(245,158,11,0.15)';
-        badge.style.color = '#FDE68A';
+      if (!window.firebaseEnabled || !window.fbDb || !window.fbAuth || !window.fbAuth.currentUser || !window.fbExports) {
+        setCloudStatusUI('Kohalik', 'offline', '📡 Ruum <strong>' + escapeHtml(roomCode) + '</strong>: salvestatud telefoni mällu.');
+        showToast('💾 Salvestatud telefoni mällu (Ruum: ' + roomCode + ')');
+        return;
       }
-      setTimeout(function () {
-        if (badge) {
-          badge.textContent = '🟢 Sünkroonitud (' + appState.savedSeries.length + ' seeriat)';
-          badge.style.background = 'rgba(16,185,129,0.15)';
-          badge.style.color = '#34D399';
-        }
-        showToast('☁️ Pilveruum "' + roomCode + '" sünkroonitud edukalt!');
-      }, 700);
+
+      setCloudStatusUI('Sünkroonin...', 'syncing', '⏳ Sünkroonimine pilveruumiga <strong>' + escapeHtml(roomCode) + '</strong>...');
+
+      if (direction === 'pull') {
+        var roomDocRef = window.fbExports.doc(
+          window.fbDb,
+          'artifacts',
+          window.fbAppId,
+          'public',
+          'data',
+          'biathlonCloudRooms',
+          roomCode
+        );
+        window.fbExports.getDoc(roomDocRef).then(function (docSnap) {
+          if (!docSnap.exists()) {
+            setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
+            showToast('ℹ️ Ruumis "' + roomCode + '" pole veel andmeid.');
+            return;
+          }
+          lastAppliedCloudTimestamp = 0;
+          var data = docSnap.data();
+          if (data && data.liveShotsJson) {
+            isApplyingRemoteCloudUpdate = true;
+            try {
+              appState.activeShots = JSON.parse(data.liveShotsJson) || [];
+              if (data.savedSeriesJson) {
+                appState.savedSeries = JSON.parse(data.savedSeriesJson) || appState.savedSeries;
+                persistSavedSeries();
+              }
+              renderAll();
+            } catch (e) {}
+            isApplyingRemoteCloudUpdate = false;
+          }
+          setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
+          showToast('📥 Tõmmatud pilveruumist "' + roomCode + '"!');
+        }).catch(function () {
+          setCloudStatusUI('Ühenduse viga', 'offline');
+        });
+      } else {
+        connectToCloudRoom(roomCode);
+        pushLiveStateToCloud('manual-push');
+        setTimeout(function () {
+          setCloudStatusUI('Sünkroonis (' + roomCode + ')', 'ok');
+          showToast('☁️ Saadetud pilveruumi "' + roomCode + '" (' + appState.activeShots.length + ' aktiivset lasku, ' + appState.savedSeries.length + ' seeriat)!');
+        }, 350);
+      }
     }
 
     var toastTimer = null;
